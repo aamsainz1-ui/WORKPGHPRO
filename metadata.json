@@ -1,0 +1,8 @@
+{
+  "name": "GlobalWork Pro | Enterprise OS",
+  "description": "Next-generation workforce management system featuring biometric identity verification, AI-driven productivity insights, and seamless multi-language HR operations.",
+  "requestFramePermissions": [
+    "geolocation",
+    "camera"
+  ]
+}
