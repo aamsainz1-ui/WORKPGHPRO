@@ -225,7 +225,12 @@ const loadMonthlySummary = async (monthPrefix: string): Promise<MonthlySummaryRo
 
 // ============================================================
 
-const MktDashboard: React.FC = () => {
+interface MktDashboardProps {
+  defaultStaff?: string;
+  isAdmin?: boolean;
+}
+
+const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = true }) => {
   const [data, setData] = useState<MktData>(initData);
   const [activeTab, setActiveTab] = useState<TabKey>('TG');
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -234,7 +239,7 @@ const MktDashboard: React.FC = () => {
   const [saving, setSaving] = useState<string | null>(null);
   const [monthlySummary, setMonthlySummary] = useState<MonthlySummaryRow[]>([]);
   const [loadingMonthly, setLoadingMonthly] = useState(false);
-  const [staffFilter, setStaffFilter] = useState<string>('all');
+  const [staffFilter, setStaffFilter] = useState<string>(defaultStaff || 'all');
   const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   // Load today's data from Supabase on mount / date change
@@ -351,26 +356,18 @@ const MktDashboard: React.FC = () => {
           {loading && (
             <span className="text-xs font-bold text-blue-500 animate-pulse">⏳ กำลังโหลด...</span>
           )}
-          <select
-            value={staffFilter}
-            onChange={e => setStaffFilter(e.target.value)}
-            className="px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-sm font-bold text-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-          >
-            <option value="all">👥 ทั้งหมด</option>
-            {STAFF.map(s => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
-          <select
-            value={staffFilter}
-            onChange={e => setStaffFilter(e.target.value)}
-            className="px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-sm font-bold text-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-          >
-            <option value="all">👥 ทั้งหมด</option>
-            {STAFF.map(s => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
+          {isAdmin && (
+            <select
+              value={staffFilter}
+              onChange={e => setStaffFilter(e.target.value)}
+              className="px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-sm font-bold text-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            >
+              <option value="all">👥 ทั้งหมด</option>
+              {STAFF.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          )}
           <input
             type="date"
             value={selectedDate}
