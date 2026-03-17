@@ -585,6 +585,19 @@ const App: React.FC = () => {
             {activeTab === 'mkt' && <MktDashboard />}
             {activeTab === 'payroll' && currentUser.role === UserRole.ADMIN && <PayrollManager members={teamMembers} payroll={payrollRecords} compensation={compensationSettings} onUpdateCompensation={handleUpdateCompensation} onProcessPayroll={handleProcessPayroll} lang={lang} />}
             {activeTab === 'admin' && <AdminConsole leaves={leaves} onApprove={handleLeaveApproval} members={teamMembers} lang={lang} settings={settings} onUpdateSettings={setSettings} onCreateMember={handleCreateMember} onUpdateMember={handleUpdateMember} allRecordsMap={allRecordsMap} announcements={announcements} onAddAnnouncement={handleAddAnnouncement} onDeleteAnnouncement={handleDeleteAnnouncement} />}
+            {activeTab === 'teams' && currentUser.role === UserRole.ADMIN && (
+              <TeamManagement
+                teams={settings.teams || []}
+                members={allUsers}
+                lang={lang}
+                onCreateTeam={(team) => setSettings(prev => ({ ...prev, teams: [...(prev.teams || []), { ...team, id: Date.now().toString(), createdAt: new Date().toISOString() }] }))}
+                onDeleteTeam={(id) => setSettings(prev => ({ ...prev, teams: (prev.teams || []).filter(t => t.id !== id) }))}
+                onUpdateTeam={(id, updates) => setSettings(prev => ({ ...prev, teams: (prev.teams || []).map(t => t.id === id ? { ...t, ...updates } : t) }))}
+                onAssignMemberToTeam={(memberId, teamId) => {
+                  setAllUsers(prev => prev.map(u => u.id === memberId ? { ...u, teamId: teamId || undefined } : u));
+                }}
+              />
+            )}
             {activeTab === 'permissions' && currentUser.role === UserRole.ADMIN && (
               <PermissionManager
                 lang={lang}
