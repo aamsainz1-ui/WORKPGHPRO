@@ -192,13 +192,14 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, user, lang, 
                 )
               }
             ]
-            : [
+            : filterMenuByPermissions([
               menuItems[0], // Dashboard
               menuItems[3], // History
               menuItems[2], // Leave
               menuItems[5], // Marketing
               menuItems[4], // News
-            ]
+              menuItems[6], // MKT
+            ], user.role, rolePermissions)
           ).map((item) => (
             <button
               key={item.id}
