@@ -15,7 +15,7 @@ export const hasPermission = (
     if (role === 'ADMIN') return true;
 
     // ตรวจสอบจาก permission matrix
-    const permissions = rolePermissions[role] || [];
+    const permissions = rolePermissions[role] || getDefaultPermissions(role);
     return permissions.includes(permissionKey);
 };
 
