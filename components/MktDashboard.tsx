@@ -234,6 +234,7 @@ const MktDashboard: React.FC = () => {
   const [saving, setSaving] = useState<string | null>(null);
   const [monthlySummary, setMonthlySummary] = useState<MonthlySummaryRow[]>([]);
   const [loadingMonthly, setLoadingMonthly] = useState(false);
+  const [staffFilter, setStaffFilter] = useState<string>('all');
   const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   // Load today's data from Supabase on mount / date change
@@ -296,7 +297,9 @@ const MktDashboard: React.FC = () => {
     });
   }, [activeTab, selectedDate]);
 
-  const totals = STAFF.reduce((acc, staff) => {
+  const displayStaff = staffFilter === 'all' ? STAFF : STAFF.filter(s => s === staffFilter);
+
+  const totals = displayStaff.reduce((acc, staff) => {
     const row = data[activeTab][staff];
     if (!row) return acc;
     COLUMNS.forEach(col => {
@@ -308,8 +311,10 @@ const MktDashboard: React.FC = () => {
 
   const totalRecalced = recalc(totals);
 
+  const displayMonthlySummary = staffFilter === 'all' ? monthlySummary : monthlySummary.filter(r => r.name === staffFilter);
+
   // Monthly summary totals
-  const monthTotals = monthlySummary.reduce((acc, r) => ({
+  const monthTotals = displayMonthlySummary.reduce((acc, r) => ({
     fb: acc.fb + r.fb,
     google: acc.google + r.google,
     tiktok: acc.tiktok + r.tiktok,
@@ -339,6 +344,16 @@ const MktDashboard: React.FC = () => {
           {loading && (
             <span className="text-xs font-bold text-blue-500 animate-pulse">⏳ กำลังโหลด...</span>
           )}
+          <select
+            value={staffFilter}
+            onChange={e => setStaffFilter(e.target.value)}
+            className="px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-sm font-bold text-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+          >
+            <option value="all">👥 ทั้งหมด</option>
+            {STAFF.map(s => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
           <input
             type="date"
             value={selectedDate}
@@ -422,7 +437,7 @@ const MktDashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {STAFF.map((staff, idx) => {
+              {displayStaff.map((staff, idx) => {
                 const row = data[activeTab][staff] || emptyRow();
                 const isSaving = saving === `${activeTab}:${staff}`;
                 return (
@@ -535,13 +550,13 @@ const MktDashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {monthlySummary.length === 0 && !loadingMonthly ? (
+              {displayMonthlySummary.length === 0 && !loadingMonthly ? (
                 <tr>
                   <td colSpan={11} className="text-center py-8 text-slate-400 text-sm font-bold">ไม่มีข้อมูลในเดือนนี้</td>
                 </tr>
               ) : (
                 <>
-                  {monthlySummary.map((r, idx) => (
+                  {displayMonthlySummary.map((r, idx) => (
                     <tr key={r.name} className={`border-b border-slate-50 hover:bg-blue-50/30 ${idx % 2 === 0 ? 'bg-slate-50/30' : ''}`}>
                       <td className="px-4 py-3 font-black text-slate-800 sticky left-0 bg-inherit z-10">
                         <div className="flex items-center gap-2">
@@ -564,7 +579,7 @@ const MktDashboard: React.FC = () => {
                     </tr>
                   ))}
                   {/* Monthly total row */}
-                  {monthlySummary.length > 0 && (
+                  {displayMonthlySummary.length > 0 && (
                     <tr className="bg-slate-900/5 border-t-2 border-slate-200">
                       <td className="px-4 py-4 font-black text-slate-900 sticky left-0 bg-slate-100/80 z-10">
                         <div className="flex items-center gap-2">

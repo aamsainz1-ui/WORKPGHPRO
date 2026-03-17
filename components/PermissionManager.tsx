@@ -21,6 +21,7 @@ const ALL_PERMISSIONS: Permission[] = [
     { key: 'payroll', label: 'Payroll System', labelTH: 'ระบบเงินเดือน', icon: '💰' },
     { key: 'summary', label: 'Daily Summary', labelTH: 'สรุปรายวัน', icon: '📝' },
     { key: 'admin', label: 'Admin Console', labelTH: 'ตั้งค่าระบบ', icon: '⚙️' },
+    { key: 'mkt', label: 'MKT Dashboard', labelTH: 'แดชบอร์ด MKT', icon: '📈' },
 ];
 
 const PermissionManager: React.FC<PermissionManagerProps> = ({

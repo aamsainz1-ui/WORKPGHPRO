@@ -206,7 +206,8 @@ export type PermissionKey =
   | 'content'
   | 'payroll'
   | 'summary'
-  | 'admin';
+  | 'admin'
+  | 'mkt';
 
 export interface Permission {
   key: PermissionKey;
