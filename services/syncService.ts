@@ -23,7 +23,7 @@ export const syncUsers = async (localUsers: UserProfile[]): Promise<UserProfile[
             // Only upsert if user exists in cloud OR is a brand new user
             const isNewUser = !cloudUserIds.has(user.id);
 
-            if (isNewUser) {
+            if (isNewUser && user.name) {
                 const { error } = await supabase
                     .from('users')
                     .upsert({
