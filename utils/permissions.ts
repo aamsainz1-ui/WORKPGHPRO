@@ -44,7 +44,7 @@ export const getDefaultPermissions = (role: string): PermissionKey[] => {
 
     // ADMIN มีสิทธิ์ทั้งหมด
     if (roleUpper === 'ADMIN') {
-        return ['dashboard', 'history', 'insights', 'profile', 'leave', 'organization', 'announcements', 'content', 'payroll', 'summary', 'admin'];
+        return ['dashboard', 'history', 'insights', 'profile', 'leave', 'organization', 'announcements', 'content', 'calendar', 'payroll', 'summary', 'admin', 'mkt', 'permissions', 'teams'];
     }
 
     // MANAGER มีสิทธิ์ส่วนใหญ่ ยกเว้น admin

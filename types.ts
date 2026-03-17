@@ -206,10 +206,13 @@ export type PermissionKey =
   | 'organization'
   | 'announcements'
   | 'content'
+  | 'calendar'
   | 'payroll'
   | 'summary'
   | 'admin'
-  | 'mkt';
+  | 'mkt'
+  | 'permissions'
+  | 'teams';
 
 export interface Permission {
   key: PermissionKey;
