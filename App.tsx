@@ -53,58 +53,6 @@ const DEFAULT_USERS: UserProfile[] = [
     role: UserRole.ADMIN,
     pin: '435600',
     leaveBalances: { sick: 99, annual: 99, personal: 99 }
-  },
-  {
-    id: 'usr_keng',
-    name: "เก่ง",
-    position: "Marketing",
-    department: "MKT",
-    employeeId: "GW-MKT-001",
-    joinDate: "2024-01-01",
-    company: "WIN",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=keng",
-    role: UserRole.EMPLOYEE,
-    pin: '111111',
-    leaveBalances: { sick: 30, annual: 10, personal: 5 }
-  },
-  {
-    id: 'usr_bank',
-    name: "แบงค์",
-    position: "Marketing",
-    department: "MKT",
-    employeeId: "GW-MKT-002",
-    joinDate: "2024-01-01",
-    company: "WIN",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=bank",
-    role: UserRole.EMPLOYEE,
-    pin: '333333',
-    leaveBalances: { sick: 30, annual: 10, personal: 5 }
-  },
-  {
-    id: 'usr_lan',
-    name: "ลัน",
-    position: "Marketing",
-    department: "MKT",
-    employeeId: "GW-MKT-003",
-    joinDate: "2024-01-01",
-    company: "WIN",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=lan",
-    role: UserRole.EMPLOYEE,
-    pin: '444444',
-    leaveBalances: { sick: 30, annual: 10, personal: 5 }
-  },
-  {
-    id: 'usr_mao',
-    name: "เม่า",
-    position: "Marketing",
-    department: "MKT",
-    employeeId: "GW-MKT-004",
-    joinDate: "2024-01-01",
-    company: "WIN",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=mao",
-    role: UserRole.EMPLOYEE,
-    pin: '777777',
-    leaveBalances: { sick: 30, annual: 10, personal: 5 }
   }
 ];
 
