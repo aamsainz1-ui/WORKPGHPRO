@@ -565,6 +565,12 @@ const App: React.FC = () => {
               const u = { ...currentUser, storedFace: undefined, faceSignature: undefined };
               setCurrentUser(u);
               setAllUsers(prev => prev.map(it => it.id === u.id ? u : it));
+            }} onChangePIN={(oldPin: string, newPin: string) => {
+              if ((currentUser as any).pin !== oldPin) return false;
+              const u = { ...currentUser, pin: newPin } as any;
+              setCurrentUser(u);
+              setAllUsers(prev => prev.map(it => it.id === u.id ? u : it));
+              return true;
             }} />}
             {activeTab === 'organization' && <Organization
               members={teamMembers}

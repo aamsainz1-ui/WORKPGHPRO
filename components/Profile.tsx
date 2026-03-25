@@ -8,9 +8,36 @@ interface ProfileProps {
   leaves: LeaveRecord[];
   lang: Language;
   onResetFaceID: () => void;
+  onChangePIN?: (oldPin: string, newPin: string) => boolean;
 }
 
-const Profile: React.FC<ProfileProps> = ({ user, records, leaves, lang, onResetFaceID }) => {
+const Profile: React.FC<ProfileProps> = ({ user, records, leaves, lang, onResetFaceID, onChangePIN }) => {
+  const [showChangePIN, setShowChangePIN] = React.useState(false);
+  const [oldPin, setOldPin] = React.useState('');
+  const [newPin, setNewPin] = React.useState('');
+  const [confirmPin, setConfirmPin] = React.useState('');
+  const [pinError, setPinError] = React.useState('');
+  const [pinSuccess, setPinSuccess] = React.useState(false);
+
+  const handleChangePIN = () => {
+    setPinError('');
+    setPinSuccess(false);
+    if (newPin.length < 4 || newPin.length > 6) {
+      setPinError(lang === Language.TH ? 'PIN ต้อง 4-6 หลัก' : 'PIN must be 4-6 digits');
+      return;
+    }
+    if (newPin !== confirmPin) {
+      setPinError(lang === Language.TH ? 'PIN ไม่ตรงกัน' : 'PINs do not match');
+      return;
+    }
+    if (onChangePIN && onChangePIN(oldPin, newPin)) {
+      setPinSuccess(true);
+      setOldPin(''); setNewPin(''); setConfirmPin('');
+      setTimeout(() => { setShowChangePIN(false); setPinSuccess(false); }, 1500);
+    } else {
+      setPinError(lang === Language.TH ? 'PIN เดิมไม่ถูกต้อง' : 'Current PIN is incorrect');
+    }
+  };
   const stats = useMemo(() => {
     const now = new Date();
     
@@ -179,6 +206,28 @@ const Profile: React.FC<ProfileProps> = ({ user, records, leaves, lang, onResetF
                   ? "การรีเซ็ตจะลบชุดข้อมูลใบหน้าเดิมออกเพื่อความปลอดภัยในกรณีที่มีการเปลี่ยนแปลงรูปลักษณ์ที่ส่งผลต่อการจดจำ" 
                   : "Resetting will clear previous biometric data for security or in case of significant appearance changes affecting recognition."}
               </p>
+
+              {/* Change PIN Section */}
+              <div className="mt-6 pt-6 border-t border-slate-100">
+                <button
+                  onClick={() => setShowChangePIN(!showChangePIN)}
+                  className="w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-widest bg-blue-600 text-white hover:bg-blue-700 shadow-sm active:scale-95 transition-all"
+                >
+                  {lang === Language.TH ? 'เปลี่ยนรหัส PIN' : 'Change PIN'}
+                </button>
+                {showChangePIN && (
+                  <div className="mt-4 space-y-3">
+                    <input type="password" inputMode="numeric" maxLength={6} placeholder={lang === Language.TH ? 'PIN เดิม' : 'Current PIN'} value={oldPin} onChange={e => setOldPin(e.target.value.replace(/\D/g,''))} className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input type="password" inputMode="numeric" maxLength={6} placeholder={lang === Language.TH ? 'PIN ใหม่' : 'New PIN'} value={newPin} onChange={e => setNewPin(e.target.value.replace(/\D/g,''))} className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input type="password" inputMode="numeric" maxLength={6} placeholder={lang === Language.TH ? 'ยืนยัน PIN ใหม่' : 'Confirm New PIN'} value={confirmPin} onChange={e => setConfirmPin(e.target.value.replace(/\D/g,''))} className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    {pinError && <p className="text-xs text-red-500 font-semibold">{pinError}</p>}
+                    {pinSuccess && <p className="text-xs text-green-500 font-semibold">{lang === Language.TH ? 'เปลี่ยน PIN สำเร็จ ✓' : 'PIN changed ✓'}</p>}
+                    <button onClick={handleChangePIN} className="w-full py-3 rounded-xl text-xs font-bold bg-green-600 text-white hover:bg-green-700 active:scale-95 transition-all">
+                      {lang === Language.TH ? 'ยืนยัน' : 'Confirm'}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

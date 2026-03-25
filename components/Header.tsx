@@ -52,7 +52,7 @@ const Header: React.FC<HeaderProps> = ({ user, onToggleRole, lang, onToggleLang 
             onClick={onToggleRole}
             className="flex items-center space-x-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-slate-900 text-white rounded-xl sm:rounded-2xl transition-all shadow-lg shadow-slate-900/10 active:scale-95 text-[9px] sm:text-[10px] font-black uppercase tracking-widest whitespace-nowrap"
           >
-            {lang === Language.TH ? 'สลับบัญชี' : 'Switch Account'}
+            {lang === Language.TH ? 'ออกจากระบบ' : 'Logout'}
           </button>
 
           <div className="flex items-center space-x-4">
