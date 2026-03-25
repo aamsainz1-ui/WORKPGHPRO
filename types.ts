@@ -111,8 +111,7 @@ export interface UserProfile {
   teamId?: string;
   storedFace?: string;
   faceSignature?: number[];
-  pin?: string; // Legacy plaintext PIN (deprecated, use pin_hash)
-  pin_hash?: string; // SHA-256 hashed PIN
+  pin?: string; // 4-6 digit PIN for switching accounts
   leaveBalances: {
     sick: number;
     annual: number;
