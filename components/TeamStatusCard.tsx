@@ -40,7 +40,7 @@ const TeamStatusCard: React.FC<TeamStatusCardProps> = ({ members, teams, onViewA
               </svg>
             </div>
             <div>
-              <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center">
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-normal flex items-center">
                 {lang === Language.TH ? 'สถานะทีม' : 'Team Status'}
                 {activeCount > 0 && (
                   <span className="ml-2 flex h-2 w-2">
@@ -79,7 +79,7 @@ const TeamStatusCard: React.FC<TeamStatusCardProps> = ({ members, teams, onViewA
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setSelectedTeam('ALL')}
-              className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${selectedTeam === 'ALL'
+              className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-normal transition-all ${selectedTeam === 'ALL'
                   ? 'bg-slate-900 text-white shadow-lg'
                   : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                 }`}
@@ -90,7 +90,7 @@ const TeamStatusCard: React.FC<TeamStatusCardProps> = ({ members, teams, onViewA
               <button
                 key={team.id}
                 onClick={() => setSelectedTeam(team.id)}
-                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center space-x-1.5 ${selectedTeam === team.id
+                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-normal transition-all flex items-center space-x-1.5 ${selectedTeam === team.id
                     ? 'text-white shadow-lg'
                     : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                   }`}

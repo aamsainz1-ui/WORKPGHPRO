@@ -27,10 +27,10 @@ const Header: React.FC<HeaderProps> = ({ user, onToggleRole, lang, onToggleLang 
         <div className="hidden lg:flex items-center space-x-6">
           <div>
             <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.25em]">{lang === Language.TH ? 'พอร์ทัลพนักงาน' : 'Employee Portal'}</p>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Global Enterprise Network</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-normal mt-0.5">Global Enterprise Network</p>
           </div>
           {isAdmin && (
-            <span className="bg-slate-900 text-white text-[9px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest shadow-xl">
+            <span className="bg-slate-900 text-white text-[9px] font-black px-3 py-1.5 rounded-full uppercase tracking-normal shadow-xl">
               ADMINISTRATOR
             </span>
           )}
@@ -50,7 +50,7 @@ const Header: React.FC<HeaderProps> = ({ user, onToggleRole, lang, onToggleLang 
 
           <button
             onClick={onToggleRole}
-            className="flex items-center space-x-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-slate-900 text-white rounded-xl sm:rounded-2xl transition-all shadow-lg shadow-slate-900/10 active:scale-95 text-[9px] sm:text-[10px] font-black uppercase tracking-widest whitespace-nowrap"
+            className="flex items-center space-x-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-slate-900 text-white rounded-xl sm:rounded-2xl transition-all shadow-lg shadow-slate-900/10 active:scale-95 text-[9px] sm:text-[10px] font-black uppercase tracking-normal whitespace-nowrap"
           >
             {lang === Language.TH ? 'ออกจากระบบ' : 'Logout'}
           </button>
@@ -58,7 +58,7 @@ const Header: React.FC<HeaderProps> = ({ user, onToggleRole, lang, onToggleLang 
           <div className="flex items-center space-x-4">
             <div className="text-right hidden sm:block">
               <p className="text-sm font-black text-slate-900 leading-none">{user.name}</p>
-              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1.5">{user.department}</p>
+              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-normal mt-1.5">{user.department}</p>
             </div>
             <div className="relative group cursor-pointer">
               <img

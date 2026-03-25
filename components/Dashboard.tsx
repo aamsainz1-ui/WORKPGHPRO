@@ -113,13 +113,13 @@ const Dashboard: React.FC<DashboardProps> = ({ isClockedIn, onAction, lastRecord
             <div className="bg-slate-50/50 p-2 rounded-[2rem] border border-slate-100 flex items-center">
               <button 
                 onClick={() => setSelectedMode(WorkMode.OFFICE)}
-                className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${selectedMode === WorkMode.OFFICE ? 'bg-white shadow-xl text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-normal transition-all ${selectedMode === WorkMode.OFFICE ? 'bg-white shadow-xl text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
               >
                 Corporate Office
               </button>
               <button 
                 onClick={() => setSelectedMode(WorkMode.REMOTE)}
-                className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${selectedMode === WorkMode.REMOTE ? 'bg-white shadow-xl text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-normal transition-all ${selectedMode === WorkMode.REMOTE ? 'bg-white shadow-xl text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
               >
                 Remote Access
               </button>
@@ -144,7 +144,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isClockedIn, onAction, lastRecord
                 isClockedIn ? 'bg-slate-50 text-slate-200 opacity-50' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-2xl shadow-blue-600/30 active:scale-95'
               }`}
             >
-              <span className="text-xl tracking-widest">{t.checkIn}</span>
+              <span className="text-xl tracking-normal">{t.checkIn}</span>
               <span className="text-[9px] font-black opacity-60 uppercase tracking-[0.3em]">{t.shiftStart}</span>
             </button>
             <button
@@ -154,7 +154,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isClockedIn, onAction, lastRecord
                 !isClockedIn ? 'bg-slate-50 text-slate-200 opacity-50' : 'bg-slate-900 text-white hover:bg-black shadow-2xl shadow-slate-900/30 active:scale-95'
               }`}
             >
-              <span className="text-xl tracking-widest">{t.checkOut}</span>
+              <span className="text-xl tracking-normal">{t.checkOut}</span>
               <span className="text-[9px] font-black opacity-60 uppercase tracking-[0.3em]">{t.shiftEnd}</span>
             </button>
           </div>
@@ -173,7 +173,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isClockedIn, onAction, lastRecord
             </div>
             <div className="text-right">
               <p className="text-6xl font-black text-blue-600 tracking-tighter">{weeklyStats.total}</p>
-              <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{t.totalHours}</p>
+              <p className="text-[10px] text-slate-400 font-black uppercase tracking-normal">{t.totalHours}</p>
             </div>
           </div>
           <div className="grid grid-cols-7 gap-5 h-48 items-end px-4">
@@ -195,7 +195,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isClockedIn, onAction, lastRecord
                       )}
                     </div>
                   </div>
-                  <p className="text-[9px] font-black text-slate-400 mt-5 group-hover:text-blue-600 transition-colors uppercase tracking-widest">{day.label}</p>
+                  <p className="text-[9px] font-black text-slate-400 mt-5 group-hover:text-blue-600 transition-colors uppercase tracking-normal">{day.label}</p>
                 </div>
               );
             })}

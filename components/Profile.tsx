@@ -119,7 +119,7 @@ const Profile: React.FC<ProfileProps> = ({ user, records, leaves, lang, onResetF
     <div className="space-y-4 sm:space-y-6">
       <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 overflow-hidden relative">
         <div className="absolute top-0 right-0 p-4 sm:p-8 hidden sm:block">
-           <span className="px-3 sm:px-4 py-1 sm:py-1.5 bg-blue-50 text-blue-600 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest border border-blue-100">
+           <span className="px-3 sm:px-4 py-1 sm:py-1.5 bg-blue-50 text-blue-600 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-normal border border-blue-100">
              {t.officialBadge}
            </span>
         </div>
@@ -136,11 +136,11 @@ const Profile: React.FC<ProfileProps> = ({ user, records, leaves, lang, onResetF
             
             <div className="grid grid-cols-2 gap-4 mt-6 sm:mt-8 pt-6 border-t border-slate-100">
               <div>
-                <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-widest">{t.empId}</p>
+                <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-normal">{t.empId}</p>
                 <p className="font-mono text-xs sm:text-sm font-bold text-slate-700">{user.employeeId}</p>
               </div>
               <div>
-                <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-widest">{t.joinDate}</p>
+                <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-normal">{t.joinDate}</p>
                 <p className="font-mono text-xs sm:text-sm font-bold text-slate-700">{user.joinDate}</p>
               </div>
             </div>
@@ -192,7 +192,7 @@ const Profile: React.FC<ProfileProps> = ({ user, records, leaves, lang, onResetF
               <button
                 onClick={handleResetFaceID}
                 disabled={!user.storedFace}
-                className={`w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                className={`w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-normal transition-all ${
                   user.storedFace 
                     ? 'bg-white text-red-600 border border-red-100 hover:bg-red-50 shadow-sm active:scale-95' 
                     : 'bg-slate-200 text-slate-400 cursor-not-allowed'
@@ -211,7 +211,7 @@ const Profile: React.FC<ProfileProps> = ({ user, records, leaves, lang, onResetF
               <div className="mt-6 pt-6 border-t border-slate-100">
                 <button
                   onClick={() => setShowChangePIN(!showChangePIN)}
-                  className="w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-widest bg-blue-600 text-white hover:bg-blue-700 shadow-sm active:scale-95 transition-all"
+                  className="w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-normal bg-blue-600 text-white hover:bg-blue-700 shadow-sm active:scale-95 transition-all"
                 >
                   {lang === Language.TH ? 'เปลี่ยนรหัส PIN' : 'Change PIN'}
                 </button>
@@ -238,7 +238,7 @@ const Profile: React.FC<ProfileProps> = ({ user, records, leaves, lang, onResetF
 
 const StatCard: React.FC<{ label: string, value: string | number, sub: string, color: string }> = ({ label, value, sub, color }) => (
   <div className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-slate-200 group hover:border-blue-200 transition-colors">
-    <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{label}</p>
+    <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-normal mb-1">{label}</p>
     <p className={`text-2xl sm:text-3xl font-black ${color}`}>{value}</p>
     <p className="text-[10px] sm:text-xs text-slate-500 mt-1.5 sm:mt-2 font-medium">{sub}</p>
   </div>

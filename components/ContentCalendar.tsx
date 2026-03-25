@@ -62,7 +62,7 @@ const ContentCalendar: React.FC<ContentCalendarProps> = ({ plans, onAdd, onDelet
                 </div>
                 <button
                     onClick={() => setShowAdd(true)}
-                    className="px-8 py-4 bg-slate-900 text-white rounded-[2rem] text-[11px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-2xl active:scale-95 flex items-center space-x-3"
+                    className="px-8 py-4 bg-slate-900 text-white rounded-[2rem] text-[11px] font-black uppercase tracking-normal hover:bg-slate-800 transition-all shadow-2xl active:scale-95 flex items-center space-x-3"
                 >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
@@ -77,7 +77,7 @@ const ContentCalendar: React.FC<ContentCalendarProps> = ({ plans, onAdd, onDelet
                     <button
                         key={p}
                         onClick={() => setActivePlatform(p)}
-                        className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${activePlatform === p
+                        className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-normal transition-all ${activePlatform === p
                                 ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 scale-105'
                                 : 'bg-white text-slate-400 border border-slate-100 hover:border-indigo-200'
                             }`}
@@ -101,7 +101,7 @@ const ContentCalendar: React.FC<ContentCalendarProps> = ({ plans, onAdd, onDelet
                         <div className={`h-2 ${platformColors[plan.platform]}`}></div>
                         <div className="p-8 flex-1">
                             <div className="flex items-center justify-between mb-4">
-                                <span className={`text-[9px] font-black px-3 py-1 rounded-lg uppercase tracking-widest text-white ${platformColors[plan.platform]}`}>
+                                <span className={`text-[9px] font-black px-3 py-1 rounded-lg uppercase tracking-normal text-white ${platformColors[plan.platform]}`}>
                                     {plan.platform}
                                 </span>
                                 <span className="text-[10px] font-bold text-slate-400 tabular-nums">
@@ -116,7 +116,7 @@ const ContentCalendar: React.FC<ContentCalendarProps> = ({ plans, onAdd, onDelet
                                     <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400">
                                         {plan.author[0]}
                                     </div>
-                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{plan.author}</span>
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-normal">{plan.author}</span>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <button
@@ -145,13 +145,13 @@ const ContentCalendar: React.FC<ContentCalendarProps> = ({ plans, onAdd, onDelet
                         <div className="space-y-6">
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="col-span-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Platform</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">Platform</label>
                                     <div className="flex gap-2">
                                         {Object.values(ContentPlatform).map(p => (
                                             <button
                                                 key={p}
                                                 onClick={() => setNewPlan({ ...newPlan, platform: p })}
-                                                className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${newPlan.platform === p ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
+                                                className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-normal transition-all ${newPlan.platform === p ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
                                                     }`}
                                             >
                                                 {p}
@@ -160,7 +160,7 @@ const ContentCalendar: React.FC<ContentCalendarProps> = ({ plans, onAdd, onDelet
                                     </div>
                                 </div>
                                 <div className="col-span-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Title</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">Title</label>
                                     <input
                                         value={newPlan.title}
                                         onChange={e => setNewPlan({ ...newPlan, title: e.target.value })}
@@ -170,7 +170,7 @@ const ContentCalendar: React.FC<ContentCalendarProps> = ({ plans, onAdd, onDelet
                                     />
                                 </div>
                                 <div className="col-span-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Description</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">Description</label>
                                     <textarea
                                         value={newPlan.description}
                                         onChange={e => setNewPlan({ ...newPlan, description: e.target.value })}
@@ -180,7 +180,7 @@ const ContentCalendar: React.FC<ContentCalendarProps> = ({ plans, onAdd, onDelet
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Author</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">Author</label>
                                     <input
                                         value={newPlan.author}
                                         onChange={e => setNewPlan({ ...newPlan, author: e.target.value })}
@@ -190,7 +190,7 @@ const ContentCalendar: React.FC<ContentCalendarProps> = ({ plans, onAdd, onDelet
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Schedule Date</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">Schedule Date</label>
                                     <input
                                         type="date"
                                         value={newPlan.scheduledDate}
@@ -204,13 +204,13 @@ const ContentCalendar: React.FC<ContentCalendarProps> = ({ plans, onAdd, onDelet
                             <div className="flex space-x-4 pt-6">
                                 <button
                                     onClick={() => setShowAdd(false)}
-                                    className="flex-1 py-5 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest"
+                                    className="flex-1 py-5 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-normal"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleAdd}
-                                    className="flex-1 py-5 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-indigo-600/20"
+                                    className="flex-1 py-5 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-normal shadow-xl shadow-indigo-600/20"
                                 >
                                     Post Plan
                                 </button>

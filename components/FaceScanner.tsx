@@ -88,7 +88,7 @@ const FaceScanner: React.FC<FaceScannerProps> = ({ onCapture, onCancel, isVerify
               </svg>
             </div>
             <div>
-              <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">{t.instruction}</p>
+              <p className="text-[10px] font-black text-blue-600 uppercase tracking-normal mb-1">{t.instruction}</p>
               <p className="text-base font-black text-slate-900">{challenge}</p>
             </div>
           </div>
@@ -97,7 +97,7 @@ const FaceScanner: React.FC<FaceScannerProps> = ({ onCapture, onCancel, isVerify
             {error ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
                 <p className="text-red-400 text-sm font-black">{error}</p>
-                <button onClick={() => window.location.reload()} className="mt-6 px-6 py-3 bg-slate-800 text-white rounded-xl text-[10px] font-black uppercase tracking-widest">{t.reload}</button>
+                <button onClick={() => window.location.reload()} className="mt-6 px-6 py-3 bg-slate-800 text-white rounded-xl text-[10px] font-black uppercase tracking-normal">{t.reload}</button>
               </div>
             ) : (
               <>

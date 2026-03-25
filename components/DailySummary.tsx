@@ -151,13 +151,13 @@ const DailySummary: React.FC<DailySummaryProps> = ({ records, members, onAdd, on
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
                     <h2 className="text-3xl font-black text-slate-900 tracking-tight">{lang === Language.TH ? 'ตารางสรุปรายวัน' : 'Daily Summary Dashboard'}</h2>
-                    <p className="text-xs font-black text-indigo-600 uppercase tracking-widest mt-1">Operational Performance Hub</p>
+                    <p className="text-xs font-black text-indigo-600 uppercase tracking-normal mt-1">Operational Performance Hub</p>
                 </div>
                 <div className="flex items-center space-x-4">
                     <select
                         value={filterEmployee}
                         onChange={(e) => setFilterEmployee(e.target.value)}
-                        className="bg-white border border-slate-200 rounded-2xl px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-600 outline-none shadow-sm"
+                        className="bg-white border border-slate-200 rounded-2xl px-6 py-3 text-[10px] font-black uppercase tracking-normal text-slate-600 outline-none shadow-sm"
                         title="Filter by Employee"
                     >
                         <option value="ALL">{lang === Language.TH ? 'พนักงานทุกคน' : 'All Employees'}</option>
@@ -167,13 +167,13 @@ const DailySummary: React.FC<DailySummaryProps> = ({ records, members, onAdd, on
                     </select>
                     <button
                         onClick={() => setShowAdd(true)}
-                        className="bg-slate-900 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl"
+                        className="bg-slate-900 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-normal hover:bg-black transition-all shadow-xl"
                     >
                         {lang === Language.TH ? '+ เพิ่มข้อมูล' : '+ Add Entry'}
                     </button>
                     <button
                         onClick={() => setShowExport(true)}
-                        className="bg-emerald-600 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-xl flex items-center space-x-2"
+                        className="bg-emerald-600 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-normal hover:bg-emerald-700 transition-all shadow-xl flex items-center space-x-2"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -187,7 +187,7 @@ const DailySummary: React.FC<DailySummaryProps> = ({ records, members, onAdd, on
                 <div className="overflow-x-auto custom-scrollbar">
                     <table className="w-full text-left min-w-[1400px] border-collapse">
                         <thead>
-                            <tr className="bg-white/5 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                            <tr className="bg-white/5 text-[9px] font-black text-slate-400 uppercase tracking-normal">
                                 <th className="px-6 py-5 border-b border-white/5">พนักงาน (Staff)</th>
                                 <th className="px-6 py-5 border-b border-white/5">วันที่ (Date)</th>
                                 <th className="px-6 py-5 border-b border-white/5">FB</th>
@@ -246,7 +246,7 @@ const DailySummary: React.FC<DailySummaryProps> = ({ records, members, onAdd, on
 
                             {/* Footer Totals */}
                             <tr className="bg-purple-900/40 border-t-2 border-purple-500/50">
-                                <td colSpan={2} className="px-6 py-6 text-[10px] font-black text-white uppercase tracking-widest">{lang === Language.TH ? 'รวมทั้งหมด' : 'Grand Totals'}</td>
+                                <td colSpan={2} className="px-6 py-6 text-[10px] font-black text-white uppercase tracking-normal">{lang === Language.TH ? 'รวมทั้งหมด' : 'Grand Totals'}</td>
                                 <td className="px-6 py-6 text-xs font-black text-white tabular-nums">{formatCurrency(totals.fb)}</td>
                                 <td className="px-6 py-6 text-xs font-black text-white tabular-nums">{formatCurrency(totals.google)}</td>
                                 <td className="px-6 py-6 text-xs font-black text-white tabular-nums">{formatCurrency(totals.tiktok)}</td>
@@ -271,7 +271,7 @@ const DailySummary: React.FC<DailySummaryProps> = ({ records, members, onAdd, on
                         <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-8">{lang === Language.TH ? 'เพิ่มบันทึกรายวัน' : 'Add Daily Log'}</h3>
                         <div className="grid grid-cols-2 gap-6">
                             <div className="col-span-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Responsible Employee</label>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">Responsible Employee</label>
                                 <select value={form.employeeId} onChange={e => setForm({ ...form, employeeId: e.target.value })} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-black text-slate-900" title="Employee">
                                     {members.map(m => (
                                         <option key={m.id} value={m.id}>{m.name}</option>
@@ -279,51 +279,51 @@ const DailySummary: React.FC<DailySummaryProps> = ({ records, members, onAdd, on
                                 </select>
                             </div>
                             <div className="col-span-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Date</label>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">Date</label>
                                 <input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-black text-slate-900" title="Date" />
                             </div>
                             <div>
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">FB Ads</label>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">FB Ads</label>
                                 <input type="number" value={form.fb} onChange={e => setForm({ ...form, fb: parseFloat(e.target.value) || 0 })} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-black" title="FB" />
                             </div>
                             <div>
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Google Ads</label>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">Google Ads</label>
                                 <input type="number" value={form.google} onChange={e => setForm({ ...form, google: parseFloat(e.target.value) || 0 })} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-black" title="Google" />
                             </div>
                             <div>
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">TikTok Ads</label>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">TikTok Ads</label>
                                 <input type="number" value={form.tiktok} onChange={e => setForm({ ...form, tiktok: parseFloat(e.target.value) || 0 })} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-black" title="TikTok" />
                             </div>
                             <div>
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Registrations</label>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">Registrations</label>
                                 <input type="number" value={form.registrations} onChange={e => setForm({ ...form, registrations: parseInt(e.target.value) || 0 })} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-black" title="Registrations" />
                             </div>
                             <div>
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Depositors (People)</label>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">Depositors (People)</label>
                                 <input type="number" value={form.depositors} onChange={e => setForm({ ...form, depositors: parseInt(e.target.value) || 0 })} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-black" title="Depositors" />
                             </div>
                             <div>
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">First Deposit Amount</label>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">First Deposit Amount</label>
                                 <input type="number" value={form.firstDeposit} onChange={e => setForm({ ...form, firstDeposit: parseFloat(e.target.value) || 0 })} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-black" title="First Deposit" />
                             </div>
                             <div>
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Full Day Deposit</label>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">Full Day Deposit</label>
                                 <input type="number" value={form.fullDayDeposit} onChange={e => setForm({ ...form, fullDayDeposit: parseFloat(e.target.value) || 0 })} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-black" title="Full Day" />
                             </div>
                             <div>
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Full Month Deposit</label>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">Full Month Deposit</label>
                                 <input type="number" value={form.fullMonthDeposit} onChange={e => setForm({ ...form, fullMonthDeposit: parseFloat(e.target.value) || 0 })} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-black" title="Full Month" />
                             </div>
 
                         </div>
                         <div className="flex space-x-4 mt-8">
-                            <button onClick={() => setShowAdd(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest">Cancel</button>
+                            <button onClick={() => setShowAdd(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-normal">Cancel</button>
                             <button
                                 onClick={() => {
                                     onAdd(form);
                                     setShowAdd(false);
                                 }}
-                                className="flex-1 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg"
+                                className="flex-1 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-normal shadow-lg"
                             >
                                 Save Log
                             </button>
@@ -341,13 +341,13 @@ const DailySummary: React.FC<DailySummaryProps> = ({ records, members, onAdd, on
                         <div className="space-y-6">
                             {/* Period Selection */}
                             <div>
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">
                                     {lang === Language.TH ? 'ช่วงเวลา' : 'Period'}
                                 </label>
                                 <div className="grid grid-cols-2 gap-3">
                                     <button
                                         onClick={() => setExportPeriod('daily')}
-                                        className={`px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${exportPeriod === 'daily'
+                                        className={`px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-normal transition-all ${exportPeriod === 'daily'
                                                 ? 'bg-indigo-600 text-white shadow-lg'
                                                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                                             }`}
@@ -356,7 +356,7 @@ const DailySummary: React.FC<DailySummaryProps> = ({ records, members, onAdd, on
                                     </button>
                                     <button
                                         onClick={() => setExportPeriod('weekly')}
-                                        className={`px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${exportPeriod === 'weekly'
+                                        className={`px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-normal transition-all ${exportPeriod === 'weekly'
                                                 ? 'bg-indigo-600 text-white shadow-lg'
                                                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                                             }`}
@@ -365,7 +365,7 @@ const DailySummary: React.FC<DailySummaryProps> = ({ records, members, onAdd, on
                                     </button>
                                     <button
                                         onClick={() => setExportPeriod('monthly')}
-                                        className={`px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${exportPeriod === 'monthly'
+                                        className={`px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-normal transition-all ${exportPeriod === 'monthly'
                                                 ? 'bg-indigo-600 text-white shadow-lg'
                                                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                                             }`}
@@ -374,7 +374,7 @@ const DailySummary: React.FC<DailySummaryProps> = ({ records, members, onAdd, on
                                     </button>
                                     <button
                                         onClick={() => setExportPeriod('custom')}
-                                        className={`px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${exportPeriod === 'custom'
+                                        className={`px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-normal transition-all ${exportPeriod === 'custom'
                                                 ? 'bg-indigo-600 text-white shadow-lg'
                                                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                                             }`}
@@ -388,7 +388,7 @@ const DailySummary: React.FC<DailySummaryProps> = ({ records, members, onAdd, on
                             {exportPeriod === 'custom' && (
                                 <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                                     <div>
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 block">
+                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-normal mb-2 block">
                                             {lang === Language.TH ? 'วันเริ่มต้น' : 'Start Date'}
                                         </label>
                                         <input
@@ -400,7 +400,7 @@ const DailySummary: React.FC<DailySummaryProps> = ({ records, members, onAdd, on
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 block">
+                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-normal mb-2 block">
                                             {lang === Language.TH ? 'วันสิ้นสุด' : 'End Date'}
                                         </label>
                                         <input
@@ -416,7 +416,7 @@ const DailySummary: React.FC<DailySummaryProps> = ({ records, members, onAdd, on
 
                             {/* Employee Selection */}
                             <div>
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">
                                     {lang === Language.TH ? 'พนักงาน' : 'Employee'}
                                 </label>
                                 <select
@@ -436,13 +436,13 @@ const DailySummary: React.FC<DailySummaryProps> = ({ records, members, onAdd, on
                             <div className="flex space-x-4 pt-4">
                                 <button
                                     onClick={() => setShowExport(false)}
-                                    className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+                                    className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-normal hover:bg-slate-200 transition-all"
                                 >
                                     {lang === Language.TH ? 'ยกเลิก' : 'Cancel'}
                                 </button>
                                 <button
                                     onClick={exportToCSV}
-                                    className="flex-1 py-4 bg-emerald-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-xl active:scale-95 flex items-center justify-center space-x-2"
+                                    className="flex-1 py-4 bg-emerald-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-normal hover:bg-emerald-700 transition-all shadow-xl active:scale-95 flex items-center justify-center space-x-2"
                                 >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

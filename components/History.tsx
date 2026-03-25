@@ -225,7 +225,7 @@ const History: React.FC<HistoryProps> = ({ records, lang, settings, allRecordsMa
         </div>
         <button
           onClick={exportToCSV}
-          className="bg-slate-900 text-white px-8 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-slate-900/10 active:scale-95 flex items-center space-x-3"
+          className="bg-slate-900 text-white px-8 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-normal hover:bg-black transition-all shadow-xl shadow-slate-900/10 active:scale-95 flex items-center space-x-3"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -253,7 +253,7 @@ const History: React.FC<HistoryProps> = ({ records, lang, settings, allRecordsMa
               <select
                 value={selectedUser}
                 onChange={(e) => setSelectedUser(e.target.value)}
-                className="flex-1 md:flex-none bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-600 outline-none"
+                className="flex-1 md:flex-none bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-xs font-black uppercase tracking-normal text-slate-600 outline-none"
                 title="Select Employee"
               >
                 <option value="ALL">{lang === Language.TH ? 'พนักงานทุกคน' : 'All Employees'}</option>
@@ -265,7 +265,7 @@ const History: React.FC<HistoryProps> = ({ records, lang, settings, allRecordsMa
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value as any)}
-              className="flex-1 md:flex-none bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-600 outline-none"
+              className="flex-1 md:flex-none bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-xs font-black uppercase tracking-normal text-slate-600 outline-none"
               title="Filter by type"
             >
               <option value="ALL">{lang === Language.TH ? 'ทุกประเภท' : 'All Types'}</option>
@@ -275,7 +275,7 @@ const History: React.FC<HistoryProps> = ({ records, lang, settings, allRecordsMa
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value as any)}
-              className="flex-1 md:flex-none bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-600 outline-none"
+              className="flex-1 md:flex-none bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-xs font-black uppercase tracking-normal text-slate-600 outline-none"
               title="Sort order"
             >
               <option value="desc">{lang === Language.TH ? 'ล่าสุด' : 'Newest First'}</option>
@@ -295,7 +295,7 @@ const History: React.FC<HistoryProps> = ({ records, lang, settings, allRecordsMa
               <button
                 key={range.id}
                 onClick={() => setTimeRange(range.id as any)}
-                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${timeRange === range.id
+                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-normal transition-all ${timeRange === range.id
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
                   : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
                   }`}
@@ -359,13 +359,13 @@ const History: React.FC<HistoryProps> = ({ records, lang, settings, allRecordsMa
                       <div className={`w-3 h-10 rounded-full ${record.type === AttendanceType.CHECK_IN ? 'bg-blue-600 shadow-lg shadow-blue-600/30' : 'bg-slate-200'}`}></div>
                       <div>
                         {record.employeeName && (
-                          <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-0.5">{record.employeeName}</p>
+                          <p className="text-[10px] font-black text-slate-900 uppercase tracking-normal mb-0.5">{record.employeeName}</p>
                         )}
-                        <p className={`text-sm font-black tracking-widest ${record.type === AttendanceType.CHECK_IN ? 'text-blue-600' : 'text-slate-400'}`}>
+                        <p className={`text-sm font-black tracking-normal ${record.type === AttendanceType.CHECK_IN ? 'text-blue-600' : 'text-slate-400'}`}>
                           {record.type === AttendanceType.CHECK_IN ? 'INBOUND' : 'OUTBOUND'}
                         </p>
                         <div className="flex items-center space-x-2 mt-0.5">
-                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{record.workMode || 'OFFICE'}</p>
+                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-normal">{record.workMode || 'OFFICE'}</p>
                           {record.type === AttendanceType.CHECK_IN && (() => {
                             const { isLate, delay } = checkIfLate(record.timestamp);
                             console.log('🔍 Late Check:', {
@@ -376,7 +376,7 @@ const History: React.FC<HistoryProps> = ({ records, lang, settings, allRecordsMa
                               workStartTimes: settings.workStartTimes
                             });
                             return isLate ? (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-black bg-red-50 text-red-600 uppercase tracking-widest">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-black bg-red-50 text-red-600 uppercase tracking-normal">
                                 {lang === Language.TH ? `สาย ${delay} นาที` : `Late ${delay}m`}
                               </span>
                             ) : null;
@@ -387,7 +387,7 @@ const History: React.FC<HistoryProps> = ({ records, lang, settings, allRecordsMa
                   </td>
                   <td className="px-10 py-8">
                     <p className="text-xs font-black text-slate-900 mb-1">{new Date(record.timestamp).toLocaleDateString(lang === Language.TH ? 'th-TH' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{new Date(record.timestamp).toLocaleTimeString(lang === Language.TH ? 'th-TH' : 'en-US', { hour: '2-digit', minute: '2-digit' })}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-normal">{new Date(record.timestamp).toLocaleTimeString(lang === Language.TH ? 'th-TH' : 'en-US', { hour: '2-digit', minute: '2-digit' })}</p>
                   </td>
                   <td className="px-10 py-8">
                     {record.type === AttendanceType.CHECK_OUT && (() => {
@@ -404,7 +404,7 @@ const History: React.FC<HistoryProps> = ({ records, lang, settings, allRecordsMa
                               {duration.hours}h {duration.minutes}m
                             </p>
                             {duration.overtimeMinutes > 0 && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-black bg-amber-50 text-amber-600 uppercase tracking-widest">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-black bg-amber-50 text-amber-600 uppercase tracking-normal">
                                 OT: {duration.overtimeMinutes}m
                               </span>
                             )}
@@ -423,14 +423,14 @@ const History: React.FC<HistoryProps> = ({ records, lang, settings, allRecordsMa
                   </td>
                   <td className="px-10 py-8 text-right">
                     {record.location?.latitude && record.location?.longitude ? (
-                      <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[9px] font-black bg-green-50 text-green-600 uppercase tracking-widest">
+                      <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[9px] font-black bg-green-50 text-green-600 uppercase tracking-normal">
                         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                         </svg>
                         {lang === Language.TH ? 'ยืนยันแล้ว' : 'Verified'}
                       </span>
                     ) : (
-                      <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[9px] font-black bg-slate-50 text-slate-400 uppercase tracking-widest">
+                      <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[9px] font-black bg-slate-50 text-slate-400 uppercase tracking-normal">
                         {lang === Language.TH ? 'ไม่ระบุ' : 'N/A'}
                       </span>
                     )}
@@ -460,7 +460,7 @@ const History: React.FC<HistoryProps> = ({ records, lang, settings, allRecordsMa
                 <div className={`w-3 h-12 rounded-full ${record.type === AttendanceType.CHECK_IN ? 'bg-blue-600 shadow-lg shadow-blue-600/30' : 'bg-slate-200'}`}></div>
                 <div>
                   {record.employeeName && (
-                    <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-0.5">{record.employeeName}</p>
+                    <p className="text-[10px] font-black text-slate-900 uppercase tracking-normal mb-0.5">{record.employeeName}</p>
                   )}
                   <p className={`text-base font-black tracking-wider ${record.type === AttendanceType.CHECK_IN ? 'text-blue-600' : 'text-slate-400'}`}>
                     {record.type === AttendanceType.CHECK_IN ? (lang === Language.TH ? 'เข้างาน' : 'CHECK IN') : (lang === Language.TH ? 'ออกงาน' : 'CHECK OUT')}
@@ -468,7 +468,7 @@ const History: React.FC<HistoryProps> = ({ records, lang, settings, allRecordsMa
                 </div>
               </div>
               {(record.location?.latitude && record.location?.longitude) && (
-                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[9px] font-black bg-green-50 text-green-600 uppercase tracking-widest">
+                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[9px] font-black bg-green-50 text-green-600 uppercase tracking-normal">
                   <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
@@ -516,7 +516,7 @@ const History: React.FC<HistoryProps> = ({ records, lang, settings, allRecordsMa
                           {duration.hours}h {duration.minutes}m
                         </p>
                         {duration.overtimeMinutes > 0 && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-black bg-amber-50 text-amber-600 uppercase tracking-widest mt-1">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-black bg-amber-50 text-amber-600 uppercase tracking-normal mt-1">
                             OT: {duration.overtimeMinutes}m
                           </span>
                         )}

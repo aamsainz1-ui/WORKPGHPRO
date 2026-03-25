@@ -660,7 +660,7 @@ const App: React.FC = () => {
                 <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mb-1">
                   {successModal.message.split('!')[0]}
                 </h3>
-                <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest">
+                <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-normal">
                   {lang === Language.TH ? 'บันทึกข้อมูลเรียบร้อย' : 'Data Saved Successfully'}
                 </p>
               </div>

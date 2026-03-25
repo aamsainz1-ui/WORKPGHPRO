@@ -80,11 +80,11 @@ const TeamManagement: React.FC<TeamManagementProps> = ({
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
                     <h2 className="text-3xl font-black text-slate-900 tracking-tight">{t.title}</h2>
-                    <p className="text-xs font-black text-indigo-600 uppercase tracking-widest mt-1">{t.subtitle}</p>
+                    <p className="text-xs font-black text-indigo-600 uppercase tracking-normal mt-1">{t.subtitle}</p>
                 </div>
                 <button
                     onClick={() => setShowAddTeam(true)}
-                    className="bg-slate-900 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl"
+                    className="bg-slate-900 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-normal hover:bg-black transition-all shadow-xl"
                 >
                     {t.addTeam}
                 </button>
@@ -132,7 +132,7 @@ const TeamManagement: React.FC<TeamManagementProps> = ({
                                     </button>
                                 </div>
                                 <div className="mt-3 flex items-center space-x-2">
-                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-normal">
                                         {teamMembers.length} {t.members}
                                     </span>
                                 </div>
@@ -187,7 +187,7 @@ const TeamManagement: React.FC<TeamManagementProps> = ({
                 <div className="bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200 overflow-hidden">
                     <div className="p-6 border-b border-slate-200 bg-white">
                         <h3 className="text-lg font-black text-slate-600">{t.unassigned}</h3>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-normal mt-1">
                             {getUnassignedMembers().length} {t.members}
                         </p>
                     </div>
@@ -234,7 +234,7 @@ const TeamManagement: React.FC<TeamManagementProps> = ({
                         <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-8">{t.addTeam}</h3>
                         <div className="space-y-6">
                             <div>
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">
                                     {t.teamName}
                                 </label>
                                 <input
@@ -247,7 +247,7 @@ const TeamManagement: React.FC<TeamManagementProps> = ({
                                 />
                             </div>
                             <div>
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">
                                     {t.description}
                                 </label>
                                 <textarea
@@ -259,7 +259,7 @@ const TeamManagement: React.FC<TeamManagementProps> = ({
                                 />
                             </div>
                             <div>
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">
                                     {t.color}
                                 </label>
                                 <div className="grid grid-cols-8 gap-2">
@@ -283,13 +283,13 @@ const TeamManagement: React.FC<TeamManagementProps> = ({
                                         setShowAddTeam(false);
                                         setNewTeam({ name: '', description: '', color: TEAM_COLORS[0], memberIds: [] });
                                     }}
-                                    className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+                                    className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-normal hover:bg-slate-200 transition-all"
                                 >
                                     {t.cancel}
                                 </button>
                                 <button
                                     onClick={handleCreateTeam}
-                                    className="flex-1 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl active:scale-95"
+                                    className="flex-1 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-normal hover:bg-black transition-all shadow-xl active:scale-95"
                                 >
                                     {t.create}
                                 </button>

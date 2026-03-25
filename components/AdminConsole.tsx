@@ -225,7 +225,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
         </div>
         <button
           onClick={() => setShowAddMember(true)}
-          className="px-6 py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg"
+          className="px-6 py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-normal hover:bg-slate-800 transition-all shadow-lg"
           title={t.addMember}
         >
           {t.addMember}
@@ -234,7 +234,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div className="bg-indigo-600 p-8 rounded-[2.5rem] text-white shadow-2xl shadow-indigo-600/20 relative overflow-hidden group">
-          <p className="text-[10px] font-black opacity-60 uppercase tracking-widest mb-1">{t.pendingLabel}</p>
+          <p className="text-[10px] font-black opacity-60 uppercase tracking-normal mb-1">{t.pendingLabel}</p>
           <p className="text-5xl font-black tracking-tighter">{stats.pendingRequests}</p>
           <div className="mt-6 h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
             <div className="h-full bg-white transition-all duration-1000 shadow-[0_0_10px_white]" style={{ width: `${Math.min(100, (stats.pendingRequests / 10) * 100)}%` }}></div>
@@ -244,10 +244,10 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
 
         <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col justify-between">
           <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{t.activeLabel}</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-1">{t.activeLabel}</p>
             <p className="text-5xl font-black text-slate-900 tracking-tighter">{stats.activeCount}</p>
           </div>
-          <div className="mt-6 flex items-center text-[10px] text-emerald-500 font-black uppercase tracking-widest">
+          <div className="mt-6 flex items-center text-[10px] text-emerald-500 font-black uppercase tracking-normal">
             <span className="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse"></span>
             {lang === Language.TH ? 'กำลังปฏิบัติงาน' : 'Live Operations'}
           </div>
@@ -255,7 +255,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
 
         <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col justify-between">
           <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{t.onLeaveLabel}</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-1">{t.onLeaveLabel}</p>
             <p className="text-5xl font-black text-slate-900 tracking-tighter">{stats.leaveCount}</p>
           </div>
         </div>
@@ -264,13 +264,13 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
       <div className="bg-white rounded-[3rem] shadow-sm border border-slate-100 p-8 flex flex-col md:flex-row items-center justify-between gap-6">
         <div>
           <h3 className="text-xl font-black text-slate-900">{lang === Language.TH ? 'ส่งออกข้อมูลรายงาน' : 'Export Reports'}</h3>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{lang === Language.TH ? 'ระบบประมวลผลข้อมูลพนักงานทั้งหมด' : 'Comprehensive Data Export Hub'}</p>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-normal mt-1">{lang === Language.TH ? 'ระบบประมวลผลข้อมูลพนักงานทั้งหมด' : 'Comprehensive Data Export Hub'}</p>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
           <select
             value={exportUser}
             onChange={(e) => setExportUser(e.target.value)}
-            className="w-full sm:w-64 bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-600 outline-none"
+            className="w-full sm:w-64 bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-[10px] font-black uppercase tracking-normal text-slate-600 outline-none"
             title="Select Member to Export"
           >
             <option value="ALL">{lang === Language.TH ? 'พนักงานทุกคน' : 'All Employees'}</option>
@@ -280,7 +280,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
           </select>
           <button
             onClick={handleExport}
-            className="w-full sm:w-auto bg-emerald-600 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-600/10 active:scale-95 flex items-center justify-center space-x-3"
+            className="w-full sm:w-auto bg-emerald-600 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-normal hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-600/10 active:scale-95 flex items-center justify-center space-x-3"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -296,7 +296,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
             <h3 className="text-2xl font-black text-slate-900 tracking-tight">{t.settingsTitle}</h3>
 
             <div className="space-y-4">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">{t.lateThreshold}</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">{t.lateThreshold}</label>
               <input
                 type="number"
                 value={settings.lateThresholdMinute}
@@ -311,7 +311,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                 <h4 className="text-lg font-black text-slate-900">{lang === Language.TH ? 'เวลาเข้างานแต่ละกะ' : 'Work Start Times'}</h4>
                 <button
                   onClick={() => setShowAddShift(true)}
-                  className="text-xs font-black text-indigo-600 uppercase tracking-widest hover:text-indigo-700"
+                  className="text-xs font-black text-indigo-600 uppercase tracking-normal hover:text-indigo-700"
                 >
                   + {lang === Language.TH ? 'เพิ่มกะ' : 'Add Shift'}
                 </button>
@@ -347,7 +347,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                 <h4 className="text-lg font-black text-slate-900">{t.locationTitle}</h4>
                 <button
                   onClick={() => setShowAddLocation(true)}
-                  className="text-xs font-black text-indigo-600 uppercase tracking-widest hover:text-indigo-700"
+                  className="text-xs font-black text-indigo-600 uppercase tracking-normal hover:text-indigo-700"
                 >
                   + {t.addLocation}
                 </button>
@@ -394,7 +394,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                   className="flex-1 px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl font-black text-sm focus:outline-none"
                   title={t.addRole}
                 />
-                <button onClick={handleAddRole} className="px-4 py-3 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest">
+                <button onClick={handleAddRole} className="px-4 py-3 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-normal">
                   {t.addRole}
                 </button>
               </div>
@@ -419,11 +419,11 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                   <div key={member.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="text-xs font-black text-slate-900">{member.name}</span>
-                      <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest">{member.position}</span>
+                      <span className="text-[9px] font-black text-blue-600 uppercase tracking-normal">{member.position}</span>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       <div>
-                        <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-1">{t.quotaSick}</label>
+                        <label className="text-[8px] font-black text-slate-400 uppercase tracking-normal block mb-1">{t.quotaSick}</label>
                         <input
                           type="number"
                           value={(member as any).leaveBalances?.sick || 0}
@@ -433,7 +433,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                         />
                       </div>
                       <div>
-                        <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-1">{t.quotaAnnual}</label>
+                        <label className="text-[8px] font-black text-slate-400 uppercase tracking-normal block mb-1">{t.quotaAnnual}</label>
                         <input
                           type="number"
                           value={(member as any).leaveBalances?.annual || 0}
@@ -443,7 +443,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                         />
                       </div>
                       <div>
-                        <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-1">{t.quotaPersonal}</label>
+                        <label className="text-[8px] font-black text-slate-400 uppercase tracking-normal block mb-1">{t.quotaPersonal}</label>
                         <input
                           type="number"
                           value={(member as any).leaveBalances?.personal || 0}
@@ -463,7 +463,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                 <h4 className="text-lg font-black text-slate-900">{t.announcementTitle}</h4>
                 <button
                   onClick={() => setShowAddAnnouncement(true)}
-                  className="text-xs font-black text-indigo-600 uppercase tracking-widest hover:text-indigo-700"
+                  className="text-xs font-black text-indigo-600 uppercase tracking-normal hover:text-indigo-700"
                 >
                   + {t.addAnnouncement}
                 </button>
@@ -496,7 +496,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
           <div className="p-10 border-b border-slate-50 flex items-center justify-between">
             <h3 className="text-2xl font-black text-slate-900 tracking-tight">{t.pendingTitle}</h3>
             {stats.pendingRequests > 0 && (
-              <span className="bg-red-50 text-red-600 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest border border-red-100">
+              <span className="bg-red-50 text-red-600 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-normal border border-red-100">
                 {stats.pendingRequests} Urgent
               </span>
             )}
@@ -532,12 +532,12 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                           </div>
                           <div>
                             <p className="text-sm font-black text-slate-900">{leave.employeeName || 'Identity'}</p>
-                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{leave.employeeId}</p>
+                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-normal">{leave.employeeId}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-10 py-8">
-                        <span className="text-[8px] font-black px-2 py-0.5 rounded-md bg-slate-900 text-white uppercase tracking-widest mb-1 inline-block">
+                        <span className="text-[8px] font-black px-2 py-0.5 rounded-md bg-slate-900 text-white uppercase tracking-normal mb-1 inline-block">
                           {leaveLabelsInternal[leave.type as keyof typeof leaveLabelsInternal] || leave.type}
                         </span>
                         <p className="text-xs text-slate-500 font-medium italic">{duration} days</p>
@@ -590,11 +590,11 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
               <input value={newLoc.name} onChange={e => setNewLoc({ ...newLoc, name: e.target.value })} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-black" placeholder="Name" title="Name" />
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Latitude</label>
+                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-normal ml-2">Latitude</label>
                   <input type="number" step="any" value={newLoc.lat} onChange={e => setNewLoc({ ...newLoc, lat: parseFloat(e.target.value) })} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-black text-sm" title="Lat" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Longitude</label>
+                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-normal ml-2">Longitude</label>
                   <input type="number" step="any" value={newLoc.lng} onChange={e => setNewLoc({ ...newLoc, lng: parseFloat(e.target.value) })} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-black text-sm" title="Lng" />
                 </div>
               </div>
@@ -602,14 +602,14 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
               <div className="grid grid-cols-2 gap-4">
                 <button
                   onClick={handleGetCurrentLocation}
-                  className="flex-1 py-4 bg-emerald-50 text-emerald-600 rounded-2xl text-[9px] font-black uppercase tracking-widest border border-emerald-100 hover:bg-emerald-100 transition-all flex items-center justify-center space-x-2"
+                  className="flex-1 py-4 bg-emerald-50 text-emerald-600 rounded-2xl text-[9px] font-black uppercase tracking-normal border border-emerald-100 hover:bg-emerald-100 transition-all flex items-center justify-center space-x-2"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                   <span>{lang === Language.TH ? 'ตำแหน่งปัจจุบัน' : 'Current GPS'}</span>
                 </button>
                 <button
                   onClick={() => setShowMapPicker(true)}
-                  className="flex-1 py-4 bg-indigo-50 text-indigo-600 rounded-2xl text-[9px] font-black uppercase tracking-widest border border-indigo-100 hover:bg-indigo-100 transition-all flex items-center justify-center space-x-2"
+                  className="flex-1 py-4 bg-indigo-50 text-indigo-600 rounded-2xl text-[9px] font-black uppercase tracking-normal border border-indigo-100 hover:bg-indigo-100 transition-all flex items-center justify-center space-x-2"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.723A2 2 0 013 15.483V4.517a2 2 0 011.553-1.943L9 2l6 3 5.447-2.723A2 2 0 0123 4.517v10.966a2 2 0 01-1.553 1.943L15 20l-6-3z" /></svg>
                   <span>{lang === Language.TH ? 'เลือกจากแผนที่' : 'Pick on Map'}</span>
@@ -617,12 +617,12 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
               </div>
 
               <div className="space-y-2">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Radius (meters)</label>
+                <label className="text-[9px] font-black text-slate-400 uppercase tracking-normal ml-2">Radius (meters)</label>
                 <input type="number" value={newLoc.radius} onChange={e => setNewLoc({ ...newLoc, radius: parseInt(e.target.value) })} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-black text-sm" placeholder="Radius (m)" title="Radius" />
               </div>
               <div className="flex space-x-4 pt-4">
-                <button onClick={() => setShowAddLocation(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest">Cancel</button>
-                <button onClick={handleAddLocation} className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg">Add Office</button>
+                <button onClick={() => setShowAddLocation(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-normal">Cancel</button>
+                <button onClick={handleAddLocation} className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-normal shadow-lg">Add Office</button>
               </div>
             </div>
           </div>
@@ -644,8 +644,8 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
               </select>
             </div>
             <div className="flex space-x-4">
-              <button onClick={() => setShowAddMember(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest">Cancel</button>
-              <button onClick={handleAddMember} className="flex-1 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg">Create</button>
+              <button onClick={() => setShowAddMember(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-normal">Cancel</button>
+              <button onClick={handleAddMember} className="flex-1 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-normal shadow-lg">Create</button>
             </div>
           </div>
         </div>
@@ -657,16 +657,16 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
             <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-8">{t.addAnnouncement}</h3>
             <div className="space-y-6">
               <div>
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Title</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">Title</label>
                 <input value={newA.title} onChange={e => setNewA({ ...newA, title: e.target.value })} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-black" placeholder="Announcement Title" title="Title" />
               </div>
               <div>
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Content</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">Content</label>
                 <textarea value={newA.content} onChange={e => setNewA({ ...newA, content: e.target.value })} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold min-h-[120px]" placeholder="Content..." title="Content" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Category</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">Category</label>
                   <select value={newA.category} onChange={e => setNewA({ ...newA, category: e.target.value as any })} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-black" title="Category">
                     <option value="GENERAL">GENERAL</option>
                     <option value="POLICY">POLICY</option>
@@ -674,13 +674,13 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                   </select>
                 </div>
                 <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Author</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">Author</label>
                   <input value={newA.author} onChange={e => setNewA({ ...newA, author: e.target.value })} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-black" placeholder="Author" title="Author" />
                 </div>
               </div>
               <div className="flex space-x-4 pt-4">
-                <button onClick={() => setShowAddAnnouncement(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest">Cancel</button>
-                <button onClick={handleCreateAnnouncement} className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg">Post</button>
+                <button onClick={() => setShowAddAnnouncement(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-normal">Cancel</button>
+                <button onClick={handleCreateAnnouncement} className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-normal shadow-lg">Post</button>
               </div>
             </div>
           </div>
@@ -715,7 +715,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
             <h3 className="text-2xl font-black text-slate-900 mb-6">{lang === Language.TH ? 'เพิ่มกะทำงาน' : 'Add Work Shift'}</h3>
             <div className="space-y-4">
               <div>
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">
                   {lang === Language.TH ? 'ชื่อกะ' : 'Shift Name'}
                 </label>
                 <input
@@ -728,7 +728,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                 />
               </div>
               <div>
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">
                   {lang === Language.TH ? 'เวลาเข้างาน' : 'Start Time'}
                 </label>
                 <input
@@ -740,7 +740,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                 />
               </div>
               <div>
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2 block">
                   {lang === Language.TH ? 'เวลาเลิกงาน' : 'End Time'}
                 </label>
                 <input
@@ -753,7 +753,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
               </div>
               <button
                 onClick={handleAddShift}
-                className="w-full bg-indigo-600 text-white px-8 py-4 rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-xl active:scale-95"
+                className="w-full bg-indigo-600 text-white px-8 py-4 rounded-2xl text-sm font-black uppercase tracking-normal hover:bg-indigo-700 transition-all shadow-xl active:scale-95"
               >
                 {lang === Language.TH ? 'เพิ่มกะ' : 'Add Shift'}
               </button>

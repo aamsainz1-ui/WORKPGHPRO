@@ -33,7 +33,7 @@ const GeminiInsights: React.FC<GeminiInsightsProps> = ({ records, lang }) => {
                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
              </svg>
           </div>
-          <h4 className="text-xs font-black uppercase tracking-widest text-indigo-100">
+          <h4 className="text-xs font-black uppercase tracking-normal text-indigo-100">
             {lang === Language.TH ? 'AI สรุปภาพรวมการทำงาน' : 'AI Work Insights'}
           </h4>
         </div>

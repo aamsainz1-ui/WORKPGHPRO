@@ -80,7 +80,7 @@ const Organization: React.FC<OrganizationProps> = ({
               <div className="flex bg-slate-100 p-1.5 rounded-2xl">
                 <button
                   onClick={() => setActiveTab('members')}
-                  className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'members'
+                  className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-normal transition-all ${activeTab === 'members'
                     ? 'bg-white text-slate-900 shadow-lg'
                     : 'text-slate-400 hover:text-slate-600'
                     }`}
@@ -89,7 +89,7 @@ const Organization: React.FC<OrganizationProps> = ({
                 </button>
                 <button
                   onClick={() => setActiveTab('teams')}
-                  className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'teams'
+                  className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-normal transition-all ${activeTab === 'teams'
                     ? 'bg-white text-slate-900 shadow-lg'
                     : 'text-slate-400 hover:text-slate-600'
                     }`}
@@ -166,21 +166,21 @@ const Organization: React.FC<OrganizationProps> = ({
                   </select>
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-1">Sick</label>
+                      <label className="text-[8px] font-black text-slate-400 uppercase tracking-normal block mb-1">Sick</label>
                       <input type="number" className="w-full bg-slate-50 p-3 rounded-xl font-bold text-sm" value={editForm.leaveBalances.sick} onChange={e => setEditForm({ ...editForm, leaveBalances: { ...editForm.leaveBalances, sick: parseInt(e.target.value) || 0 } })} title="Sick Leave" />
                     </div>
                     <div>
-                      <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-1">Annual</label>
+                      <label className="text-[8px] font-black text-slate-400 uppercase tracking-normal block mb-1">Annual</label>
                       <input type="number" className="w-full bg-slate-50 p-3 rounded-xl font-bold text-sm" value={editForm.leaveBalances.annual} onChange={e => setEditForm({ ...editForm, leaveBalances: { ...editForm.leaveBalances, annual: parseInt(e.target.value) || 0 } })} title="Annual Leave" />
                     </div>
                     <div>
-                      <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-1">Prsnl</label>
+                      <label className="text-[8px] font-black text-slate-400 uppercase tracking-normal block mb-1">Prsnl</label>
                       <input type="number" className="w-full bg-slate-50 p-3 rounded-xl font-bold text-sm" value={editForm.leaveBalances.personal} onChange={e => setEditForm({ ...editForm, leaveBalances: { ...editForm.leaveBalances, personal: parseInt(e.target.value) || 0 } })} title="Personal Leave" />
                     </div>
                   </div>
                   <div className="flex space-x-2 pt-2">
-                    <button onClick={handleSave} className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest">{lang === Language.TH ? 'บันทึก' : 'Save'}</button>
-                    <button onClick={() => setEditingId(null)} className="flex-1 bg-slate-100 text-slate-400 py-3 rounded-xl font-black text-xs uppercase tracking-widest">{lang === Language.TH ? 'ยกเลิก' : 'Cancel'}</button>
+                    <button onClick={handleSave} className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-black text-xs uppercase tracking-normal">{lang === Language.TH ? 'บันทึก' : 'Save'}</button>
+                    <button onClick={() => setEditingId(null)} className="flex-1 bg-slate-100 text-slate-400 py-3 rounded-xl font-black text-xs uppercase tracking-normal">{lang === Language.TH ? 'ยกเลิก' : 'Cancel'}</button>
                   </div>
                 </div>
               ) : (
@@ -196,11 +196,11 @@ const Organization: React.FC<OrganizationProps> = ({
 
                   <h3 className="text-xl font-black text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors">{member.name}</h3>
                   <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] mt-2">{member.position}</p>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 mb-6">{member.department}</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-normal mt-1 mb-6">{member.department}</p>
 
                   <div className="w-full pt-6 border-t border-slate-50 flex items-center justify-between">
                     <div className="flex flex-col items-start">
-                      <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest">{lang === Language.TH ? 'อีเมลทางการ' : 'Corporate Email'}</p>
+                      <p className="text-[8px] font-black text-slate-300 uppercase tracking-normal">{lang === Language.TH ? 'อีเมลทางการ' : 'Corporate Email'}</p>
                       <span className="text-[10px] font-bold text-slate-600 truncate max-w-[120px]">{member.email}</span>
                     </div>
                     {isAdmin && onUpdateMember && (

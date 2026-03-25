@@ -347,7 +347,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">MKT Dashboard</h2>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">ติดตามผลการตลาดรายวัน</p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-normal mt-1">ติดตามผลการตลาดรายวัน</p>
         </div>
         <div className="flex items-center gap-3">
           {saving && (
@@ -381,7 +381,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
       {withdrawData && withdrawData.data.length > 0 && (
         <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-slate-100 shadow-xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-black text-slate-700 uppercase tracking-widest">💸 ยอดเบิก/โอนวันนี้</h3>
+            <h3 className="text-sm font-black text-slate-700 uppercase tracking-normal">💸 ยอดเบิก/โอนวันนี้</h3>
             <span className="text-[10px] font-bold text-slate-400">{withdrawData.date}</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -423,7 +423,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${
+            className={`px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-normal transition-all duration-300 ${
               activeTab === tab
                 ? 'bg-slate-900 text-white shadow-2xl shadow-slate-900/20 scale-105'
                 : 'bg-white text-slate-400 hover:bg-slate-50 hover:text-slate-700 border border-slate-100'
@@ -440,11 +440,11 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100">
-                <th className="text-left px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest sticky left-0 bg-white/90 backdrop-blur-sm z-10 min-w-[80px]">
+                <th className="text-left px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-normal sticky left-0 bg-white/90 backdrop-blur-sm z-10 min-w-[80px]">
                   Staff
                 </th>
                 {COLUMNS.map(col => (
-                  <th key={col.key} className="px-3 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right min-w-[90px]">
+                  <th key={col.key} className="px-3 py-4 text-[10px] font-black text-slate-400 uppercase tracking-normal text-right min-w-[90px]">
                     {col.label}
                   </th>
                 ))}
@@ -523,19 +523,19 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
       {/* Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="bg-white/80 backdrop-blur-xl rounded-[1.5rem] border border-slate-100 p-5 shadow-sm">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">ค่าใช้จ่ายรวม</p>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2">ค่าใช้จ่ายรวม</p>
           <p className="text-2xl font-black text-amber-600">{fmt(totalRecalced.totalAds)}</p>
         </div>
         <div className="bg-white/80 backdrop-blur-xl rounded-[1.5rem] border border-slate-100 p-5 shadow-sm">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">สมัครทั้งหมด</p>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2">สมัครทั้งหมด</p>
           <p className="text-2xl font-black text-blue-600">{fmt(totalRecalced.register)}</p>
         </div>
         <div className="bg-white/80 backdrop-blur-xl rounded-[1.5rem] border border-slate-100 p-5 shadow-sm">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">%ฝากรวม</p>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2">%ฝากรวม</p>
           <p className="text-2xl font-black text-emerald-600">{fmtPct(totalRecalced.depositPct)}</p>
         </div>
         <div className="bg-white/80 backdrop-blur-xl rounded-[1.5rem] border border-slate-100 p-5 shadow-sm">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">ฝากทั้งวัน</p>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2">ฝากทั้งวัน</p>
           <p className="text-2xl font-black text-purple-600">{fmt(totalRecalced.dailyDeposit)}</p>
         </div>
       </div>
@@ -543,24 +543,24 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
       {/* ===== Monthly Summary ===== */}
       <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-          <h3 className="text-sm font-black text-slate-700 uppercase tracking-widest">📊 สรุปเดือนนี้</h3>
+          <h3 className="text-sm font-black text-slate-700 uppercase tracking-normal">📊 สรุปเดือนนี้</h3>
           {loadingMonthly && <span className="text-xs text-blue-400 font-bold animate-pulse">⏳ กำลังโหลด...</span>}
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100">
-                <th className="text-left px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest sticky left-0 bg-white/90 z-10 min-w-[80px]">Staff</th>
-                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">FB</th>
-                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Google</th>
-                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">TikTok</th>
-                <th className="px-3 py-3 text-[10px] font-black text-amber-500 uppercase tracking-widest text-right">รวม ADS</th>
-                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">สมัคร</th>
-                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">สมาชิกฝาก</th>
-                <th className="px-3 py-3 text-[10px] font-black text-emerald-500 uppercase tracking-widest text-right">%ฝาก</th>
-                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">ฝากแรก</th>
-                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">ฝากทั้งวัน</th>
-                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">ฝากทั้งเดือน</th>
+                <th className="text-left px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal sticky left-0 bg-white/90 z-10 min-w-[80px]">Staff</th>
+                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal text-right">FB</th>
+                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal text-right">Google</th>
+                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal text-right">TikTok</th>
+                <th className="px-3 py-3 text-[10px] font-black text-amber-500 uppercase tracking-normal text-right">รวม ADS</th>
+                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal text-right">สมัคร</th>
+                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal text-right">สมาชิกฝาก</th>
+                <th className="px-3 py-3 text-[10px] font-black text-emerald-500 uppercase tracking-normal text-right">%ฝาก</th>
+                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal text-right">ฝากแรก</th>
+                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal text-right">ฝากทั้งวัน</th>
+                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal text-right">ฝากทั้งเดือน</th>
               </tr>
             </thead>
             <tbody>

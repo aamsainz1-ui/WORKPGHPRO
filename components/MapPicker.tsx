@@ -53,13 +53,13 @@ const MapPicker: React.FC<MapPickerProps> = ({ initialLat, initialLng, onLocatio
                     <h3 className="text-xl font-black text-slate-900 tracking-tight">
                         {lang === 'TH' ? 'ปักหมุดที่ตั้งอาคาร' : 'Pin Building Site'}
                     </h3>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-normal italic">
                         {lang === 'TH' ? 'คลิกที่จุดในแผนที่เพื่อเลือกพิกัด' : 'Click on the map to set coordinates'}
                     </p>
                 </div>
                 <button
                     onClick={onClose}
-                    className="px-6 py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-slate-900/20 active:scale-95 transition-all"
+                    className="px-6 py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-normal shadow-xl shadow-slate-900/20 active:scale-95 transition-all"
                 >
                     {lang === 'TH' ? 'เสร็จสิ้น' : 'Confirm Pin'}
                 </button>

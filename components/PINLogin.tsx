@@ -61,7 +61,7 @@ const PINLogin: React.FC<PINLoginProps> = ({ users, onLogin, lang }) => {
                                     <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                                 </div>
                                 <h3 className="text-base font-black text-slate-900 line-clamp-1">{user.name}</h3>
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{user.position}</p>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-normal mt-1">{user.position}</p>
                             </button>
                         ))}
                     </div>
@@ -96,7 +96,7 @@ const PINLogin: React.FC<PINLoginProps> = ({ users, onLogin, lang }) => {
                 </div>
 
                 {error && (
-                    <p className="text-center text-red-400 text-[10px] font-black uppercase tracking-widest animate-bounce">
+                    <p className="text-center text-red-400 text-[10px] font-black uppercase tracking-normal animate-bounce">
                         {t.error}
                     </p>
                 )}
@@ -113,7 +113,7 @@ const PINLogin: React.FC<PINLoginProps> = ({ users, onLogin, lang }) => {
                     ))}
                     <button
                         onClick={() => setSelectedUser(null)}
-                        className="h-20 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all"
+                        className="h-20 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-[1.5rem] text-[10px] font-black uppercase tracking-normal transition-all"
                     >
                         {t.back}
                     </button>

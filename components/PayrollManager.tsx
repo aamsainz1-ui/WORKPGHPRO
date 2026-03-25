@@ -75,13 +75,13 @@ const PayrollManager: React.FC<PayrollManagerProps> = ({ members, payroll, compe
                 <div className="flex bg-slate-100 p-1.5 rounded-2xl">
                     <button
                         onClick={() => setActiveTab('MANAGEMENT')}
-                        className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'MANAGEMENT' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'}`}
+                        className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-normal transition-all ${activeTab === 'MANAGEMENT' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'}`}
                     >
                         {lang === Language.TH ? 'จัดการเงินเดือน' : 'Management'}
                     </button>
                     <button
                         onClick={() => setActiveTab('HISTORY')}
-                        className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'HISTORY' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'}`}
+                        className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-normal transition-all ${activeTab === 'HISTORY' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'}`}
                     >
                         {lang === Language.TH ? 'ประวัติการเงิน' : 'History'}
                     </button>
@@ -92,7 +92,7 @@ const PayrollManager: React.FC<PayrollManagerProps> = ({ members, payroll, compe
                 {/* Sidebar Member List */}
                 <div className="lg:col-span-4 space-y-4">
                     <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-6">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 px-2">Select Employee</p>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-4 px-2">Select Employee</p>
                         <div className="space-y-2 max-h-[500px] overflow-y-auto custom-scrollbar pr-2">
                             {members.map(member => (
                                 <button
@@ -104,7 +104,7 @@ const PayrollManager: React.FC<PayrollManagerProps> = ({ members, payroll, compe
                                     <img src={member.avatar} className="w-10 h-10 rounded-xl object-cover" alt="" />
                                     <div className="text-left overflow-hidden">
                                         <p className="text-xs font-black truncate">{member.name}</p>
-                                        <p className={`text-[9px] font-bold uppercase tracking-widest truncate ${selectedMemberId === member.id ? 'text-slate-400' : 'text-slate-400'}`}>
+                                        <p className={`text-[9px] font-bold uppercase tracking-normal truncate ${selectedMemberId === member.id ? 'text-slate-400' : 'text-slate-400'}`}>
                                             {member.position}
                                         </p>
                                     </div>
@@ -126,7 +126,7 @@ const PayrollManager: React.FC<PayrollManagerProps> = ({ members, payroll, compe
                                     </h3>
                                     <button
                                         onClick={handleSaveComp}
-                                        className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 transition-all active:scale-95"
+                                        className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-normal hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 transition-all active:scale-95"
                                     >
                                         {lang === Language.TH ? 'บันทึกโครงสร้าง' : 'Update Structure'}
                                     </button>
@@ -134,7 +134,7 @@ const PayrollManager: React.FC<PayrollManagerProps> = ({ members, payroll, compe
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Base Monthly Salary (฿)</label>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal block">Base Monthly Salary (฿)</label>
                                         <input
                                             type="number"
                                             value={editComp.baseSalary}
@@ -143,7 +143,7 @@ const PayrollManager: React.FC<PayrollManagerProps> = ({ members, payroll, compe
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Fixed Allowances (฿)</label>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal block">Fixed Allowances (฿)</label>
                                         <input
                                             type="number"
                                             value={editComp.allowances}
@@ -152,7 +152,7 @@ const PayrollManager: React.FC<PayrollManagerProps> = ({ members, payroll, compe
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Commission Rate (%)</label>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal block">Commission Rate (%)</label>
                                         <input
                                             type="number"
                                             value={editComp.commissionRate}
@@ -161,7 +161,7 @@ const PayrollManager: React.FC<PayrollManagerProps> = ({ members, payroll, compe
                                         />
                                     </div>
                                     <div className="bg-emerald-50 rounded-2xl p-6 flex flex-col justify-center border border-emerald-100">
-                                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Standard Monthly Payout</p>
+                                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-normal mb-1">Standard Monthly Payout</p>
                                         <p className="text-3xl font-black text-emerald-700">฿{(editComp.baseSalary + editComp.allowances).toLocaleString()}</p>
                                     </div>
                                 </div>
@@ -174,7 +174,7 @@ const PayrollManager: React.FC<PayrollManagerProps> = ({ members, payroll, compe
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                                     <div className="space-y-4">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Processing Month</label>
+                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-normal block">Processing Month</label>
                                         <input
                                             type="month"
                                             value={processData.month}
@@ -183,7 +183,7 @@ const PayrollManager: React.FC<PayrollManagerProps> = ({ members, payroll, compe
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Extra Bonus (฿)</label>
+                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-normal block">Extra Bonus (฿)</label>
                                         <input
                                             type="number"
                                             value={processData.bonus}
@@ -192,7 +192,7 @@ const PayrollManager: React.FC<PayrollManagerProps> = ({ members, payroll, compe
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Deductions (฿)</label>
+                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-normal block">Deductions (฿)</label>
                                         <input
                                             type="number"
                                             value={processData.deductions}
@@ -204,12 +204,12 @@ const PayrollManager: React.FC<PayrollManagerProps> = ({ members, payroll, compe
 
                                 <div className="flex flex-col md:flex-row items-center justify-between gap-8 pt-8 border-t border-white/10">
                                     <div className="text-center md:text-left">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Net Payable Amount</p>
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-1">Net Payable Amount</p>
                                         <p className="text-5xl font-black text-emerald-400 tracking-tighter">฿{totalPayable.toLocaleString()}</p>
                                     </div>
                                     <button
                                         onClick={handleProcess}
-                                        className="w-full md:w-auto px-12 py-6 bg-emerald-500 hover:bg-emerald-400 text-white rounded-[2rem] font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-emerald-500/20 active:scale-95 flex items-center justify-center space-x-3"
+                                        className="w-full md:w-auto px-12 py-6 bg-emerald-500 hover:bg-emerald-400 text-white rounded-[2rem] font-black uppercase tracking-normal text-xs transition-all shadow-xl shadow-emerald-500/20 active:scale-95 flex items-center justify-center space-x-3"
                                     >
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -224,12 +224,12 @@ const PayrollManager: React.FC<PayrollManagerProps> = ({ members, payroll, compe
                         <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col flex-1">
                             <div className="p-10 border-b border-slate-50">
                                 <h3 className="text-2xl font-black text-slate-900 tracking-tight">Payment History</h3>
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Audit Log for {selectedMember?.name}</p>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-normal mt-1">Audit Log for {selectedMember?.name}</p>
                             </div>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left">
                                     <thead className="bg-slate-50/50">
-                                        <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                        <tr className="text-[10px] font-black text-slate-400 uppercase tracking-normal">
                                             <th className="px-10 py-5">Month</th>
                                             <th className="px-10 py-5">Net Pay</th>
                                             <th className="px-10 py-5">Status</th>
@@ -242,7 +242,7 @@ const PayrollManager: React.FC<PayrollManagerProps> = ({ members, payroll, compe
                                                 <td className="px-10 py-6 font-black text-slate-900 text-sm italic">{rec.month}</td>
                                                 <td className="px-10 py-6 font-black text-slate-900 text-sm">฿{rec.netPayable.toLocaleString()}</td>
                                                 <td className="px-10 py-6">
-                                                    <span className={`text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-widest ${rec.status === 'PAID' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                                                    <span className={`text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-normal ${rec.status === 'PAID' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
                                                         }`}>
                                                         {rec.status}
                                                     </span>

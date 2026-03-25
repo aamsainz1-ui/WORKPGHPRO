@@ -73,7 +73,7 @@ const LeaveManager: React.FC<LeaveManagerProps> = ({ leaves, onRequest, user, la
             )}
 
             <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-1.5 block">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-normal ml-1 mb-1.5 block">
                 {lang === Language.TH ? 'ประเภทการลา' : 'Leave Type'}
               </label>
               <select 
@@ -87,7 +87,7 @@ const LeaveManager: React.FC<LeaveManagerProps> = ({ leaves, onRequest, user, la
             
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-1.5 block">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-normal ml-1 mb-1.5 block">
                   {lang === Language.TH ? 'ตั้งแต่วันที่' : 'From Date'}
                 </label>
                 <input 
@@ -98,7 +98,7 @@ const LeaveManager: React.FC<LeaveManagerProps> = ({ leaves, onRequest, user, la
                 />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-1.5 block">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-normal ml-1 mb-1.5 block">
                   {lang === Language.TH ? 'ถึงวันที่' : 'To Date'}
                 </label>
                 <input 
@@ -111,7 +111,7 @@ const LeaveManager: React.FC<LeaveManagerProps> = ({ leaves, onRequest, user, la
             </div>
 
             <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-1.5 block">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-normal ml-1 mb-1.5 block">
                 {lang === Language.TH ? 'เหตุผลประกอบการลา' : 'Reason'}
               </label>
               <textarea 
@@ -131,7 +131,7 @@ const LeaveManager: React.FC<LeaveManagerProps> = ({ leaves, onRequest, user, la
 
         <div className="bg-slate-900 rounded-3xl p-6 text-white overflow-hidden relative">
           <div className="relative z-10">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-normal mb-4">
               {lang === Language.TH ? 'สิทธิการลาคงเหลือ' : 'Remaining Leave Quota'}
             </p>
             <div className="space-y-4">
@@ -156,13 +156,13 @@ const LeaveManager: React.FC<LeaveManagerProps> = ({ leaves, onRequest, user, la
             <h2 className="text-xl font-black text-slate-900 tracking-tight">
               {lang === Language.TH ? 'ประวัติและสถานะการลา' : 'Leave Status & History'}
             </h2>
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-white px-3 py-1 rounded-full border border-slate-200">{leaves.length}</span>
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-normal bg-white px-3 py-1 rounded-full border border-slate-200">{leaves.length}</span>
           </div>
           
           <div className="overflow-x-auto no-scrollbar">
             <table className="w-full text-left min-w-[500px]">
               <thead>
-                <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-normal">
                   <th className="px-8 py-5">{lang === Language.TH ? 'ประเภทการลา' : 'Type'}</th>
                   <th className="px-8 py-5">{lang === Language.TH ? 'ช่วงวันที่ขอลา' : 'Period'}</th>
                   <th className="px-8 py-5">{lang === Language.TH ? 'สถานะ' : 'Status'}</th>
@@ -181,7 +181,7 @@ const LeaveManager: React.FC<LeaveManagerProps> = ({ leaves, onRequest, user, la
                     <td className="px-8 py-6">
                       <div className="flex items-center">
                         <div className={`w-1.5 h-6 rounded-full mr-3 ${getTypeColor(leave.type)}`}></div>
-                        <span className="text-xs font-black tracking-widest text-slate-800 uppercase">{leaveLabels[leave.type]}</span>
+                        <span className="text-xs font-black tracking-normal text-slate-800 uppercase">{leaveLabels[leave.type]}</span>
                       </div>
                     </td>
                     <td className="px-8 py-6">
@@ -189,7 +189,7 @@ const LeaveManager: React.FC<LeaveManagerProps> = ({ leaves, onRequest, user, la
                       <p className="text-[10px] text-slate-400 mt-1 truncate max-w-[150px] font-medium">{leave.reason}</p>
                     </td>
                     <td className="px-8 py-6">
-                      <span className={`text-[9px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border shadow-sm inline-block ${getStatusStyle(leave.status)}`}>
+                      <span className={`text-[9px] font-black px-3 py-1.5 rounded-full uppercase tracking-normal border shadow-sm inline-block ${getStatusStyle(leave.status)}`}>
                         {statusLabels[leave.status]}
                       </span>
                     </td>
