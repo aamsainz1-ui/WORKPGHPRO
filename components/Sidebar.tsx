@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { UserProfile, UserRole, Language, RolePermissions } from '../types';
 import { filterMenuByPermissions } from '../utils/permissions';
 
@@ -13,6 +13,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, user, lang, rolePermissions }) => {
   const isAdmin = user.role === UserRole.ADMIN;
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const menuItems = [
     {
@@ -166,35 +167,59 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, user, lang, 
         </div>
       </aside>
 
+      {/* Mobile expanded menu overlay */}
+      {moreOpen && (
+        <div className="lg:hidden fixed inset-0 z-[99]" onClick={() => setMoreOpen(false)}>
+          <div className="absolute bottom-20 left-4 right-4 glass-effect rounded-2xl shadow-2xl border border-white/40 p-4" onClick={e => e.stopPropagation()}>
+            <div className="grid grid-cols-4 gap-3">
+              {(isAdmin
+                ? [
+                  menuItems[1], // Organization
+                  menuItems[4], // Announcements
+                  menuItems[6], // Payroll
+                  {
+                    id: 'permissions', label: 'สิทธิ์', icon: (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    )
+                  },
+                  {
+                    id: 'admin', label: 'Admin Hub', icon: (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                    )
+                  },
+                ]
+                : []
+              ).map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => { setActiveTab(item.id as any); setMoreOpen(false); }}
+                  className={`flex flex-col items-center p-3 rounded-xl transition-all ${activeTab === item.id ? 'text-blue-600 bg-blue-50' : 'text-slate-500 hover:bg-slate-50'}`}
+                >
+                  {item.icon}
+                  <span className="text-[10px] mt-1 font-semibold">{item.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 glass-effect border-t border-white/40 px-2 py-3 z-[100] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] rounded-t-[2.5rem]">
         <div className="flex justify-around items-center px-2">
-          {(isAdmin
-            ? [
-              menuItems[0], // Dashboard
-              menuItems[3], // History
-              menuItems[2], // Leave
-              menuItems[5], // MKT Dashboard
-              {
-                id: 'admin', label: 'Admin', icon: (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                )
-              },
-            ]
-            : filterMenuByPermissions([
-              menuItems[0], // Dashboard
-              menuItems[3], // History
-              menuItems[2], // Leave
-              menuItems[5], // Marketing
-              menuItems[6], // MKT
-            ], user.role, rolePermissions)
-          ).map((item) => (
+          {[
+            menuItems[0], // Dashboard
+            menuItems[3], // History
+            menuItems[2], // Leave
+            menuItems[5], // MKT Dashboard
+          ].map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id as any)}
-              className={`flex flex-col items-center px-3 py-2 transition-all duration-300 ${activeTab === item.id ? 'text-blue-600 scale-110 -translate-y-1' : 'text-slate-400'
-                }`}
+              onClick={() => { setActiveTab(item.id as any); setMoreOpen(false); }}
+              className={`flex flex-col items-center px-3 py-2 transition-all duration-300 ${activeTab === item.id ? 'text-blue-600 scale-110 -translate-y-1' : 'text-slate-400'}`}
               title={item.label}
             >
               <div className={`p-2 rounded-xl transition-all ${activeTab === item.id ? 'bg-blue-600/10 shadow-inner' : ''}`}>
@@ -202,8 +227,21 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, user, lang, 
               </div>
             </button>
           ))}
+          {isAdmin && (
+            <button
+              onClick={() => setMoreOpen(!moreOpen)}
+              className={`flex flex-col items-center px-3 py-2 transition-all duration-300 ${moreOpen ? 'text-blue-600 scale-110 -translate-y-1' : 'text-slate-400'}`}
+              title="เพิ่มเติม"
+            >
+              <div className={`p-2 rounded-xl transition-all ${moreOpen ? 'bg-blue-600/10 shadow-inner' : ''}`}>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+                </svg>
+              </div>
+            </button>
+          )}
           <button
-            onClick={() => setActiveTab('profile')}
+            onClick={() => { setActiveTab('profile'); setMoreOpen(false); }}
             className={`flex justify-center px-3 py-2 transition-all ${activeTab === 'profile' ? 'scale-125 -translate-y-2' : 'hover:scale-110'}`}
             title="Profile"
           >
