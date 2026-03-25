@@ -47,7 +47,7 @@ const PINLogin: React.FC<PINLoginProps> = ({ users, onLogin, lang }) => {
                 <div className="w-full max-w-2xl space-y-12">
                     <div className="text-center space-y-4">
                         <h1 className="text-5xl font-black text-slate-900 tracking-tighter">GlobalWork <span className="text-blue-600">Pro</span></h1>
-                        <p className="text-xs font-black text-slate-400 uppercase tracking-[0.4em]">{t.title}</p>
+                        <p className="text-xs font-black text-slate-400 uppercase tracking-normal">{t.title}</p>
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
@@ -79,7 +79,7 @@ const PINLogin: React.FC<PINLoginProps> = ({ users, onLogin, lang }) => {
                     </div>
                     <div>
                         <h2 className="text-2xl font-black tracking-tight">{selectedUser.name}</h2>
-                        <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mt-2">{t.enterPin}</p>
+                        <p className="text-[10px] font-black text-blue-400 uppercase tracking-normal mt-2">{t.enterPin}</p>
                     </div>
                 </div>
 
@@ -137,7 +137,7 @@ const PINLogin: React.FC<PINLoginProps> = ({ users, onLogin, lang }) => {
                 <button
                     onClick={handleLogin}
                     disabled={pin.length < 4}
-                    className={`w-full py-5 rounded-[2rem] font-black uppercase tracking-[0.2em] transition-all ${pin.length < 4
+                    className={`w-full py-5 rounded-[2rem] font-black uppercase tracking-normal transition-all ${pin.length < 4
                         ? 'bg-white/5 text-white/20 cursor-not-allowed'
                         : 'bg-blue-600 text-white hover:bg-blue-500 shadow-xl shadow-blue-600/20 animate-in fade-in slide-in-from-bottom-2'
                         }`}

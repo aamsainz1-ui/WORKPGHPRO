@@ -221,7 +221,7 @@ const History: React.FC<HistoryProps> = ({ records, lang, settings, allRecordsMa
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
         <div>
           <h2 className="text-4xl font-black text-slate-900 tracking-tight">{lang === Language.TH ? 'บันทึกไทม์ไลน์' : 'Activity Timeline'}</h2>
-          <p className="text-xs font-black text-blue-600 uppercase tracking-[0.3em] mt-2">{lang === Language.TH ? 'ประวัติการเข้าออกงานแบบเรียลไทม์' : 'Secure Operational Logging'}</p>
+          <p className="text-xs font-black text-blue-600 uppercase tracking-normal mt-2">{lang === Language.TH ? 'ประวัติการเข้าออกงานแบบเรียลไทม์' : 'Secure Operational Logging'}</p>
         </div>
         <button
           onClick={exportToCSV}
@@ -330,7 +330,7 @@ const History: React.FC<HistoryProps> = ({ records, lang, settings, allRecordsMa
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-left min-w-[900px]">
             <thead>
-              <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
+              <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-normal">
                 <th className="px-10 py-6">{lang === Language.TH ? 'ประเภท' : 'Activity'}</th>
                 <th className="px-10 py-6">{lang === Language.TH ? 'เวลาปฏิบัติงาน' : 'Schedule'}</th>
                 <th className="px-10 py-6">{lang === Language.TH ? 'ระยะเวลา' : 'Duration'}</th>

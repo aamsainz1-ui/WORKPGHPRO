@@ -72,7 +72,7 @@ const Organization: React.FC<OrganizationProps> = ({
               <h2 className="text-4xl font-black text-slate-900 tracking-tight">
                 {lang === Language.TH ? 'จัดการองค์กร' : 'Organization Management'}
               </h2>
-              <p className="text-xs font-black text-blue-600 uppercase tracking-[0.3em] mt-2">Operational Human Resources</p>
+              <p className="text-xs font-black text-blue-600 uppercase tracking-normal mt-2">Operational Human Resources</p>
             </div>
 
             {/* Tabs */}
@@ -195,7 +195,7 @@ const Organization: React.FC<OrganizationProps> = ({
                   </div>
 
                   <h3 className="text-xl font-black text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors">{member.name}</h3>
-                  <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] mt-2">{member.position}</p>
+                  <p className="text-[10px] font-black text-blue-600 uppercase tracking-normal mt-2">{member.position}</p>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-normal mt-1 mb-6">{member.department}</p>
 
                   <div className="w-full pt-6 border-t border-slate-50 flex items-center justify-between">

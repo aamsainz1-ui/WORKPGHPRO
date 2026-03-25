@@ -87,7 +87,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isClockedIn, onAction, lastRecord
         <div className="absolute top-0 left-0 w-full h-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500"></div>
         
         <div className="mb-10 flex flex-col items-center">
-          <div className={`px-6 py-2 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-700 mb-4 ${
+          <div className={`px-6 py-2 rounded-2xl text-[10px] font-black uppercase tracking-normal transition-all duration-700 mb-4 ${
             isClockedIn ? 'bg-green-600 text-white shadow-xl shadow-green-600/20' : 'bg-slate-100 text-slate-500'
           }`}>
             {isClockedIn ? t.working : t.ready}
@@ -96,15 +96,15 @@ const Dashboard: React.FC<DashboardProps> = ({ isClockedIn, onAction, lastRecord
             {time.toLocaleTimeString(lang === Language.TH ? 'th-TH' : 'en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
             <span className="text-3xl sm:text-4xl text-slate-200 ml-2">{time.toLocaleTimeString(lang === Language.TH ? 'th-TH' : 'en-US', { second: '2-digit', hour12: false })}</span>
           </h2>
-          <p className="text-xs sm:text-sm text-slate-400 mt-6 font-black uppercase tracking-[0.4em]">
+          <p className="text-xs sm:text-sm text-slate-400 mt-6 font-black uppercase tracking-normal">
             {time.toLocaleDateString(lang === Language.TH ? 'th-TH' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
 
         {isClockedIn && (
           <div className="mb-12 bg-slate-900 px-14 py-8 rounded-[3rem] shadow-2xl shadow-slate-900/30 animate-in zoom-in-95 duration-500">
-            <p className="text-[10px] text-blue-400 font-black uppercase tracking-[0.4em] mb-3">{t.todayDuration}</p>
-            <p className="text-4xl sm:text-5xl font-mono font-black text-white tracking-[0.2em]">{shiftDuration}</p>
+            <p className="text-[10px] text-blue-400 font-black uppercase tracking-normal mb-3">{t.todayDuration}</p>
+            <p className="text-4xl sm:text-5xl font-mono font-black text-white tracking-normal">{shiftDuration}</p>
           </div>
         )}
 
@@ -145,7 +145,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isClockedIn, onAction, lastRecord
               }`}
             >
               <span className="text-xl tracking-normal">{t.checkIn}</span>
-              <span className="text-[9px] font-black opacity-60 uppercase tracking-[0.3em]">{t.shiftStart}</span>
+              <span className="text-[9px] font-black opacity-60 uppercase tracking-normal">{t.shiftStart}</span>
             </button>
             <button
               onClick={() => onAction(AttendanceType.CHECK_OUT, note)}
@@ -155,7 +155,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isClockedIn, onAction, lastRecord
               }`}
             >
               <span className="text-xl tracking-normal">{t.checkOut}</span>
-              <span className="text-[9px] font-black opacity-60 uppercase tracking-[0.3em]">{t.shiftEnd}</span>
+              <span className="text-[9px] font-black opacity-60 uppercase tracking-normal">{t.shiftEnd}</span>
             </button>
           </div>
         </div>
@@ -168,7 +168,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isClockedIn, onAction, lastRecord
               <h3 className="text-2xl font-black text-slate-900 tracking-tight">{t.weekSummary}</h3>
               <div className="flex items-center space-x-2 mt-2">
                  <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
-                 <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Operational Analytics</p>
+                 <p className="text-[10px] text-slate-400 font-black uppercase tracking-normal">Operational Analytics</p>
               </div>
             </div>
             <div className="text-right">
@@ -204,7 +204,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isClockedIn, onAction, lastRecord
 
         <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-[3rem] p-10 text-white flex flex-col justify-between shadow-2xl shadow-slate-900/40 relative overflow-hidden group">
           <div className="relative z-10">
-            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400/80 mb-2">{t.balanceScore}</h4>
+            <h4 className="text-[10px] font-black uppercase tracking-normal text-blue-400/80 mb-2">{t.balanceScore}</h4>
             <div className="flex items-end space-x-2 mb-8">
               <span className="text-7xl font-black tracking-tighter">{weeklyStats.score}</span>
               <span className="text-2xl font-bold mb-3 text-blue-500">%</span>

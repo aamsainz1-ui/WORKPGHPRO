@@ -67,7 +67,7 @@ const PayrollManager: React.FC<PayrollManagerProps> = ({ members, payroll, compe
                     <h2 className="text-4xl font-black text-slate-900 tracking-tight">
                         {lang === Language.TH ? 'ระบบบริหารเงินเดือนและค่าตอบแทน' : 'Payroll & Compensation'}
                     </h2>
-                    <p className="text-xs font-black text-emerald-600 uppercase tracking-[0.3em] mt-2">
+                    <p className="text-xs font-black text-emerald-600 uppercase tracking-normal mt-2">
                         Enterprise Grade Financial Operations
                     </p>
                 </div>

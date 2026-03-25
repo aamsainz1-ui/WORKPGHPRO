@@ -158,7 +158,7 @@ const TeamStatusCard: React.FC<TeamStatusCardProps> = ({ members, teams, onViewA
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </p>
-                  <p className="text-[8px] text-slate-400 font-black uppercase tracking-[0.1em] mt-0.5">
+                  <p className="text-[8px] text-slate-400 font-black uppercase tracking-normal mt-0.5">
                     Check-in
                   </p>
                 </div>
@@ -172,7 +172,7 @@ const TeamStatusCard: React.FC<TeamStatusCardProps> = ({ members, teams, onViewA
       <div className="p-5 mt-auto bg-slate-50/40 border-t border-slate-50">
         <button
           onClick={onViewAll}
-          className="w-full group py-3.5 bg-white border border-slate-200 rounded-2xl text-[10px] font-black text-slate-700 hover:text-blue-600 hover:border-blue-500/30 hover:shadow-xl hover:shadow-blue-500/5 transition-all uppercase tracking-[0.15em] flex items-center justify-center space-x-3"
+          className="w-full group py-3.5 bg-white border border-slate-200 rounded-2xl text-[10px] font-black text-slate-700 hover:text-blue-600 hover:border-blue-500/30 hover:shadow-xl hover:shadow-blue-500/5 transition-all uppercase tracking-normal flex items-center justify-center space-x-3"
         >
           <span>{lang === Language.TH ? 'ดูรายชื่อทั้งหมด' : 'View All Directory'}</span>
           <div className="p-1 bg-slate-50 rounded-lg group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">

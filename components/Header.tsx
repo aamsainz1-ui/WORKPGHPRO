@@ -26,7 +26,7 @@ const Header: React.FC<HeaderProps> = ({ user, onToggleRole, lang, onToggleLang 
 
         <div className="hidden lg:flex items-center space-x-6">
           <div>
-            <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.25em]">{lang === Language.TH ? 'พอร์ทัลพนักงาน' : 'Employee Portal'}</p>
+            <p className="text-[10px] font-black text-blue-600 uppercase tracking-normal">{lang === Language.TH ? 'พอร์ทัลพนักงาน' : 'Employee Portal'}</p>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-normal mt-0.5">Global Enterprise Network</p>
           </div>
           {isAdmin && (

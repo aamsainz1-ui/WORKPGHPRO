@@ -56,7 +56,7 @@ const ContentCalendar: React.FC<ContentCalendarProps> = ({ plans, onAdd, onDelet
                     <h2 className="text-4xl font-black text-slate-900 tracking-tight">
                         {lang === Language.TH ? 'ปฏิทินวางแผนคอนเทนต์' : 'Content Marketing Calendar'}
                     </h2>
-                    <p className="text-xs font-black text-indigo-600 uppercase tracking-[0.3em] mt-2">
+                    <p className="text-xs font-black text-indigo-600 uppercase tracking-normal mt-2">
                         Multi-Platform Strategic Planning Hub
                     </p>
                 </div>

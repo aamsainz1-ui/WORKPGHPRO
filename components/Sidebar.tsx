@@ -93,12 +93,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, user, lang, 
             </div>
             <div>
               <h1 className="text-2xl font-black text-slate-900 tracking-tighter">GlobalWork</h1>
-              <p className="text-[8px] font-black text-blue-600 uppercase tracking-[0.4em]">Pro Edition</p>
+              <p className="text-[8px] font-black text-blue-600 uppercase tracking-normal">Pro Edition</p>
             </div>
           </div>
 
           <div className="mb-10">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-6 px-4">Navigation</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-6 px-4">Navigation</p>
             <nav className="space-y-2">
               {filterMenuByPermissions(menuItems, user.role, rolePermissions).map((item) => (
                 <button
@@ -120,7 +120,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, user, lang, 
 
           {isAdmin && (
             <div className="space-y-2">
-              <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-6 px-4">Operations</p>
+              <p className="text-[10px] font-black text-indigo-400 uppercase tracking-normal mb-6 px-4">Operations</p>
               <button
                 onClick={() => setActiveTab('admin')}
                 className={`w-full flex items-center space-x-4 px-5 py-4 rounded-[1.5rem] font-black transition-all duration-300 group ${activeTab === 'admin'

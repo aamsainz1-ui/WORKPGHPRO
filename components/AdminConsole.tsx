@@ -221,7 +221,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h2 className="text-4xl font-black text-slate-900 tracking-tight">{t.title}</h2>
-          <p className="text-xs font-black text-indigo-600 uppercase tracking-[0.3em] mt-2">{t.subTitle}</p>
+          <p className="text-xs font-black text-indigo-600 uppercase tracking-normal mt-2">{t.subTitle}</p>
         </div>
         <button
           onClick={() => setShowAddMember(true)}
@@ -504,7 +504,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
           <div className="overflow-x-auto custom-scrollbar flex-1">
             <table className="w-full text-left min-w-[600px]">
               <thead>
-                <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-normal">
                   <th className="px-10 py-5">{t.staffCol}</th>
                   <th className="px-10 py-5">{t.typeCol}</th>
                   <th className="px-10 py-5 text-center">{t.manageCol}</th>

@@ -71,7 +71,7 @@ const FaceScanner: React.FC<FaceScannerProps> = ({ onCapture, onCancel, isVerify
         <div className="p-10 pb-6 border-b border-slate-50 flex items-center justify-between">
           <div>
             <h3 className="text-2xl font-black text-slate-900 tracking-tight">{t.title}</h3>
-            <p className="text-[10px] text-blue-600 font-black uppercase tracking-[0.2em] mt-1">{t.subTitle}</p>
+            <p className="text-[10px] text-blue-600 font-black uppercase tracking-normal mt-1">{t.subTitle}</p>
           </div>
           <button onClick={onCancel} className="text-slate-400 p-2.5 hover:bg-slate-50 rounded-2xl transition-all" title="Close">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,7 +113,7 @@ const FaceScanner: React.FC<FaceScannerProps> = ({ onCapture, onCancel, isVerify
                 {isVerifying && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-blue-600/20 [-webkit-backdrop-filter:blur(10px)] [backdrop-filter:blur(10px)] z-20">
                     <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <p className="mt-8 text-white font-black text-sm uppercase tracking-[0.3em]">{t.processing}</p>
+                    <p className="mt-8 text-white font-black text-sm uppercase tracking-normal">{t.processing}</p>
                   </div>
                 )}
 
@@ -127,7 +127,7 @@ const FaceScanner: React.FC<FaceScannerProps> = ({ onCapture, onCancel, isVerify
           </div>
 
           <div className="text-center">
-            <p className={`text-[11px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-full inline-block ${statusMessage ? 'bg-red-50 text-red-500' : 'text-slate-400'}`}>
+            <p className={`text-[11px] font-black uppercase tracking-normal px-4 py-2 rounded-full inline-block ${statusMessage ? 'bg-red-50 text-red-500' : 'text-slate-400'}`}>
               {statusMessage || t.statusDefault}
             </p>
 
@@ -143,7 +143,7 @@ const FaceScanner: React.FC<FaceScannerProps> = ({ onCapture, onCancel, isVerify
             <button
               onClick={handleCapture}
               disabled={isVerifying || !!error || !stream}
-              className={`w-full mt-8 py-5 rounded-[2rem] font-black uppercase tracking-[0.2em] transition-all shadow-2xl active:scale-95 ${isVerifying || !!error || !stream
+              className={`w-full mt-8 py-5 rounded-[2rem] font-black uppercase tracking-normal transition-all shadow-2xl active:scale-95 ${isVerifying || !!error || !stream
                 ? 'bg-slate-100 text-slate-300 shadow-none'
                 : 'bg-slate-900 text-white hover:bg-black shadow-slate-900/20'
                 }`}
