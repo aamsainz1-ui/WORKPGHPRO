@@ -214,7 +214,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, user, lang, 
             menuItems[0], // Dashboard
             menuItems[3], // History
             menuItems[2], // Leave
-            menuItems[5], // MKT Dashboard
+            menuItems[6], // MKT Dashboard
           ].map((item) => (
             <button
               key={item.id}
