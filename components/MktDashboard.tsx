@@ -10,7 +10,7 @@ const SUPA_HEADERS = {
   'Prefer': 'resolution=merge-duplicates',
 };
 
-const STAFF = ['เก่ง', 'แบงค์', 'ลัน', 'เม่า'];
+const STAFF = ['เก่ง', 'พิม', 'แบงค์', 'ลัน', 'โอ๊ต', 'บอม', 'เม่า'];
 const TABS = ['TG', 'Huay', 'อื่นๆ'] as const;
 type TabKey = typeof TABS[number];
 
