@@ -1,6 +1,7 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { UserProfile, Language } from '../types';
+import { verifyPin } from '../utils/crypto';
+import { checkRateLimit, recordFailedAttempt, resetAttempts } from '../utils/rateLimiter';
 
 interface PINLoginProps {
     users: UserProfile[];
@@ -12,33 +13,84 @@ const PINLogin: React.FC<PINLoginProps> = ({ users, onLogin, lang }) => {
     const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
     const [pin, setPin] = useState('');
     const [error, setError] = useState(false);
+    const [locked, setLocked] = useState(false);
+    const [countdown, setCountdown] = useState(0);
+
+    // Countdown timer for lockout
+    useEffect(() => {
+        if (countdown <= 0) {
+            setLocked(false);
+            return;
+        }
+        const timer = setTimeout(() => setCountdown(prev => prev - 1), 1000);
+        return () => clearTimeout(timer);
+    }, [countdown]);
+
+    // Check lock status when selecting user
+    useEffect(() => {
+        if (selectedUser) {
+            const status = checkRateLimit(selectedUser.id);
+            if (!status.allowed) {
+                setLocked(true);
+                setCountdown(Math.ceil(status.remainingMs / 1000));
+            }
+        }
+    }, [selectedUser]);
 
     const handlePINClick = (num: string) => {
-        if (pin.length < 6) {
-            setPin(prev => prev + num);
-            setError(false);
-        }
+        if (locked || pin.length >= 6) return;
+        setPin(prev => prev + num);
+        setError(false);
     };
 
     const handleBackspace = () => {
+        if (locked) return;
         setPin(prev => prev.slice(0, -1));
     };
 
-    const handleLogin = () => {
-        if (selectedUser && selectedUser.pin === pin) {
+    const handleLogin = useCallback(async () => {
+        if (!selectedUser || locked) return;
+
+        // Check rate limit
+        const status = checkRateLimit(selectedUser.id);
+        if (!status.allowed) {
+            setLocked(true);
+            setCountdown(Math.ceil(status.remainingMs / 1000));
+            return;
+        }
+
+        // Verify PIN: support both hashed (pin_hash) and legacy plaintext (pin)
+        let isValid = false;
+        const pinHash = (selectedUser as any).pin_hash;
+
+        if (pinHash) {
+            isValid = await verifyPin(pin, pinHash);
+        } else if (selectedUser.pin) {
+            // Legacy plaintext fallback
+            isValid = selectedUser.pin === pin;
+        }
+
+        if (isValid) {
+            resetAttempts(selectedUser.id);
             onLogin(selectedUser);
         } else {
+            const result = recordFailedAttempt(selectedUser.id);
             setError(true);
             setPin('');
+            if (result.locked) {
+                setLocked(true);
+                setCountdown(Math.ceil(result.remainingMs / 1000));
+            }
         }
-    };
+    }, [selectedUser, pin, locked, onLogin]);
 
     const t = {
         title: lang === Language.TH ? 'เลือกบัญชีเพื่อเริ่มต้น' : 'Select Account',
         enterPin: lang === Language.TH ? `กรอกรหัส PIN สำหรับ ${selectedUser?.name}` : `Enter PIN for ${selectedUser?.name}`,
         error: lang === Language.TH ? 'รหัส PIN ไม่ถูกต้อง' : 'Incorrect PIN',
         back: lang === Language.TH ? 'ย้อนกลับ' : 'Back',
-        login: lang === Language.TH ? 'เข้าสู่ระบบ' : 'Login'
+        login: lang === Language.TH ? 'เข้าสู่ระบบ' : 'Login',
+        locked: lang === Language.TH ? `ล็อกชั่วคราว — รอ ${countdown} วินาที` : `Locked — wait ${countdown}s`
     };
 
     if (!selectedUser) {
@@ -89,13 +141,19 @@ const PINLogin: React.FC<PINLoginProps> = ({ users, onLogin, lang }) => {
                             key={i}
                             className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${pin.length > i
                                 ? 'bg-blue-500 border-blue-500 scale-125 shadow-[0_0_15px_rgba(59,130,246,0.5)]'
-                                : error ? 'border-red-500' : 'border-white/20'
+                                : error ? 'border-red-500' : locked ? 'border-orange-500' : 'border-white/20'
                                 }`}
                         />
                     ))}
                 </div>
 
-                {error && (
+                {locked && (
+                    <p className="text-center text-orange-400 text-[10px] font-black uppercase tracking-widest">
+                        🔒 {t.locked}
+                    </p>
+                )}
+
+                {error && !locked && (
                     <p className="text-center text-red-400 text-[10px] font-black uppercase tracking-widest animate-bounce">
                         {t.error}
                     </p>
@@ -106,25 +164,28 @@ const PINLogin: React.FC<PINLoginProps> = ({ users, onLogin, lang }) => {
                         <button
                             key={num}
                             onClick={() => handlePINClick(num.toString())}
-                            className="h-20 bg-white/5 hover:bg-white/10 rounded-[1.5rem] text-2xl font-black transition-all active:scale-90"
+                            disabled={locked}
+                            className={`h-20 rounded-[1.5rem] text-2xl font-black transition-all active:scale-90 ${locked ? 'bg-white/5 text-white/20 cursor-not-allowed' : 'bg-white/5 hover:bg-white/10'}`}
                         >
                             {num}
                         </button>
                     ))}
                     <button
-                        onClick={() => setSelectedUser(null)}
+                        onClick={() => { setSelectedUser(null); setPin(''); setError(false); setLocked(false); setCountdown(0); }}
                         className="h-20 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all"
                     >
                         {t.back}
                     </button>
                     <button
                         onClick={() => handlePINClick('0')}
-                        className="h-20 bg-white/5 hover:bg-white/10 rounded-[1.5rem] text-2xl font-black transition-all"
+                        disabled={locked}
+                        className={`h-20 rounded-[1.5rem] text-2xl font-black transition-all ${locked ? 'bg-white/5 text-white/20 cursor-not-allowed' : 'bg-white/5 hover:bg-white/10'}`}
                     >
                         0
                     </button>
                     <button
                         onClick={handleBackspace}
+                        disabled={locked}
                         className="h-20 bg-white/5 hover:bg-white/10 rounded-[1.5rem] flex items-center justify-center transition-all active:scale-90"
                         title="Backspace"
                     >
@@ -136,8 +197,8 @@ const PINLogin: React.FC<PINLoginProps> = ({ users, onLogin, lang }) => {
 
                 <button
                     onClick={handleLogin}
-                    disabled={pin.length < 4}
-                    className={`w-full py-5 rounded-[2rem] font-black uppercase tracking-[0.2em] transition-all ${pin.length < 4
+                    disabled={pin.length < 4 || locked}
+                    className={`w-full py-5 rounded-[2rem] font-black uppercase tracking-[0.2em] transition-all ${pin.length < 4 || locked
                         ? 'bg-white/5 text-white/20 cursor-not-allowed'
                         : 'bg-blue-600 text-white hover:bg-blue-500 shadow-xl shadow-blue-600/20 animate-in fade-in slide-in-from-bottom-2'
                         }`}
@@ -150,4 +211,3 @@ const PINLogin: React.FC<PINLoginProps> = ({ users, onLogin, lang }) => {
 };
 
 export default PINLogin;
-

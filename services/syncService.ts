@@ -36,7 +36,7 @@ export const syncUsers = async (localUsers: UserProfile[]): Promise<UserProfile[
                         company: user.company,
                         avatar: user.avatar,
                         role: user.role,
-                        pin: user.pin,
+                        pin_hash: (user as any).pin_hash || null,
                         stored_face: user.storedFace,
                         face_signature: user.faceSignature,
                         leave_balances: user.leaveBalances,
@@ -66,7 +66,7 @@ export const syncUsers = async (localUsers: UserProfile[]): Promise<UserProfile[
             company: u.company,
             avatar: u.avatar,
             role: u.role,
-            pin: u.pin,
+            pin_hash: u.pin_hash,
             storedFace: u.stored_face,
             faceSignature: u.face_signature,
             leaveBalances: u.leave_balances

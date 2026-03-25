@@ -18,7 +18,8 @@ import TeamStatusCard from './components/TeamStatusCard';
 import TeamManagement from './components/TeamManagement';
 import MktDashboard from './components/MktDashboard';
 import PINLogin from './components/PINLogin';
-import { verifyFace, reverseGeocode } from './services/gemini';
+import { hashPin } from './utils/crypto';
+import { reverseGeocode } from './services/gemini';
 import { verifyFaceLocal, initFaceDetection } from './services/faceService';
 import { isOnline } from './services/supabase';
 import { syncUsers, syncAttendance, syncLeaves, syncAnnouncements, syncContentPlans, syncPayroll, syncCompensation, syncDailySummaries, syncSettings, deleteUser, deleteDailySummary, deleteAnnouncement, deleteContentPlan } from './services/syncService';
@@ -51,7 +52,7 @@ const DEFAULT_USERS: UserProfile[] = [
     company: "GlobalWork Pro",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Owner",
     role: UserRole.ADMIN,
-    pin: '435600',
+    pin_hash: '9a7a139539b96b1239ffd9600ee4aafa5440b35bc9595aa94f4c6e2d7601aaa8',
     leaveBalances: { sick: 99, annual: 99, personal: 99 }
   }
 ];
@@ -368,31 +369,36 @@ const App: React.FC = () => {
     setLeaves(prev => prev.map(l => l.id === id ? { ...l, status: stage } : l));
   };
 
-  const handleUpdateMember = (id: string, data: any) => {
+  const handleUpdateMember = async (id: string, data: any) => {
+    if (data.pin && data.pin !== '') {
+      data.pin_hash = await hashPin(data.pin);
+      delete data.pin;
+    } else {
+      delete data.pin; // Keep existing hash if empty
+    }
     setAllUsers(prev => prev.map(u => {
       if (u.id === id) {
-        const updated = { ...u, ...data };
-        if (data.pin === '') delete updated.pin; // Keep existing if empty
-        return updated;
+        return { ...u, ...data };
       }
       return u;
     }));
   };
 
-  const handleCreateMember = (data: any) => {
+  const handleCreateMember = async (data: any) => {
+    const pinHash = await hashPin(data.pin || '0000');
     const newUser: UserProfile = {
       id: `usr_${Math.random().toString(36).slice(2, 10)}`,
       name: data.name || 'New Member',
       role: data.role || UserRole.EMPLOYEE,
       position: data.position || 'Staff',
       department: data.department || 'General',
-      pin: data.pin || '0000',
+      pin_hash: pinHash,
       employeeId: `GW-${Date.now().toString().slice(-4)}`,
       joinDate: new Date().toISOString().split('T')[0],
       company: "GlobalWork Pro",
       avatar: data.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${Date.now()}`,
       leaveBalances: { sick: 15, annual: 15, personal: 7 }
-    };
+    } as any;
     setAllUsers(prev => [...prev, newUser]);
   };
 
