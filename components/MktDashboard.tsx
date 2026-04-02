@@ -291,12 +291,20 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
     : 'all';
   const [data, setData] = useState<MktData>(initData);
   const [activeTab, setActiveTab] = useState<TabKey>('TG');
-  const [selectedDate, setSelectedDate] = useState(() => {
-    // ใช้ Bangkok timezone (UTC+7)
-    const now = new Date();
-    const bkk = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+  const getBkkDate = () => {
+    const bkk = new Date(new Date().getTime() + 7 * 60 * 60 * 1000);
     return bkk.toISOString().split('T')[0];
-  });
+  };
+  const [selectedDate, setSelectedDate] = useState(getBkkDate);
+
+  // Auto-update วันที่เมื่อเที่ยงคืน Bangkok
+  useEffect(() => {
+    const checkDate = setInterval(() => {
+      const today = getBkkDate();
+      setSelectedDate(prev => prev === today ? prev : today);
+    }, 60000); // เช็คทุก 1 นาที
+    return () => clearInterval(checkDate);
+  }, []);
   const [withdrawData, setWithdrawData] = useState<WithdrawData | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState<string | null>(null);
