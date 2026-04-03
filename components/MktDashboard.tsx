@@ -529,6 +529,31 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
   const displayMonthlySummary = staffFilter === 'all' ? monthlySummary : monthlySummary.filter(r => r.name === staffFilter);
 
   // === EXPORT EXCEL ===
+  const exportMonthlyExcel = () => {
+    const wb = XLSX.utils.book_new();
+    const rows = displayMonthlySummary.map(r => ({
+      'ชื่อ': r.name, 'FB': r.fb, 'Google': r.google, 'TikTok': r.tiktok,
+      'รวม ADS': r.totalAds, 'สมัคร': r.register, 'สมาชิกฝาก': r.deposit_member,
+      '%ฝาก': r.depositPct, 'ฝากแรก': r.first_deposit, 'ฝากทั้งวัน': r.daily_deposit,
+      'ฝากทั้งเดือน': r.month_deposit, 'ยอดถอน': r.total_withdraw || 0,
+      'ถอน R+D': r.register_withdraw_amount || 0,
+    }));
+    // Total row
+    rows.push({
+      'ชื่อ': 'รวม', 'FB': monthTotals.fb, 'Google': monthTotals.google, 'TikTok': monthTotals.tiktok,
+      'รวม ADS': monthTotals.totalAds, 'สมัคร': monthTotals.register, 'สมาชิกฝาก': monthTotals.deposit_member,
+      '%ฝาก': monthTotals.depositPct, 'ฝากแรก': monthTotals.first_deposit, 'ฝากทั้งวัน': monthTotals.daily_deposit,
+      'ฝากทั้งเดือน': monthTotals.month_deposit, 'ยอดถอน': monthTotals.total_withdraw || 0,
+      'ถอน R+D': monthTotals.register_withdraw_amount || 0,
+    });
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = Array(13).fill({ wch: 14 });
+    const monthStr = selectedDate.slice(0, 7);
+    XLSX.utils.book_append_sheet(wb, ws, `สรุปเดือน ${monthStr}`);
+    const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    saveAs(new Blob([buf], { type: 'application/octet-stream' }), `MKT_สรุปเดือน_${monthStr}.xlsx`);
+  };
+
   const exportExcel = () => {
     const wb = XLSX.utils.book_new();
 
@@ -980,7 +1005,15 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
       <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
           <h3 className="text-sm font-black text-slate-700 uppercase tracking-normal">📊 สรุปเดือนนี้</h3>
-          {loadingMonthly && <span className="text-xs text-blue-400 font-bold animate-pulse">⏳ กำลังโหลด...</span>}
+          <div className="flex items-center gap-3">
+            {loadingMonthly && <span className="text-xs text-blue-400 font-bold animate-pulse">⏳ กำลังโหลด...</span>}
+            <button
+              onClick={exportMonthlyExcel}
+              className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-colors"
+            >
+              📄 ส่งออก Excel
+            </button>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
