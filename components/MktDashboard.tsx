@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 const TIGER_API = '/api/tiger-links';
 
@@ -526,6 +528,58 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
 
   const displayMonthlySummary = staffFilter === 'all' ? monthlySummary : monthlySummary.filter(r => r.name === staffFilter);
 
+  // === EXPORT EXCEL ===
+  const exportExcel = () => {
+    const wb = XLSX.utils.book_new();
+
+    // Sheet 1: รายวัน (แต่ละ tab)
+    const dailyRows: any[] = [];
+    const tabKey = activeTab;
+    const tabData = data[tabKey] || {};
+    const staffKeys = staffFilter === 'all' ? STAFF : [staffFilter];
+    staffKeys.forEach(name => {
+      const row = tabData[name];
+      if (!row) return;
+      const r = recalc(row);
+      dailyRows.push({
+        'ชื่อ': name, 'FB': r.fb, 'Google': r.google, 'TikTok': r.tiktok,
+        'รวม ADS': r.totalAds, 'สมัคร': r.register, 'สมาชิกฝาก': r.memberDeposit,
+        '%ฝาก': r.depositPct, 'ฝากแรก': r.firstDeposit, 'ฝากทั้งวัน': r.dailyDeposit,
+        'ฝากทั้งเดือน': r.monthlyDeposit, 'ยอดถอน': r.totalWithdraw,
+        'W/L': r.winLoss, 'เฉลี่ย/ยูส': r.avgPerUser,
+        'ค่าหัว/สมัคร': r.costPerRegister, 'ค่าหัว/ฝาก': r.costPerDeposit,
+      });
+    });
+    // Total row
+    dailyRows.push({
+      'ชื่อ': 'รวม', 'FB': totalRecalced.fb, 'Google': totalRecalced.google, 'TikTok': totalRecalced.tiktok,
+      'รวม ADS': totalRecalced.totalAds, 'สมัคร': totalRecalced.register, 'สมาชิกฝาก': totalRecalced.memberDeposit,
+      '%ฝาก': totalRecalced.depositPct, 'ฝากแรก': totalRecalced.firstDeposit, 'ฝากทั้งวัน': totalRecalced.dailyDeposit,
+      'ฝากทั้งเดือน': totalRecalced.monthlyDeposit, 'ยอดถอน': totalRecalced.totalWithdraw,
+      'W/L': totalRecalced.winLoss, 'เฉลี่ย/ยูส': totalRecalced.avgPerUser,
+      'ค่าหัว/สมัคร': totalRecalced.costPerRegister, 'ค่าหัว/ฝาก': totalRecalced.costPerDeposit,
+    });
+    const ws1 = XLSX.utils.json_to_sheet(dailyRows);
+    ws1['!cols'] = Array(16).fill({ wch: 14 });
+    XLSX.utils.book_append_sheet(wb, ws1, `รายวัน ${tabKey} ${selectedDate}`);
+
+    // Sheet 2: สรุปเดือน
+    if (displayMonthlySummary.length > 0) {
+      const monthRows = displayMonthlySummary.map(r => ({
+        'ชื่อ': r.name, 'FB': r.fb, 'Google': r.google, 'TikTok': r.tiktok,
+        'รวม ADS': r.totalAds, 'สมัคร': r.register, 'สมาชิกฝาก': r.deposit_member,
+        'ฝากแรก': r.first_deposit, 'ฝากทั้งวัน': r.daily_deposit, 'ฝากทั้งเดือน': r.month_deposit,
+        '%ฝาก': r.depositPct,
+      }));
+      const ws2 = XLSX.utils.json_to_sheet(monthRows);
+      ws2['!cols'] = Array(11).fill({ wch: 14 });
+      XLSX.utils.book_append_sheet(wb, ws2, 'สรุปเดือน');
+    }
+
+    const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    saveAs(new Blob([buf], { type: 'application/octet-stream' }), `MKT_${tabKey}_${selectedDate}.xlsx`);
+  };
+
   // Monthly summary totals
   const monthTotals = displayMonthlySummary.reduce((acc, r) => ({
     fb: acc.fb + r.fb,
@@ -583,6 +637,12 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
             onChange={e => setSelectedDate(e.target.value)}
             className="px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-sm font-bold text-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           />
+          <button
+            onClick={exportExcel}
+            className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-sm transition-colors"
+          >
+            📄 ส่งออก Excel
+          </button>
         </div>
       </div>
 
