@@ -593,3 +593,53 @@ export const deleteContentPlan = async (planId: string): Promise<boolean> => {
     }
 };
 
+
+// ---- Update single user in Supabase ----
+export const createUserInCloud = async (user: any): Promise<boolean> => {
+    if (!isOnline || !supabase) return false;
+    try {
+        const { error } = await supabase
+            .from('users')
+            .upsert({
+                id: user.id, name: user.name, position: user.position,
+                department: user.department, employee_id: user.employeeId,
+                join_date: user.joinDate, company: user.company,
+                avatar: user.avatar, role: user.role, pin: user.pin,
+                stored_face: user.storedFace || null, face_signature: user.faceSignature || null,
+                leave_balances: user.leaveBalances || null,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'id' });
+        if (error) { console.error('createUserInCloud error:', error); return false; }
+        console.log(`✅ User ${user.id} created in Supabase`);
+        return true;
+    } catch (e) {
+        console.error('createUserInCloud exception:', e);
+        return false;
+    }
+};
+
+export const updateUserInCloud = async (id: string, data: Partial<any>): Promise<boolean> => {
+    if (!isOnline || !supabase) return false;
+    try {
+        const payload: any = { updated_at: new Date().toISOString() };
+        if (data.name !== undefined) payload.name = data.name;
+        if (data.position !== undefined) payload.position = data.position;
+        if (data.department !== undefined) payload.department = data.department;
+        if (data.role !== undefined) payload.role = data.role;
+        if (data.pin !== undefined && data.pin !== '') payload.pin = data.pin;
+        if (data.avatar !== undefined) payload.avatar = data.avatar;
+        if (data.leaveBalances !== undefined) payload.leave_balances = data.leaveBalances;
+
+        const { error } = await supabase
+            .from('users')
+            .update(payload)
+            .eq('id', id);
+
+        if (error) { console.error('updateUserInCloud error:', error); return false; }
+        console.log(`✅ User ${id} updated in Supabase`);
+        return true;
+    } catch (e) {
+        console.error('updateUserInCloud exception:', e);
+        return false;
+    }
+};

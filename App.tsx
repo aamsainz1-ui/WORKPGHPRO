@@ -21,7 +21,7 @@ import PINLogin from './components/PINLogin';
 import { verifyFace, reverseGeocode } from './services/gemini';
 import { verifyFaceLocal, initFaceDetection } from './services/faceService';
 import { isOnline } from './services/supabase';
-import { syncUsers, syncAttendance, syncLeaves, syncAnnouncements, syncContentPlans, syncPayroll, syncCompensation, syncDailySummaries, syncSettings, deleteUser, deleteDailySummary, deleteAnnouncement, deleteContentPlan } from './services/syncService';
+import { syncUsers, syncAttendance, syncLeaves, syncAnnouncements, syncContentPlans, syncPayroll, syncCompensation, syncDailySummaries, syncSettings, deleteUser, deleteDailySummary, deleteAnnouncement, deleteContentPlan, updateUserInCloud, createUserInCloud } from './services/syncService';
 
 const APP_DATA_KEY = 'global_work_pro_v9_data'; // Bumped for a fresh start with total stability
 const CURRENT_USER_ID_KEY = 'global_work_pro_v9_user';
@@ -377,6 +377,8 @@ const App: React.FC = () => {
       }
       return u;
     }));
+    // Save to Supabase immediately
+    updateUserInCloud(id, data).catch(console.error);
   };
 
   const handleCreateMember = (data: any) => {
@@ -394,6 +396,8 @@ const App: React.FC = () => {
       leaveBalances: { sick: 15, annual: 15, personal: 7 }
     };
     setAllUsers(prev => [...prev, newUser]);
+    // Save to Supabase immediately
+    createUserInCloud(newUser).catch(console.error);
   };
 
   const handleAddSummary = (data: Omit<DailySummaryRecord, 'id'>) => {
