@@ -1,15 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// fallback hardcode กัน env หลุด
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://kmloseczqatswwczqajs.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImttbG9zZWN6cWF0c3d3Y3pxYWpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3NjQyMzAsImV4cCI6MjA3NzM0MDIzMH0.tc3oZrRBDhbQXfwerLPjTbsNMDwSP0gHhhmd96bPd9I';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn('Supabase credentials not found. Running in offline mode.');
-}
-
-export const supabase = supabaseUrl && supabaseAnonKey
-    ? createClient(supabaseUrl, supabaseAnonKey)
-    : null;
-
-export const isOnline = !!supabase;
-
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const isOnline = true;
