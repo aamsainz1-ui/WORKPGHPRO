@@ -7,7 +7,7 @@ export const syncUsers = async (localUsers: UserProfile[]): Promise<UserProfile[
     if (!isOnline || !supabase) return localUsers;
 
     try {
-        // STEP 1: Fetch all users from Supabase (cloud is source of truth)
+        // STEP 1: Fetch all users from Supabase (cloud is ALWAYS source of truth)
         const { data: cloudUsers, error: fetchError } = await supabase
             .from('users')
             .select('*')
@@ -15,39 +15,47 @@ export const syncUsers = async (localUsers: UserProfile[]): Promise<UserProfile[
 
         if (fetchError) throw fetchError;
 
+        // ถ้า cloud มีข้อมูล → ใช้ cloud เลย ไม่ upsert local
+        if (cloudUsers && cloudUsers.length > 0) {
+            const syncedUsers: UserProfile[] = cloudUsers.map((u: any) => ({
+                id: u.id,
+                name: u.name,
+                position: u.position,
+                department: u.department,
+                employeeId: u.employee_id,
+                joinDate: u.join_date,
+                company: u.company,
+                avatar: u.avatar,
+                role: u.role,
+                pin: u.pin,
+                storedFace: u.stored_face,
+                faceSignature: u.face_signature,
+                leaveBalances: u.leave_balances,
+            }));
+            return syncedUsers;
+        }
+
+        // ถ้า cloud ว่างเปล่า → upsert local ไป (สร้าง users ครั้งแรก)
         const cloudUserIds = new Set((cloudUsers || []).map((u: any) => u.id));
-
-        // STEP 2: Upload only NEW local users (not in cloud) or UPDATE existing ones
         for (const user of localUsers) {
-            // Skip if user was deleted from cloud (not in cloudUserIds)
-            // Only upsert if user exists in cloud OR is a brand new user
             const isNewUser = !cloudUserIds.has(user.id);
-
             if (isNewUser && user.name) {
                 const { error } = await supabase
                     .from('users')
                     .upsert({
-                        id: user.id,
-                        name: user.name,
-                        position: user.position,
-                        department: user.department,
-                        employee_id: user.employeeId,
-                        join_date: user.joinDate,
-                        company: user.company,
-                        avatar: user.avatar,
-                        role: user.role,
-                        pin: user.pin,
-                        stored_face: user.storedFace,
-                        face_signature: user.faceSignature,
+                        id: user.id, name: user.name, position: user.position,
+                        department: user.department, employee_id: user.employeeId,
+                        join_date: user.joinDate, company: user.company,
+                        avatar: user.avatar, role: user.role, pin: user.pin,
+                        stored_face: user.storedFace, face_signature: user.faceSignature,
                         leave_balances: user.leaveBalances,
                         updated_at: new Date().toISOString()
                     }, { onConflict: 'id' });
-
                 if (error) console.error('Error syncing user:', error);
             }
         }
 
-        // STEP 3: Fetch again to get the final state
+        // Fetch final state
         const { data: finalData, error: finalError } = await supabase
             .from('users')
             .select('*')
