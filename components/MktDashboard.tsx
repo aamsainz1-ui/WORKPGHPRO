@@ -557,14 +557,11 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
   const exportExcel = () => {
     const wb = XLSX.utils.book_new();
 
-    // Sheet 1: รายวัน (แต่ละ tab)
+    // Sheet 1: รายวัน — ดึงจาก data state ตรงๆ (เหมือนกับที่แสดงบนตาราง)
     const dailyRows: any[] = [];
     const tabKey = activeTab;
-    const tabData = data[tabKey] || {};
-    const staffKeys = staffFilter === 'all' ? STAFF : [staffFilter];
-    staffKeys.forEach(name => {
-      const row = tabData[name];
-      if (!row) return;
+    displayStaff.forEach(name => {
+      const row = data[tabKey][name] || emptyRow();
       const r = recalc(row);
       dailyRows.push({
         'ชื่อ': name, 'FB': r.fb, 'Google': r.google, 'TikTok': r.tiktok,
@@ -601,8 +598,31 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
       XLSX.utils.book_append_sheet(wb, ws2, 'สรุปเดือน');
     }
 
+    // Sheet 3+: ทุก tab ที่ไม่ใช่ activeTab
+    TABS.filter(t => t !== tabKey).forEach(t => {
+      const tData = data[t] || {};
+      const tRows: any[] = [];
+      displayStaff.forEach(name => {
+        const row = tData[name] || emptyRow();
+        const r = recalc(row);
+        tRows.push({
+          'ชื่อ': name, 'FB': r.fb, 'Google': r.google, 'TikTok': r.tiktok,
+          'รวม ADS': r.totalAds, 'สมัคร': r.register, 'สมาชิกฝาก': r.memberDeposit,
+          '%ฝาก': r.depositPct, 'ฝากแรก': r.firstDeposit, 'ฝากทั้งวัน': r.dailyDeposit,
+          'ฝากทั้งเดือน': r.monthlyDeposit, 'ยอดถอน': r.totalWithdraw,
+          'W/L': r.winLoss, 'เฉลี่ย/ยูส': r.avgPerUser,
+          'ค่าหัว/สมัคร': r.costPerRegister, 'ค่าหัว/ฝาก': r.costPerDeposit,
+        });
+      });
+      if (tRows.some(r => Object.values(r).some((v,i) => i > 0 && v !== 0))) {
+        const ws = XLSX.utils.json_to_sheet(tRows);
+        ws['!cols'] = Array(16).fill({ wch: 14 });
+        XLSX.utils.book_append_sheet(wb, ws, `รายวัน ${t} ${selectedDate}`);
+      }
+    });
+
     const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    saveAs(new Blob([buf], { type: 'application/octet-stream' }), `MKT_${tabKey}_${selectedDate}.xlsx`);
+    saveAs(new Blob([buf], { type: 'application/octet-stream' }), `MKT_${selectedDate}.xlsx`);
   };
 
   // Monthly summary totals
