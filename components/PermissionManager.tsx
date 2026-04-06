@@ -17,12 +17,10 @@ const ALL_PERMISSIONS: Permission[] = [
     { key: 'leave', label: 'Leave Management', labelTH: 'จัดการวันลา', icon: '🏖️' },
     { key: 'organization', label: 'Team Directory', labelTH: 'รายชื่อทีม', icon: '👥' },
     { key: 'announcements', label: 'Announcements', labelTH: 'ประกาศ', icon: '📢' },
-    { key: 'content', label: 'Content Calendar', labelTH: 'ปฏิทินคอนเทนต์', icon: '📆' },
+    { key: 'calendar', label: 'Content Calendar', labelTH: 'ปฏิทินคอนเทนต์', icon: '📆' },
     { key: 'payroll', label: 'Payroll System', labelTH: 'ระบบเงินเดือน', icon: '💰' },
-    { key: 'summary', label: 'Daily Summary', labelTH: 'สรุปรายวัน', icon: '📝' },
     { key: 'admin', label: 'Admin Console', labelTH: 'ตั้งค่าระบบ', icon: '⚙️' },
     { key: 'mkt', label: 'MKT Dashboard', labelTH: 'แดชบอร์ด MKT', icon: '📈' },
-    { key: 'calendar', label: 'Marketing Calendar', labelTH: 'ปฏิทินการตลาด', icon: '📅' },
     { key: 'permissions', label: 'Permissions', labelTH: 'จัดการสิทธิ์', icon: '🔐' },
     { key: 'teams', label: 'Team Management', labelTH: 'จัดการทีม', icon: '👨‍👩‍👧' },
 ];

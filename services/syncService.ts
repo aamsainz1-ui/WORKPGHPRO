@@ -140,23 +140,7 @@ export const syncLeaves = async (localLeaves: LeaveRecord[]): Promise<LeaveRecor
     if (!isOnline || !supabase) return localLeaves;
 
     try {
-        for (const leave of localLeaves) {
-            const { error } = await supabase
-                .from('leave_records')
-                .upsert({
-                    id: leave.id,
-                    employee_id: leave.employeeId,
-                    employee_name: leave.employeeName,
-                    type: leave.type,
-                    start_date: leave.startDate,
-                    end_date: leave.endDate,
-                    reason: leave.reason,
-                    status: leave.status
-                }, { onConflict: 'id' });
-
-            if (error) console.error('Error syncing leave:', error);
-        }
-
+        // Cloud is source of truth — do NOT push local-only items back
         const { data, error } = await supabase
             .from('leave_records')
             .select('*')
@@ -274,26 +258,7 @@ export const syncPayroll = async (localRecords: PayrollRecord[]): Promise<Payrol
     if (!isOnline || !supabase) return localRecords;
 
     try {
-        for (const record of localRecords) {
-            const { error } = await supabase
-                .from('payroll_records')
-                .upsert({
-                    id: record.id,
-                    employee_id: record.employeeId,
-                    month: record.month,
-                    base_salary: record.baseSalary,
-                    commission: record.commission,
-                    bonus: record.bonus,
-                    deductions: record.deductions,
-                    net_payable: record.netPayable,
-                    status: record.status,
-                    payment_date: record.paymentDate,
-                    notes: record.notes
-                }, { onConflict: 'id' });
-
-            if (error) console.error('Error syncing payroll:', error);
-        }
-
+        // Cloud is source of truth
         const { data, error } = await supabase
             .from('payroll_records')
             .select('*')
@@ -324,21 +289,7 @@ export const syncCompensation = async (localSettings: CompensationSettings[]): P
     if (!isOnline || !supabase) return localSettings;
 
     try {
-        for (const setting of localSettings) {
-            const { error } = await supabase
-                .from('compensation_settings')
-                .upsert({
-                    id: setting.id,
-                    employee_id: setting.employeeId,
-                    base_salary: setting.baseSalary,
-                    commission_rate: setting.commissionRate,
-                    allowances: setting.allowances,
-                    updated_at: new Date().toISOString()
-                }, { onConflict: 'id' });
-
-            if (error) console.error('Error syncing compensation:', error);
-        }
-
+        // Cloud is source of truth
         const { data, error } = await supabase
             .from('compensation_settings')
             .select('*');

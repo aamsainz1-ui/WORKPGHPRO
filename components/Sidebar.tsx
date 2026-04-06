@@ -176,7 +176,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, user, lang, 
                 ? [
                   menuItems[1], // Organization
                   menuItems[4], // Announcements
-                  menuItems[6], // Payroll
+                  menuItems[5], // Calendar
+                  menuItems[7], // Payroll
                   {
                     id: 'permissions', label: 'สิทธิ์', icon: (
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -192,7 +193,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, user, lang, 
                     )
                   },
                 ]
-                : []
+                : [
+                  menuItems[1], // Organization
+                  menuItems[4], // Announcements
+                  menuItems[5], // Calendar
+                ]
               ).map((item) => (
                 <button
                   key={item.id}
@@ -227,8 +232,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, user, lang, 
               </div>
             </button>
           ))}
-          {isAdmin && (
-            <button
+          <button
               onClick={() => setMoreOpen(!moreOpen)}
               className={`flex flex-col items-center px-3 py-2 transition-all duration-300 ${moreOpen ? 'text-blue-600 scale-110 -translate-y-1' : 'text-slate-400'}`}
               title="เพิ่มเติม"
@@ -239,7 +243,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, user, lang, 
                 </svg>
               </div>
             </button>
-          )}
           <button
             onClick={() => { setActiveTab('profile'); setMoreOpen(false); }}
             className={`flex justify-center px-3 py-2 transition-all ${activeTab === 'profile' ? 'scale-125 -translate-y-2' : 'hover:scale-110'}`}
