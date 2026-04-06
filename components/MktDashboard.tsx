@@ -931,12 +931,23 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
               ) : (
                 <>
                   {(() => {
-                    // รวม today + monthly (เอา monthly เป็น fallback สำหรับ campaign ที่วันนี้ไม่มี)
+                    // รวม today + เติม staff ที่ขาดจาก monthly (แค่ source ตัวเลข 0)
                     const todayCampaigns = tigerData.items || [];
                     const todaySet = new Set(todayCampaigns.map(i => i.campaign_name));
-                    const monthlyFallback = (tigerData.monthly_items || [])
-                      .filter(i => !todaySet.has(i.campaign_name));
-                    const allCampaigns = [...todayCampaigns, ...monthlyFallback];
+                    const missingStaff = (tigerData.monthly_items || [])
+                      .filter(i => !todaySet.has(i.campaign_name) && CAMPAIGN_STAFF_MAP[i.campaign_name])
+                      .reduce((acc, i) => {
+                        if (!acc.has(i.campaign_name)) acc.set(i.campaign_name, i);
+                        return acc;
+                      }, new Map<string, TigerCampaign>());
+                    const emptyRows = Array.from(missingStaff.values()).map(i => ({
+                      ...i,
+                      total_register: 0, register_deposit_user: 0, register_deposit_amount: 0,
+                      total_deposit: 0, total_withdraw: 0, deposit_first_time_amount: 0,
+                      register_first_time_deposit_amount: 0, total_turn_winlose: 0,
+                      register_withdraw_user: 0, register_withdraw_amount: 0, total_turn_over: 0,
+                    }));
+                    const allCampaigns = [...todayCampaigns, ...emptyRows];
                     return (isAdmin
                       ? allCampaigns
                       : allCampaigns.filter(i => CAMPAIGN_STAFF_MAP[i.campaign_name] === staffFilter)
