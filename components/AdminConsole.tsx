@@ -55,6 +55,12 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
   const [newShift, setNewShift] = useState({ name: '', startTime: '09:00', endTime: '18:00' });
   const [loginLogs, setLoginLogs] = useState<any[]>([]);
   const [showLoginLogs, setShowLoginLogs] = useState(false);
+  const [showTelegramSettings, setShowTelegramSettings] = useState(false);
+  const [tgBotToken, setTgBotToken] = useState('');
+  const [tgChatId, setTgChatId] = useState('');
+  const [tgSending, setTgSending] = useState(false);
+  const [tgResult, setTgResult] = useState<string | null>(null);
+  const [tgScheduleTime, setTgScheduleTime] = useState('23:00');
 
   useEffect(() => {
     if (showLoginLogs) {
@@ -62,6 +68,47 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
         .then(({ data }) => { if (data) setLoginLogs(data); });
     }
   }, [showLoginLogs]);
+
+  // Load Telegram settings from Supabase
+  useEffect(() => {
+    if (showTelegramSettings) {
+      supabase.from('app_settings').select('*').eq('key', 'telegram_config').limit(1)
+        .then(({ data }) => {
+          if (data && data[0]?.value) {
+            try {
+              const cfg = JSON.parse(data[0].value);
+              setTgBotToken(cfg.bot_token || '');
+              setTgChatId(cfg.chat_id || '');
+              setTgScheduleTime(cfg.schedule_time || '23:00');
+            } catch { /* ignore */ }
+          }
+        });
+    }
+  }, [showTelegramSettings]);
+
+  const saveTelegramConfig = async () => {
+    await supabase.from('app_settings').upsert({
+      key: 'telegram_config',
+      value: JSON.stringify({ bot_token: tgBotToken, chat_id: tgChatId, schedule_time: tgScheduleTime }),
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'key' });
+    setTgResult('✅ บันทึกแล้ว');
+    setTimeout(() => setTgResult(null), 3000);
+  };
+
+  const testTelegramSend = async () => {
+    setTgSending(true);
+    setTgResult(null);
+    try {
+      const res = await fetch('/api/mkt-telegram', { method: 'POST' });
+      const json = await res.json();
+      setTgResult(json.ok ? '✅ ส่งสำเร็จ!' : `❌ ${json.error || 'ส่งไม่สำเร็จ'}`);
+    } catch (err: any) {
+      setTgResult(`❌ ${err.message}`);
+    } finally {
+      setTgSending(false);
+    }
+  };
 
   const stats = {
     pendingRequests: leaves.filter(l => l.status === LeaveStatus.PENDING).length,
@@ -771,6 +818,79 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
           </div>
         </div>
       )}
+      {/* ===== Telegram MKT Summary ===== */}
+      <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
+        <button
+          onClick={() => setShowTelegramSettings(!showTelegramSettings)}
+          className="w-full px-6 py-5 flex items-center justify-between hover:bg-slate-50/50 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center text-white text-lg font-black">📲</div>
+            <div className="text-left">
+              <h3 className="text-sm font-black text-slate-800">{lang === Language.TH ? 'แจ้งเตือน Telegram' : 'Telegram Notification'}</h3>
+              <p className="text-[10px] font-bold text-slate-400">{lang === Language.TH ? 'ส่งสรุป MKT Dashboard รายวันเข้า Telegram' : 'Send daily MKT summary to Telegram'}</p>
+            </div>
+          </div>
+          <span className="text-slate-400 text-xl">{showTelegramSettings ? '▲' : '▼'}</span>
+        </button>
+        {showTelegramSettings && (
+          <div className="px-6 pb-6 space-y-4">
+            <div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal">Bot Token</label>
+              <input
+                type="password"
+                value={tgBotToken}
+                onChange={e => setTgBotToken(e.target.value)}
+                placeholder="123456:ABC-DEF..."
+                className="w-full mt-1 px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal">Chat ID</label>
+              <input
+                type="text"
+                value={tgChatId}
+                onChange={e => setTgChatId(e.target.value)}
+                placeholder="-100123456789 หรือ @channelname"
+                className="w-full mt-1 px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <p className="text-[10px] text-slate-400 mt-1">ส่งข้อความ /start ให้ bot แล้วเข้า api.telegram.org/bot[TOKEN]/getUpdates เพื่อดู Chat ID</p>
+            </div>
+            <div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-normal">เวลาส่งอัตโนมัติ (เวลาไทย)</label>
+              <input
+                type="time"
+                value={tgScheduleTime}
+                onChange={e => setTgScheduleTime(e.target.value)}
+                className="w-full mt-1 px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={saveTelegramConfig}
+                className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-black transition-colors"
+              >
+                💾 บันทึก
+              </button>
+              <button
+                onClick={testTelegramSend}
+                disabled={tgSending || !tgBotToken || !tgChatId}
+                className="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {tgSending ? '⏳ กำลังส่ง...' : '🚀 ทดสอบส่ง'}
+              </button>
+            </div>
+            {tgResult && (
+              <p className="text-sm font-bold animate-in fade-in">{tgResult}</p>
+            )}
+            <div className="bg-slate-50 rounded-xl p-4">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2">ส่งอัตโนมัติ</p>
+              <p className="text-xs text-slate-600">ระบบจะส่งสรุป MKT รายวันเข้า Telegram <b>ทุกวัน {tgScheduleTime} น.</b> (เวลาไทย) อัตโนมัติ</p>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* ===== Login Logs ===== */}
       <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
         <button
