@@ -37,6 +37,9 @@ interface TigerCampaign {
   deposit_first_time_amount: number;
   register_first_time_deposit_amount: number;
   total_turn_winlose: number;
+  register_withdraw_user: number;
+  register_withdraw_amount: number;
+  total_turn_over: number;
 }
 
 interface TigerData {
@@ -954,8 +957,8 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                         <td className="px-3 py-3 text-right font-black text-purple-600">{fmt(Math.round(item.total_deposit))}</td>
                         <td className="px-3 py-3 text-right font-bold text-rose-500">{fmt(Math.round(item.total_withdraw))}</td>
                         <td className="px-3 py-3 text-right font-bold text-slate-600">{fmt(Math.round(item.register_deposit_amount))}</td>
-                        <td className="px-3 py-3 text-right font-bold text-rose-300">{fmt(item.register_withdraw_user)}</td>
-                        <td className="px-3 py-3 text-right font-bold text-rose-200">{fmt(Math.round(item.register_withdraw_amount))}</td>
+                        <td className="px-3 py-3 text-right font-bold text-rose-300">{fmt(item.register_withdraw_user || 0)}</td>
+                        <td className="px-3 py-3 text-right font-bold text-rose-200">{fmt(Math.round(item.register_withdraw_amount || 0))}</td>
 
                       </tr>
                     );
@@ -979,9 +982,9 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                       total_deposit: a.total_deposit + i.total_deposit,
                       total_withdraw: a.total_withdraw + i.total_withdraw,
                       register_deposit_amount: a.register_deposit_amount + i.register_deposit_amount,
-                      register_withdraw_user: a.register_withdraw_user + i.register_withdraw_user,
-                      register_withdraw_amount: a.register_withdraw_amount + i.register_withdraw_amount,
-                      total_turn_over: a.total_turn_over + i.total_turn_over,
+                      register_withdraw_user: a.register_withdraw_user + (i.register_withdraw_user || 0),
+                      register_withdraw_amount: a.register_withdraw_amount + (i.register_withdraw_amount || 0),
+                      total_turn_over: a.total_turn_over + (i.total_turn_over || 0),
                       total_turn_winlose: a.total_turn_winlose + i.total_turn_winlose,
                     }), { total_register: 0, register_deposit_user: 0, deposit_first_time_amount: 0, register_first_time_deposit_amount: 0, total_deposit: 0, total_withdraw: 0, register_deposit_amount: 0, register_withdraw_user: 0, register_withdraw_amount: 0, total_turn_over: 0, total_turn_winlose: 0 });
                     const totPct = tot.total_register > 0 ? Math.round((tot.register_deposit_user / tot.total_register) * 10000) / 100 : 0;
