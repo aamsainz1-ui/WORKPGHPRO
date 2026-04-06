@@ -937,7 +937,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                     const emptyItems: TigerCampaign[] = Object.entries(CAMPAIGN_STAFF_MAP)
                       .filter(([campaign]) => !existingCampaigns.has(campaign))
                       .map(([campaign, staff]) => ({
-                        source_name: '-', medium_name: '-', campaign_name: campaign,
+                        source_name: staff, medium_name: 'n/a', campaign_name: campaign,
                         total_register: 0, register_deposit_user: 0, register_deposit_amount: 0,
                         total_deposit: 0, total_withdraw: 0, deposit_first_time_amount: 0,
                         register_first_time_deposit_amount: 0, total_turn_winlose: 0,
