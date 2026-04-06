@@ -474,9 +474,15 @@ const App: React.FC = () => {
   };
 
 
-  const handleAddAnnouncement = (data: Omit<Announcement, 'id'>) => {
+  const handleAddAnnouncement = async (data: Omit<Announcement, 'id'>) => {
     const newA = { ...data, id: crypto.randomUUID() };
     setAnnouncements(prev => [newA, ...prev]);
+    try {
+      await supabase.from('announcements').upsert({
+        id: newA.id, title: newA.title, content: newA.content,
+        date: newA.date, author: newA.author, category: newA.category,
+      }, { onConflict: 'id' });
+    } catch { /* silent */ }
   };
 
   const handleDeleteAnnouncement = async (id: string) => {

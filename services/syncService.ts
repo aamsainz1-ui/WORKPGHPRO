@@ -193,38 +193,9 @@ export const syncAnnouncements = async (localAnnouncements: Announcement[]): Pro
 
         if (fetchError) throw fetchError;
 
-        const cloudIds = new Set((cloudData || []).map((a: any) => a.id));
-
-        // STEP 2: Only upsert items that exist in cloud or are new
-        for (const announcement of localAnnouncements) {
-            const isNew = !cloudIds.has(announcement.id);
-
-            if (isNew) {
-                const { error } = await supabase
-                    .from('announcements')
-                    .upsert({
-                        id: announcement.id,
-                        title: announcement.title,
-                        content: announcement.content,
-                        date: announcement.date,
-                        author: announcement.author,
-                        category: announcement.category
-                    }, { onConflict: 'id' });
-
-                if (error) console.error('Error syncing announcement:', error);
-            }
-        }
-
-        // STEP 3: Fetch final state
-        const { data: finalData, error: finalError } = await supabase
-            .from('announcements')
-            .select('*')
-            .order('date', { ascending: false });
-
-        if (finalError) throw finalError;
-
-        console.log(`🔄 Synced ${(finalData || []).length} announcements (cloud-first)`);
-        return (finalData || []).map((a: any) => ({
+        // Cloud is source of truth — do NOT push local-only items back
+        console.log(`🔄 Synced ${(cloudData || []).length} announcements (cloud-first)`);
+        return (cloudData || []).map((a: any) => ({
             id: a.id,
             title: a.title,
             content: a.content,
