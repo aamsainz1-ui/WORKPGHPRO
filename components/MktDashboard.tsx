@@ -965,12 +965,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                   })}
                   {/* Total row */}
                   {(() => {
-                    const todayMap2: Record<string, TigerCampaign> = {};
-                    tigerData.items.forEach(i => { todayMap2[i.campaign_name] = i; });
-                    const allForTotal = [
-                      ...tigerData.items,
-                      ...(tigerData.monthly_items||[]).filter(i => !todayMap2[i.campaign_name]),
-                    ];
+                    const allForTotal = tigerData.items || [];
                     const tot = (isAdmin || staffFilter === 'all'
                       ? allForTotal
                       : allForTotal.filter(i => CAMPAIGN_STAFF_MAP[i.campaign_name] === staffFilter)
