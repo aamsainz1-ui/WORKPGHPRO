@@ -804,7 +804,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                     <tr><td colSpan={5} className="text-center py-6 text-slate-400 text-sm">ไม่มีข้อมูล</td></tr>
                   ) : loginLogs.map((log, idx) => {
                     const d = new Date(log.logged_in_at);
-                    const timeStr = `${d.toLocaleDateString('th-TH')} ${d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}`;
+                    const timeStr = d.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
                     const device = (log.device || '').includes('Mobile') ? '📱 Mobile' : '💻 Desktop';
                     return (
                       <tr key={log.id || idx} className={`border-b border-slate-50 ${idx % 2 === 0 ? 'bg-slate-50/30' : ''}`}>
