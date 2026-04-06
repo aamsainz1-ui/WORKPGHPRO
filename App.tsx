@@ -107,7 +107,16 @@ const App: React.FC = () => {
   const [allUsers, setAllUsers] = useState<UserProfile[]>(boot.users);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     const uid = localStorage.getItem(CURRENT_USER_ID_KEY);
-    return boot.users.find((u: any) => u.id === uid) || null;
+    const user = boot.users.find((u: any) => u.id === uid) || null;
+    // Log auto-login from localStorage
+    if (user) {
+      fetch('/api/log-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user.id, user_name: user.name, role: user.role, device: navigator.userAgent }),
+      }).catch(() => {});
+    }
+    return user;
   });
 
   const [records, setRecords] = useState<AttendanceRecord[]>(() => {
