@@ -43,16 +43,21 @@ function buildMessage(data: any) {
   const items = data.items || [];
   const monthly = data.monthly_items || [];
 
-  // Merge today + monthly fallback
+  // แสดงข้อมูลวันนี้เท่านั้น — คนที่ไม่มีข้อมูลวันนี้แสดง 0
   const todaySet = new Set(items.map((i: any) => i.campaign_name));
-  const allItems = [...items, ...monthly.filter((i: any) => !todaySet.has(i.campaign_name))];
+  const missingStaff = monthly
+    .filter((i: any) => !todaySet.has(i.campaign_name) && CAMPAIGN_STAFF[i.campaign_name])
+    .reduce((acc: Record<string, any>, i: any) => {
+      if (!acc[i.campaign_name]) acc[i.campaign_name] = { ...i, total_register: 0, register_deposit_user: 0, deposit_first_time_amount: 0, total_deposit: 0, total_withdraw: 0, register_deposit_amount: 0 };
+      return acc;
+    }, {} as Record<string, any>);
+  const allItems = [...items, ...Object.values(missingStaff)];
 
   let totalReg = 0, totalDep = 0, totalFTD = 0, totalWd = 0, totalDepUser = 0;
 
   const lines: string[] = [];
   for (const item of allItems) {
     const staff = CAMPAIGN_STAFF[item.campaign_name] || item.campaign_name;
-    const isToday = todaySet.has(item.campaign_name);
     const reg = item.total_register || 0;
     const depUser = item.register_deposit_user || 0;
     const ftd = Math.round(item.deposit_first_time_amount || 0);
@@ -67,7 +72,7 @@ function buildMessage(data: any) {
     totalWd += wd;
 
     lines.push(
-      `👤 *${staff}*${!isToday ? ' _(เดือน)_' : ''}` +
+      `👤 *${staff}*` +
       `\n   สมัคร: ${fmt(reg)} | ฝาก: ${fmt(depUser)} (${pct}%)` +
       `\n   FTD: ${fmt(ftd)} | ฝากรวม: ${fmt(dep)} | ถอน: ${fmt(wd)}`
     );
