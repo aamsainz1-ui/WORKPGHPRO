@@ -795,12 +795,13 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                     <th className="text-left px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal">ชื่อ</th>
                     <th className="text-left px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal">Role</th>
                     <th className="text-left px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal">เวลา</th>
+                    <th className="text-left px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal">IP</th>
                     <th className="text-left px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal">อุปกรณ์</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loginLogs.length === 0 ? (
-                    <tr><td colSpan={4} className="text-center py-6 text-slate-400 text-sm">ไม่มีข้อมูล</td></tr>
+                    <tr><td colSpan={5} className="text-center py-6 text-slate-400 text-sm">ไม่มีข้อมูล</td></tr>
                   ) : loginLogs.map((log, idx) => {
                     const d = new Date(log.logged_in_at);
                     const timeStr = `${d.toLocaleDateString('th-TH')} ${d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}`;
@@ -814,6 +815,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
                           </span>
                         </td>
                         <td className="px-3 py-3 text-slate-600 text-xs font-bold">{timeStr}</td>
+                        <td className="px-3 py-3 text-slate-500 text-xs font-mono">{log.ip_address || '-'}</td>
                         <td className="px-3 py-3 text-slate-500 text-xs">{device}</td>
                       </tr>
                     );

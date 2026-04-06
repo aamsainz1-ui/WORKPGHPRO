@@ -537,13 +537,15 @@ const App: React.FC = () => {
   const handleLogin = useCallback(async (user: UserProfile) => {
     setCurrentUser(user);
     try {
-      const bkk = new Date(new Date().getTime() + 7 * 60 * 60 * 1000);
-      await supabase.from('login_logs').insert({
-        user_id: user.id,
-        user_name: user.name,
-        role: user.role,
-        logged_in_at: bkk.toISOString(),
-        device: navigator.userAgent,
+      await fetch('/api/log-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user.id,
+          user_name: user.name,
+          role: user.role,
+          device: navigator.userAgent,
+        }),
       });
     } catch { /* silent */ }
   }, []);
