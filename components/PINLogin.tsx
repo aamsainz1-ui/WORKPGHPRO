@@ -2,6 +2,13 @@
 import React, { useState } from 'react';
 import { UserProfile, Language } from '../types';
 
+const hashPIN = async (pin: string): Promise<string> => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(pin + 'gw_salt_2026');
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+};
+
 interface PINLoginProps {
     users: UserProfile[];
     onLogin: (user: UserProfile) => void;
@@ -24,8 +31,11 @@ const PINLogin: React.FC<PINLoginProps> = ({ users, onLogin, lang }) => {
         setPin(prev => prev.slice(0, -1));
     };
 
-    const handleLogin = () => {
-        if (selectedUser && selectedUser.pin === pin) {
+    const handleLogin = async () => {
+        if (!selectedUser) return;
+        const hashed = await hashPIN(pin);
+        // Support both hashed and legacy plaintext PIN
+        if (selectedUser.pinHash ? hashed === selectedUser.pinHash : selectedUser.pin === pin) {
             onLogin(selectedUser);
         } else {
             setError(true);

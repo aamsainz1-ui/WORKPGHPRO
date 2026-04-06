@@ -25,6 +25,15 @@ import { syncUsers, syncAttendance, syncLeaves, syncAnnouncements, syncContentPl
 
 const APP_DATA_KEY = 'global_work_pro_v9_data'; // Bumped for a fresh start with total stability
 const CURRENT_USER_ID_KEY = 'global_work_pro_v9_user';
+const SESSION_LOGIN_TIME_KEY = 'global_work_pro_session_time';
+const SESSION_TIMEOUT_MS = 8 * 60 * 60 * 1000; // 8 hours
+
+const hashPIN = async (pin: string): Promise<string> => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(pin + 'gw_salt_2026');
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+};
 
 // Helper for geofencing distance calculation
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -51,7 +60,8 @@ const DEFAULT_USERS: UserProfile[] = [
     company: "GlobalWork Pro",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Owner",
     role: UserRole.ADMIN,
-    pin: '435600',
+    pin: '435600', // will be compared via hash
+    pinHash: '4bdfe4a4b62cd4638c90ed79edcd6b75c36cdaeb780ee610535abd7dac629aaf',
     leaveBalances: { sick: 99, annual: 99, personal: 99 }
   }
 ];
@@ -107,8 +117,14 @@ const App: React.FC = () => {
   const [allUsers, setAllUsers] = useState<UserProfile[]>(boot.users);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     const uid = localStorage.getItem(CURRENT_USER_ID_KEY);
+    const loginTime = Number(localStorage.getItem(SESSION_LOGIN_TIME_KEY) || '0');
+    // Session timeout check
+    if (loginTime && (Date.now() - loginTime > SESSION_TIMEOUT_MS)) {
+      localStorage.removeItem(CURRENT_USER_ID_KEY);
+      localStorage.removeItem(SESSION_LOGIN_TIME_KEY);
+      return null;
+    }
     const user = boot.users.find((u: any) => u.id === uid) || null;
-    // Log auto-login from localStorage
     if (user) {
       fetch('/api/log-login', {
         method: 'POST',
@@ -371,6 +387,7 @@ const App: React.FC = () => {
   const handleSwitchAccount = () => {
     setCurrentUser(null);
     setActiveTab('dashboard');
+    localStorage.removeItem(SESSION_LOGIN_TIME_KEY);
   };
 
   const handleLeaveApproval = (id: string, stage: LeaveStatus) => {
@@ -549,8 +566,22 @@ const App: React.FC = () => {
     setPayrollRecords(prev => [newRecord, ...prev]);
   };
 
+  // Session timeout: auto-logout every minute check
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const loginTime = Number(localStorage.getItem(SESSION_LOGIN_TIME_KEY) || '0');
+      if (loginTime && (Date.now() - loginTime > SESSION_TIMEOUT_MS)) {
+        localStorage.removeItem(CURRENT_USER_ID_KEY);
+        localStorage.removeItem(SESSION_LOGIN_TIME_KEY);
+        setCurrentUser(null);
+      }
+    }, 60000);
+    return () => clearInterval(timer);
+  }, []);
+
   const handleLogin = useCallback(async (user: UserProfile) => {
     setCurrentUser(user);
+    localStorage.setItem(SESSION_LOGIN_TIME_KEY, Date.now().toString());
     try {
       await fetch('/api/log-login', {
         method: 'POST',
@@ -600,9 +631,13 @@ const App: React.FC = () => {
               const u = { ...currentUser, storedFace: undefined, faceSignature: undefined };
               setCurrentUser(u);
               setAllUsers(prev => prev.map(it => it.id === u.id ? u : it));
-            }} onChangePIN={(oldPin: string, newPin: string) => {
-              if ((currentUser as any).pin !== oldPin) return false;
-              const u = { ...currentUser, pin: newPin } as any;
+            }} onChangePIN={async (oldPin: string, newPin: string) => {
+              const oldHash = await hashPIN(oldPin);
+              const user = currentUser as any;
+              // Support both hash and legacy plaintext
+              if (user.pinHash ? oldHash !== user.pinHash : user.pin !== oldPin) return false;
+              const newHash = await hashPIN(newPin);
+              const u = { ...currentUser, pin: newPin, pinHash: newHash } as any;
               setCurrentUser(u);
               setAllUsers(prev => prev.map(it => it.id === u.id ? u : it));
               return true;
