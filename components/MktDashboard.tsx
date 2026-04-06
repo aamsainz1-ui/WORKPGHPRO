@@ -210,6 +210,7 @@ const loadTodayData = async (thaiDate: string): Promise<MktData> => {
           firstDeposit: Number(row.first_deposit) || 0,
           dailyDeposit: Number(row.daily_deposit) || 0,
           monthlyDeposit: Number(row.month_deposit) || 0,
+          totalWithdraw: Number(row.total_withdraw) || 0,
           avgPerUser: 0,
           costPerRegister: 0,
           costPerDeposit: 0,
@@ -260,6 +261,7 @@ const loadMonthlySummary = async (monthPrefix: string): Promise<MonthlySummaryRo
         fb: 0, google: 0, tiktok: 0, totalAds: 0,
         register: 0, deposit_member: 0, first_deposit: 0,
         daily_deposit: 0, month_deposit: 0, depositPct: 0,
+        total_withdraw: 0, register_withdraw_amount: 0,
       };
     }
     map[n].fb += Number(row.fb) || 0;
@@ -922,7 +924,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
               </tr>
             </thead>
             <tbody>
-              {!tigerData || (tigerData.items.length === 0 && (tigerData.monthly_items||[]).length === 0) ? (
+              {!tigerData || ((tigerData.items||[]).length === 0 && (tigerData.monthly_items||[]).length === 0) ? (
                 <tr>
                   <td colSpan={13} className="text-center py-8 text-slate-400 text-sm font-bold">
                     {tigerLoading ? '⏳ กำลังดึงข้อมูล...' : 'ไม่มีข้อมูล — กด Refresh หรือรอ auto-update'}
