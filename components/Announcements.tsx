@@ -77,7 +77,7 @@ const Announcements: React.FC<AnnouncementsProps> = ({ announcements, lang, isAd
               <div className="mt-10 pt-8 border-t border-slate-50 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 rounded-xl bg-slate-900 flex items-center justify-center text-[12px] font-black text-white">
-                    {item.author[0]}
+                    {(item.author || '?')[0]}
                   </div>
                   <div>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-normal">Authorized By</p>

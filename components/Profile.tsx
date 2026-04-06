@@ -161,9 +161,9 @@ const Profile: React.FC<ProfileProps> = ({ user, records, leaves, lang, onResetF
              {t.leaveQuota}
           </h3>
           <div className="space-y-6">
-            <LeaveQuota label={lang === Language.TH ? "ลาป่วย" : "Sick Leave"} used={15 - user.leaveBalances.sick} total={15} color="bg-red-500" lang={lang} />
-            <LeaveQuota label={lang === Language.TH ? "ลาพักร้อน" : "Annual Leave"} used={10 - user.leaveBalances.annual} total={10} color="bg-blue-500" lang={lang} />
-            <LeaveQuota label={lang === Language.TH ? "ลากิจ" : "Personal Leave"} used={5 - user.leaveBalances.personal} total={5} color="bg-emerald-500" lang={lang} />
+            <LeaveQuota label={lang === Language.TH ? "ลาป่วย" : "Sick Leave"} used={15 - (user.leaveBalances?.sick ?? 0)} total={15} color="bg-red-500" lang={lang} />
+            <LeaveQuota label={lang === Language.TH ? "ลาพักร้อน" : "Annual Leave"} used={10 - (user.leaveBalances?.annual ?? 0)} total={10} color="bg-blue-500" lang={lang} />
+            <LeaveQuota label={lang === Language.TH ? "ลากิจ" : "Personal Leave"} used={5 - (user.leaveBalances?.personal ?? 0)} total={5} color="bg-emerald-500" lang={lang} />
           </div>
         </div>
 

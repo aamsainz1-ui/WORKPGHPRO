@@ -114,7 +114,7 @@ const ContentCalendar: React.FC<ContentCalendarProps> = ({ plans, onAdd, onDelet
                             <div className="flex items-center justify-between mt-auto pt-6 border-t border-slate-50">
                                 <div className="flex items-center space-x-2">
                                     <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400">
-                                        {plan.author[0]}
+                                        {(plan.author || '?')[0]}
                                     </div>
                                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-normal">{plan.author}</span>
                                 </div>

@@ -20,7 +20,7 @@ import MktDashboard from './components/MktDashboard';
 import PINLogin from './components/PINLogin';
 import { verifyFace, reverseGeocode } from './services/gemini';
 import { verifyFaceLocal, initFaceDetection } from './services/faceService';
-import { isOnline } from './services/supabase';
+import { isOnline, supabase } from './services/supabase';
 import { syncUsers, syncAttendance, syncLeaves, syncAnnouncements, syncContentPlans, syncPayroll, syncCompensation, syncDailySummaries, syncSettings, deleteUser, deleteDailySummary, deleteAnnouncement, deleteContentPlan, updateUserInCloud, createUserInCloud } from './services/syncService';
 
 const APP_DATA_KEY = 'global_work_pro_v9_data'; // Bumped for a fresh start with total stability
@@ -97,7 +97,7 @@ const App: React.FC = () => {
         tab: (localStorage.getItem('gw_tab_v9') as any) || 'dashboard'
       };
     } catch (e) {
-      return { users: safeClone(DEFAULT_USERS), recordsMap: {}, leaves: [], settings: safeClone(DEFAULT_SETTINGS), lang: Language.TH, tab: 'dashboard' };
+      return { users: safeClone(DEFAULT_USERS), recordsMap: {}, leaves: [], settings: safeClone(DEFAULT_SETTINGS), lang: Language.TH, tab: 'dashboard', dailySummaries: [], announcements: [], contentPlans: [], payrollRecords: [], compensationSettings: [] };
     }
   };
 
@@ -534,9 +534,23 @@ const App: React.FC = () => {
     setPayrollRecords(prev => [newRecord, ...prev]);
   };
 
+  const handleLogin = useCallback(async (user: UserProfile) => {
+    setCurrentUser(user);
+    try {
+      const bkk = new Date(new Date().getTime() + 7 * 60 * 60 * 1000);
+      await supabase.from('login_logs').insert({
+        user_id: user.id,
+        user_name: user.name,
+        role: user.role,
+        logged_in_at: bkk.toISOString(),
+        device: navigator.userAgent,
+      });
+    } catch { /* silent */ }
+  }, []);
+
   // CLEANUP: Ensure no blank screen during transitions by checking currentUser directly
   if (!currentUser) {
-    return <PINLogin users={allUsers} onLogin={setCurrentUser} lang={lang} />;
+    return <PINLogin users={allUsers} onLogin={handleLogin} lang={lang} />;
   }
 
   return (

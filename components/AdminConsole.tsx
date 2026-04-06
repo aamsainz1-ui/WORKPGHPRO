@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SystemSettings,
   Language,
@@ -12,6 +12,7 @@ import {
   Announcement
 } from '../types';
 import MapPicker from './MapPicker.tsx';
+import { supabase } from '../services/supabase';
 
 interface AdminConsoleProps {
   leaves: LeaveRecord[];
@@ -52,6 +53,15 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
   const [newA, setNewA] = useState({ title: '', content: '', author: 'Admin', category: 'GENERAL', date: new Date().toISOString().split('T')[0] });
   const [showAddShift, setShowAddShift] = useState(false);
   const [newShift, setNewShift] = useState({ name: '', startTime: '09:00', endTime: '18:00' });
+  const [loginLogs, setLoginLogs] = useState<any[]>([]);
+  const [showLoginLogs, setShowLoginLogs] = useState(false);
+
+  useEffect(() => {
+    if (showLoginLogs) {
+      supabase.from('login_logs').select('*').order('logged_in_at', { ascending: false }).limit(100)
+        .then(({ data }) => { if (data) setLoginLogs(data); });
+    }
+  }, [showLoginLogs]);
 
   const stats = {
     pendingRequests: leaves.filter(l => l.status === LeaveStatus.PENDING).length,
@@ -761,6 +771,59 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({
           </div>
         </div>
       )}
+      {/* ===== Login Logs ===== */}
+      <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
+        <button
+          onClick={() => setShowLoginLogs(!showLoginLogs)}
+          className="w-full px-6 py-5 flex items-center justify-between hover:bg-slate-50/50 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white text-lg font-black">🔐</div>
+            <div className="text-left">
+              <h3 className="text-sm font-black text-slate-800">{lang === Language.TH ? 'ประวัติการเข้าสู่ระบบ' : 'Login History'}</h3>
+              <p className="text-[10px] font-bold text-slate-400">{lang === Language.TH ? 'ตรวจสอบการ Login ของพนักงาน' : 'Monitor employee login activity'}</p>
+            </div>
+          </div>
+          <span className="text-slate-400 text-xl">{showLoginLogs ? '▲' : '▼'}</span>
+        </button>
+        {showLoginLogs && (
+          <div className="px-6 pb-6">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-100">
+                    <th className="text-left px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal">ชื่อ</th>
+                    <th className="text-left px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal">Role</th>
+                    <th className="text-left px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal">เวลา</th>
+                    <th className="text-left px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal">อุปกรณ์</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loginLogs.length === 0 ? (
+                    <tr><td colSpan={4} className="text-center py-6 text-slate-400 text-sm">ไม่มีข้อมูล</td></tr>
+                  ) : loginLogs.map((log, idx) => {
+                    const d = new Date(log.logged_in_at);
+                    const timeStr = `${d.toLocaleDateString('th-TH')} ${d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}`;
+                    const device = (log.device || '').includes('Mobile') ? '📱 Mobile' : '💻 Desktop';
+                    return (
+                      <tr key={log.id || idx} className={`border-b border-slate-50 ${idx % 2 === 0 ? 'bg-slate-50/30' : ''}`}>
+                        <td className="px-3 py-3 font-bold text-slate-800">{log.user_name}</td>
+                        <td className="px-3 py-3">
+                          <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase ${log.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                            {log.role}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 text-slate-600 text-xs font-bold">{timeStr}</td>
+                        <td className="px-3 py-3 text-slate-500 text-xs">{device}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

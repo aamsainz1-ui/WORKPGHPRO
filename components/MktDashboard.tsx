@@ -532,6 +532,24 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
 
   const displayMonthlySummary = staffFilter === 'all' ? monthlySummary : monthlySummary.filter(r => r.name === staffFilter);
 
+  // Monthly summary totals (must be before exportMonthlyExcel)
+  const monthTotals = displayMonthlySummary.reduce((acc, r) => ({
+    fb: acc.fb + r.fb,
+    google: acc.google + r.google,
+    tiktok: acc.tiktok + r.tiktok,
+    totalAds: acc.totalAds + r.totalAds,
+    register: acc.register + r.register,
+    deposit_member: acc.deposit_member + r.deposit_member,
+    first_deposit: acc.first_deposit + r.first_deposit,
+    daily_deposit: acc.daily_deposit + r.daily_deposit,
+    month_deposit: acc.month_deposit + r.month_deposit,
+    total_withdraw: acc.total_withdraw + (r.total_withdraw || 0),
+    register_withdraw_amount: acc.register_withdraw_amount + (r.register_withdraw_amount || 0),
+    depositPct: 0,
+    name: 'รวม',
+  }), { name: 'รวม', fb: 0, google: 0, tiktok: 0, totalAds: 0, register: 0, deposit_member: 0, first_deposit: 0, daily_deposit: 0, month_deposit: 0, depositPct: 0, total_withdraw: 0, register_withdraw_amount: 0 });
+  monthTotals.depositPct = monthTotals.register > 0 ? Math.round((monthTotals.deposit_member / monthTotals.register) * 10000) / 100 : 0;
+
   // === EXPORT EXCEL ===
   const exportMonthlyExcel = () => {
     const wb = XLSX.utils.book_new();
@@ -628,24 +646,6 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
     const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
     saveAs(new Blob([buf], { type: 'application/octet-stream' }), `MKT_${selectedDate}.xlsx`);
   };
-
-  // Monthly summary totals
-  const monthTotals = displayMonthlySummary.reduce((acc, r) => ({
-    fb: acc.fb + r.fb,
-    google: acc.google + r.google,
-    tiktok: acc.tiktok + r.tiktok,
-    totalAds: acc.totalAds + r.totalAds,
-    register: acc.register + r.register,
-    deposit_member: acc.deposit_member + r.deposit_member,
-    first_deposit: acc.first_deposit + r.first_deposit,
-    daily_deposit: acc.daily_deposit + r.daily_deposit,
-    month_deposit: acc.month_deposit + r.month_deposit,
-    total_withdraw: acc.total_withdraw + (r.total_withdraw || 0),
-    register_withdraw_amount: acc.register_withdraw_amount + (r.register_withdraw_amount || 0),
-    depositPct: 0,
-    name: 'รวม',
-  }), { name: 'รวม', fb: 0, google: 0, tiktok: 0, totalAds: 0, register: 0, deposit_member: 0, first_deposit: 0, daily_deposit: 0, month_deposit: 0, depositPct: 0, total_withdraw: 0, register_withdraw_amount: 0 });
-  monthTotals.depositPct = monthTotals.register > 0 ? Math.round((monthTotals.deposit_member / monthTotals.register) * 10000) / 100 : 0;
 
   return (
     <div className="space-y-6">
