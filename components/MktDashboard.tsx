@@ -365,9 +365,8 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
             const staff = CAMPAIGN_STAFF_MAP[campaign];
             if (!staff) return;
             const todayItem = todayMap[campaign];
-            const existing = tabData[staff] || emptyRow();
             const merged = recalc({
-              ...existing,
+              ...emptyRow(),
               register: todayItem ? todayItem.total_register : 0,
               memberDeposit: todayItem ? todayItem.register_deposit_user : 0,
               firstDeposit: todayItem ? Math.round(todayItem.deposit_first_time_amount) : 0,
@@ -930,15 +929,10 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                 <>
                   {(() => {
                     // รวม today + monthly (เอา monthly เป็น fallback สำหรับ campaign ที่วันนี้ไม่มี)
-                    const todayMap: Record<string, TigerCampaign> = {};
-                    tigerData.items.forEach(i => { todayMap[i.campaign_name] = i; });
-                    const allCampaigns = [
-                      ...tigerData.items,
-                      ...(tigerData.monthly_items||[]).filter(i => !todayMap[i.campaign_name]),
-                    ];
+                    const todayCampaigns = tigerData.items || [];
                     return (isAdmin
-                      ? allCampaigns
-                      : allCampaigns.filter(i => CAMPAIGN_STAFF_MAP[i.campaign_name] === staffFilter)
+                      ? todayCampaigns
+                      : todayCampaigns.filter(i => CAMPAIGN_STAFF_MAP[i.campaign_name] === staffFilter)
                     );
                   })().map((item, idx) => {
                     const depositPct = item.total_register > 0
