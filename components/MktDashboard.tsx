@@ -157,8 +157,8 @@ const getMonthPrefix = (isoDate: string): string => {
   return `${m}/${y}`;
 };
 
-const fmt = (n: number) => n.toLocaleString('th-TH');
-const fmtPct = (n: number) => `${n.toFixed(2)}%`;
+const fmt = (n: number | null | undefined) => (Number.isFinite(n) ? n! : 0).toLocaleString('th-TH');
+const fmtPct = (n: number | null | undefined) => `${(Number.isFinite(n) ? n! : 0).toFixed(2)}%`;
 
 interface WithdrawItem {
   name: string;
