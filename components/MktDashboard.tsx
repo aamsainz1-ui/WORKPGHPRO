@@ -931,11 +931,22 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
               ) : (
                 <>
                   {(() => {
-                    // รวม today + monthly (เอา monthly เป็น fallback สำหรับ campaign ที่วันนี้ไม่มี)
+                    // รวม today — เติม staff ที่ขาดเป็นแถว 0
                     const todayCampaigns = tigerData.items || [];
+                    const existingCampaigns = new Set(todayCampaigns.map(i => i.campaign_name));
+                    const emptyItems: TigerCampaign[] = Object.entries(CAMPAIGN_STAFF_MAP)
+                      .filter(([campaign]) => !existingCampaigns.has(campaign))
+                      .map(([campaign, staff]) => ({
+                        source_name: '-', medium_name: '-', campaign_name: campaign,
+                        total_register: 0, register_deposit_user: 0, register_deposit_amount: 0,
+                        total_deposit: 0, total_withdraw: 0, deposit_first_time_amount: 0,
+                        register_first_time_deposit_amount: 0, total_turn_winlose: 0,
+                        register_withdraw_user: 0, register_withdraw_amount: 0, total_turn_over: 0,
+                      }));
+                    const allCampaigns = [...todayCampaigns, ...emptyItems];
                     return (isAdmin
-                      ? todayCampaigns
-                      : todayCampaigns.filter(i => CAMPAIGN_STAFF_MAP[i.campaign_name] === staffFilter)
+                      ? allCampaigns
+                      : allCampaigns.filter(i => CAMPAIGN_STAFF_MAP[i.campaign_name] === staffFilter)
                     );
                   })().map((item, idx) => {
                     const depositPct = item.total_register > 0
@@ -948,7 +959,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                           <span className="mr-1">{sourceIcon}</span>{item.source_name}
                           <span className="ml-1 text-[10px] text-slate-400 font-bold">/{item.medium_name}</span>
                         </td>
-                        <td className="px-3 py-3 font-bold text-slate-700">{item.campaign_name}</td>
+                        <td className="px-3 py-3 font-bold text-slate-700">{item.campaign_name} <span className="text-[10px] text-slate-400">({CAMPAIGN_STAFF_MAP[item.campaign_name] || '-'})</span></td>
                         <td className="px-3 py-3 text-right font-black text-blue-600">{fmt(item.total_register)}</td>
                         <td className="px-3 py-3 text-right font-black text-emerald-600">{fmt(item.register_deposit_user)}</td>
                         <td className="px-3 py-3 text-right font-black text-emerald-700">{fmtPct(depositPct)}</td>
