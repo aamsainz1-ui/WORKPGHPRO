@@ -10,15 +10,26 @@ export const initFaceDetection = async () => {
         "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
     );
 
-    faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
-        baseOptions: {
-            modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`,
-            delegate: "GPU"
-        },
-        outputFaceBlendshapes: true,
-        runningMode: "IMAGE",
-        numFaces: 1
-    });
+    const baseOptions = {
+        modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`,
+    };
+
+    try {
+        faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+            baseOptions: { ...baseOptions, delegate: "GPU" },
+            outputFaceBlendshapes: true,
+            runningMode: "IMAGE",
+            numFaces: 1
+        });
+    } catch (gpuError) {
+        console.warn("FaceLandmarker GPU failed, fallback to CPU", gpuError);
+        faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+            baseOptions: { ...baseOptions, delegate: "CPU" as any },
+            outputFaceBlendshapes: true,
+            runningMode: "IMAGE",
+            numFaces: 1
+        });
+    }
 
     return faceLandmarker;
 };
