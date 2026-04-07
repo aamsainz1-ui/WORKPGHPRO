@@ -293,7 +293,7 @@ const loadMonthlySummary = async (monthPrefix: string): Promise<MonthlySummaryRo
       depositPct: r.register > 0 ? Math.round((r.deposit_member / r.register) * 10000) / 100 : 0,
       costPerRegister: r.register > 0 ? Math.round(totalAds / r.register) : 0,
       costPerDeposit: r.deposit_member > 0 ? Math.round(totalAds / r.deposit_member) : 0,
-      profitLoss: r.month_deposit - (r.total_withdraw || 0) - totalAds,
+      profitLoss: 0, // คำนวณจริงใน fetchTiger เมื่อมี withdraw data
     };
   });
 };
