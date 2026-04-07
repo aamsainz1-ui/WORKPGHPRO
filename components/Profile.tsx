@@ -1,6 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { UserProfile, AttendanceRecord, LeaveRecord, AttendanceType, Language } from '../types';
+import { useConfirm } from './useConfirm';
 
 interface ProfileProps {
   user: UserProfile;
@@ -12,6 +13,7 @@ interface ProfileProps {
 }
 
 const Profile: React.FC<ProfileProps> = ({ user, records, leaves, lang, onResetFaceID, onChangePIN }) => {
+  const confirmDialog = useConfirm();
   const [showChangePIN, setShowChangePIN] = React.useState(false);
   const [oldPin, setOldPin] = React.useState('');
   const [newPin, setNewPin] = React.useState('');
@@ -90,14 +92,16 @@ const Profile: React.FC<ProfileProps> = ({ user, records, leaves, lang, onResetF
     };
   }, [records, leaves]);
 
-  const handleResetFaceID = () => {
-    const confirmMsg = lang === Language.TH 
-      ? "คุณแน่ใจหรือไม่ว่าต้องการรีเซ็ต Face ID? คุณจะต้องลงทะเบียนใบหน้าใหม่ในการเข้างานครั้งถัดไป" 
-      : "Are you sure you want to reset your Face ID? You will need to re-register your face on your next clock-in.";
-    
-    if (window.confirm(confirmMsg)) {
-      onResetFaceID();
-    }
+  const handleResetFaceID = async () => {
+    const ok = await confirmDialog({
+      title: lang === Language.TH ? 'รีเซ็ต Face ID' : 'Reset Face ID',
+      message: lang === Language.TH
+        ? 'คุณแน่ใจหรือไม่ว่าต้องการรีเซ็ต Face ID? คุณจะต้องลงทะเบียนใบหน้าใหม่ในการเข้างานครั้งถัดไป'
+        : 'Are you sure you want to reset your Face ID? You will need to re-register your face on your next clock-in.',
+      variant: 'warning',
+      confirmText: lang === Language.TH ? 'รีเซ็ต' : 'Reset',
+    });
+    if (ok) onResetFaceID();
   };
 
   const t = {

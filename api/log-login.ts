@@ -17,6 +17,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { user_id, user_name, role, device } = req.body || {};
 
   try {
+    // Insert new login log
     await fetch(`${SUPABASE_URL}/rest/v1/login_logs`, {
       method: 'POST',
       headers: {
@@ -34,6 +35,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         logged_in_at: new Date().toISOString(),
       }),
     });
+
+    // Cleanup: ลบ login log เกิน 7 วัน
+    const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    await fetch(`${SUPABASE_URL}/rest/v1/login_logs?logged_in_at=lt.${cutoff}`, {
+      method: 'DELETE',
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        Prefer: 'return=minimal',
+      },
+    }).catch(() => {});
+
     res.status(200).json({ ok: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });

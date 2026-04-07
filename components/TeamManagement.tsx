@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Team, UserProfile, Language } from '../types';
+import { useConfirm } from './useConfirm';
 
 interface TeamManagementProps {
     teams: Team[];
@@ -31,6 +32,7 @@ const TeamManagement: React.FC<TeamManagementProps> = ({
     onUpdateTeam,
     onAssignMemberToTeam
 }) => {
+    const confirmDialog = useConfirm();
     const [showAddTeam, setShowAddTeam] = useState(false);
     const [newTeam, setNewTeam] = useState({
         name: '',
@@ -118,10 +120,14 @@ const TeamManagement: React.FC<TeamManagementProps> = ({
                                         )}
                                     </div>
                                     <button
-                                        onClick={() => {
-                                            if (confirm(lang === Language.TH ? 'ต้องการลบทีมนี้?' : 'Delete this team?')) {
-                                                onDeleteTeam(team.id);
-                                            }
+                                        onClick={async () => {
+                                            const ok = await confirmDialog({
+                                                title: lang === Language.TH ? 'ลบทีม' : 'Delete Team',
+                                                message: lang === Language.TH ? 'ต้องการลบทีมนี้?' : 'Delete this team?',
+                                                variant: 'danger',
+                                                confirmText: lang === Language.TH ? 'ลบ' : 'Delete',
+                                            });
+                                            if (ok) onDeleteTeam(team.id);
                                         }}
                                         className="p-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
                                         title={t.delete}
@@ -161,12 +167,16 @@ const TeamManagement: React.FC<TeamManagementProps> = ({
                                                 </div>
                                             </div>
                                             <button
-                                                onClick={() => {
-                                                    if (confirm(lang === Language.TH
-                                                        ? `ต้องการลบ ${member.name} ออกจากทีม ${team.name}?`
-                                                        : `Remove ${member.name} from ${team.name}?`)) {
-                                                        onAssignMemberToTeam(member.id, null);
-                                                    }
+                                                onClick={async () => {
+                                                    const ok = await confirmDialog({
+                                                        title: lang === Language.TH ? 'ลบสมาชิก' : 'Remove Member',
+                                                        message: lang === Language.TH
+                                                            ? `ต้องการลบ ${member.name} ออกจากทีม ${team.name}?`
+                                                            : `Remove ${member.name} from ${team.name}?`,
+                                                        variant: 'warning',
+                                                        confirmText: lang === Language.TH ? 'ลบ' : 'Remove',
+                                                    });
+                                                    if (ok) onAssignMemberToTeam(member.id, null);
                                                 }}
                                                 className="p-1.5 text-slate-300 hover:text-red-500 opacity-0 group-hover/member:opacity-100 transition-all"
                                                 title={t.remove}

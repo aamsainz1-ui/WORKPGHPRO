@@ -13,6 +13,7 @@ import Announcements from './components/Announcements';
 import ContentCalendar from './components/ContentCalendar';
 import PayrollManager from './components/PayrollManager';
 import AdminConsole from './components/AdminConsole';
+import { ConfirmProvider, useConfirm } from './components/useConfirm';
 import PermissionManager from './components/PermissionManager';
 import TeamStatusCard from './components/TeamStatusCard';
 import TeamManagement from './components/TeamManagement';
@@ -80,7 +81,8 @@ const MOCK_ANNOUNCEMENTS: Announcement[] = [
   { id: 'a1', title: 'Update: Hybrid Work Policy 2025', content: 'Starting March 1st, we are transitioning to a 3-2 flexible model...', date: '2025-02-20', author: 'HR Department', category: 'POLICY' },
 ];
 
-const App: React.FC = () => {
+const AppInner: React.FC = () => {
+  const confirm = useConfirm();
   // 1. Initial Data Loader
   const getBootData = () => {
     try {
@@ -533,12 +535,15 @@ const App: React.FC = () => {
       return;
     }
 
-    // Confirm deletion
-    const confirmMsg = lang === Language.TH
-      ? 'คุณแน่ใจหรือไม่ที่จะลบพนักงานคนนี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้'
-      : 'Are you sure you want to delete this employee? This action cannot be undone.';
-
-    if (!confirm(confirmMsg)) return;
+    const ok = await confirm({
+      title: lang === Language.TH ? 'ลบพนักงาน' : 'Delete Employee',
+      message: lang === Language.TH
+        ? 'คุณแน่ใจหรือไม่ที่จะลบพนักงานคนนี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้'
+        : 'Are you sure you want to delete this employee? This action cannot be undone.',
+      variant: 'danger',
+      confirmText: lang === Language.TH ? 'ลบ' : 'Delete',
+    });
+    if (!ok) return;
 
     // Delete from local state
     setAllUsers(prev => prev.filter(u => u.id !== id));
@@ -751,5 +756,11 @@ const App: React.FC = () => {
     </div>
   );
 };
+
+const App: React.FC = () => (
+  <ConfirmProvider>
+    <AppInner />
+  </ConfirmProvider>
+);
 
 export default App;
