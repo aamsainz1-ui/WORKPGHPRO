@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, ComposedChart } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, ComposedChart, PieChart, Pie, Cell } from 'recharts';
 
 const TIGER_API = '/api/tiger-links';
 
@@ -327,6 +327,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState<string | null>(null);
   const [monthlySummary, setMonthlySummary] = useState<MonthlySummaryRow[]>([]);
+  const [prevMonthlySummary, setPrevMonthlySummary] = useState<MonthlySummaryRow[]>([]);
   const [loadingMonthly, setLoadingMonthly] = useState(false);
   const [staffFilter, setStaffFilter] = useState<string>(resolvedStaff);
 
@@ -503,7 +504,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
     });
   }, [selectedDate]);
 
-  // Load monthly summary + auto-refresh ทุก 30 วิ
+  // Load monthly summary + auto-refresh ทุก 5 นาที
   useEffect(() => {
     const monthPrefix = getMonthPrefix(selectedDate);
     const fetchMonthly = () => {
@@ -514,8 +515,17 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
     };
     setLoadingMonthly(true);
     fetchMonthly();
-    const monthlyTimer = setInterval(fetchMonthly, 5 * 60 * 1000); // refresh ทุก 5 นาที
+    const monthlyTimer = setInterval(fetchMonthly, 5 * 60 * 1000);
     return () => clearInterval(monthlyTimer);
+  }, [selectedDate]);
+
+  // Load previous month summary for comparison
+  useEffect(() => {
+    const [y, m] = selectedDate.split('-').map(Number);
+    const prevMonth = m === 1 ? 12 : m - 1;
+    const prevYear = m === 1 ? y - 1 : y;
+    const prevPrefix = `${String(prevMonth).padStart(2, '0')}/${prevYear}`;
+    loadMonthlySummary(prevPrefix).then(rows => setPrevMonthlySummary(rows));
   }, [selectedDate]);
 
   // Fetch withdraw data from Supabase
@@ -603,6 +613,31 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
   monthTotals.depositPct = monthTotals.register > 0 ? Math.round((monthTotals.deposit_member / monthTotals.register) * 10000) / 100 : 0;
   monthTotals.costPerRegister = monthTotals.register > 0 ? Math.round(monthTotals.totalAds / monthTotals.register) : 0;
   monthTotals.costPerDeposit = monthTotals.deposit_member > 0 ? Math.round(monthTotals.totalAds / monthTotals.deposit_member) : 0;
+
+  // === Previous month totals for comparison ===
+  const prevMonthTotals = prevMonthlySummary.reduce((acc, r) => ({
+    totalAds: acc.totalAds + (r.totalAds || 0),
+    register: acc.register + (r.register || 0),
+    deposit_member: acc.deposit_member + (r.deposit_member || 0),
+    month_deposit: acc.month_deposit + (r.month_deposit || 0),
+    total_withdraw: acc.total_withdraw + (r.total_withdraw || 0),
+    profitLoss: acc.profitLoss + (r.profitLoss || 0),
+  }), { totalAds: 0, register: 0, deposit_member: 0, month_deposit: 0, total_withdraw: 0, profitLoss: 0 });
+
+  const pctChange = (curr: number, prev: number) => prev > 0 ? Math.round(((curr - prev) / prev) * 100) : curr > 0 ? 100 : 0;
+
+  // === Staff Rankings ===
+  const staffRankByCPA = [...displayMonthlySummary].filter(r => r.costPerRegister > 0).sort((a, b) => a.costPerRegister - b.costPerRegister);
+  const staffRankByDeposit = [...displayMonthlySummary].sort((a, b) => b.month_deposit - a.month_deposit);
+  const staffRankByPL = [...displayMonthlySummary].sort((a, b) => b.profitLoss - a.profitLoss);
+
+  // === Pie Chart Data ===
+  const ADS_COLORS = ['#3b82f6', '#ef4444', '#000000'];
+  const adsPieData = [
+    { name: 'Facebook', value: monthTotals.fb },
+    { name: 'Google', value: monthTotals.google },
+    { name: 'TikTok', value: monthTotals.tiktok },
+  ].filter(d => d.value > 0);
 
   // === EXPORT EXCEL ===
   const exportMonthlyExcel = () => {
@@ -1182,6 +1217,119 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
               })()}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* ===== Monthly Overview Cards ===== */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        {[
+          { label: 'รวม ADS', value: monthTotals.totalAds, prev: prevMonthTotals.totalAds, color: 'from-amber-500 to-orange-600', text: 'text-amber-700' },
+          { label: 'สมัคร', value: monthTotals.register, prev: prevMonthTotals.register, color: 'from-blue-500 to-indigo-600', text: 'text-blue-700' },
+          { label: 'สมาชิกฝาก', value: monthTotals.deposit_member, prev: prevMonthTotals.deposit_member, color: 'from-violet-500 to-purple-600', text: 'text-violet-700' },
+          { label: 'ฝากทั้งเดือน', value: monthTotals.month_deposit, prev: prevMonthTotals.month_deposit, color: 'from-emerald-500 to-green-600', text: 'text-emerald-700' },
+          { label: 'ยอดถอน', value: monthTotals.total_withdraw, prev: prevMonthTotals.total_withdraw, color: 'from-rose-500 to-red-600', text: 'text-rose-700' },
+          { label: 'กำไร/ขาดทุน', value: monthTotals.profitLoss, prev: prevMonthTotals.profitLoss, color: monthTotals.profitLoss >= 0 ? 'from-emerald-500 to-teal-600' : 'from-red-500 to-rose-600', text: monthTotals.profitLoss >= 0 ? 'text-emerald-700' : 'text-red-700' },
+        ].map((card, i) => {
+          const change = pctChange(card.value, card.prev);
+          return (
+            <div key={i} className="bg-white/80 backdrop-blur-xl rounded-2xl border border-slate-100 shadow-lg p-4 relative overflow-hidden">
+              <div className={`absolute top-0 right-0 w-16 h-16 bg-gradient-to-br ${card.color} opacity-10 rounded-full -mr-4 -mt-4`} />
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-normal">{card.label}</p>
+              <p className={`text-xl font-black mt-1 ${card.text}`}>{fmt(Math.round(card.value))}</p>
+              {card.prev > 0 && (
+                <div className={`flex items-center gap-1 mt-1 text-[10px] font-bold ${change >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                  <span>{change >= 0 ? '▲' : '▼'} {Math.abs(change)}%</span>
+                  <span className="text-slate-400">vs เดือนก่อน</span>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ===== Rankings + ADS Pie Chart ===== */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Top Staff Rankings */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-slate-100 shadow-lg p-5 lg:col-span-2">
+          <h3 className="text-sm font-black text-slate-700 uppercase tracking-normal mb-4">🏆 อันดับ Staff</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Best CPA */}
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4">
+              <p className="text-[10px] font-black text-amber-500 uppercase mb-2">CPA ต่ำสุด (ต้นทุน/สมัคร)</p>
+              {staffRankByCPA.slice(0, 3).map((r, i) => (
+                <div key={r.name} className="flex items-center justify-between py-1">
+                  <span className="text-xs font-bold text-slate-700">{['🥇','🥈','🥉'][i]} {r.name}</span>
+                  <span className="text-xs font-black text-amber-700">{fmt(r.costPerRegister)}</span>
+                </div>
+              ))}
+            </div>
+            {/* Most Deposit */}
+            <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-4">
+              <p className="text-[10px] font-black text-emerald-500 uppercase mb-2">ฝากสูงสุด</p>
+              {staffRankByDeposit.slice(0, 3).map((r, i) => (
+                <div key={r.name} className="flex items-center justify-between py-1">
+                  <span className="text-xs font-bold text-slate-700">{['🥇','🥈','🥉'][i]} {r.name}</span>
+                  <span className="text-xs font-black text-emerald-700">{fmt(r.month_deposit)}</span>
+                </div>
+              ))}
+            </div>
+            {/* Best P&L */}
+            <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-4">
+              <p className="text-[10px] font-black text-cyan-500 uppercase mb-2">กำไรสูงสุด</p>
+              {staffRankByPL.slice(0, 3).map((r, i) => (
+                <div key={r.name} className="flex items-center justify-between py-1">
+                  <span className="text-xs font-bold text-slate-700">{['🥇','🥈','🥉'][i]} {r.name}</span>
+                  <span className={`text-xs font-black ${r.profitLoss >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>{fmt(Math.round(r.profitLoss))}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ADS Pie Chart */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-slate-100 shadow-lg p-5">
+          <h3 className="text-sm font-black text-slate-700 uppercase tracking-normal mb-4">🎯 สัดส่วน ADS</h3>
+          {adsPieData.length > 0 ? (
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={adsPieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} fontSize={11} fontWeight={700}>
+                    {adsPieData.map((_, i) => <Cell key={i} fill={ADS_COLORS[i % ADS_COLORS.length]} />)}
+                  </Pie>
+                  <Tooltip formatter={(v: number) => fmt(v)} contentStyle={{ borderRadius: 12, fontWeight: 700, fontSize: 12 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <p className="text-xs text-slate-400 text-center py-8">ยังไม่มีข้อมูล ADS</p>
+          )}
+          <div className="flex justify-center gap-4 mt-2">
+            {adsPieData.map((d, i) => (
+              <div key={d.name} className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ADS_COLORS[i] }} />
+                <span className="text-[10px] font-bold text-slate-500">{d.name}: {fmt(d.value)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ===== ADS Cost Trend (ข้อ 5) ===== */}
+      <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-slate-100 shadow-lg p-5">
+        <h3 className="text-sm font-black text-slate-700 uppercase tracking-normal mb-3">💰 ค่า ADS รายวัน</h3>
+        <div className="h-48">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={historyData.map(h => {
+              const s = staffFilter !== 'all' ? (h.staff?.[staffFilter] || {}) : h.total;
+              return { date: h.date?.slice(5), ADS: s?.ads || 0 };
+            })}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+              <XAxis dataKey="date" tick={{ fontSize: 11, fontWeight: 700 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip contentStyle={{ borderRadius: 12, fontWeight: 700, fontSize: 12 }} formatter={(v: number) => fmt(v)} />
+              <Bar dataKey="ADS" fill="#f59e0b" radius={[6, 6, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
