@@ -42,9 +42,11 @@ const Dashboard: React.FC<DashboardProps> = ({ isClockedIn, onAction, lastRecord
           map[s].withdraw += Math.round(item.total_withdraw || 0);
         });
         const arr = Object.entries(map).map(([name, d]) => ({ name, ...d, pl: d.deposit - d.withdraw }));
+        const withAvg = arr.map(r => ({ ...r, avgPerUser: r.register > 0 ? Math.round(r.deposit / r.register) : 0 }));
         setMktRanking({
           byDeposit: [...arr].sort((a, b) => b.deposit - a.deposit),
           byPL: [...arr].sort((a, b) => b.pl - a.pl),
+          byAvg: [...withAvg].filter(r => r.avgPerUser > 0).sort((a, b) => b.avgPerUser - a.avgPerUser),
         });
       })
       .catch(() => {});
@@ -121,10 +123,18 @@ const Dashboard: React.FC<DashboardProps> = ({ isClockedIn, onAction, lastRecord
       {mktRanking && (
         <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-slate-100 shadow-xl p-5">
           <h3 className="text-sm font-black text-slate-700 uppercase tracking-normal mb-4">🏆 อันดับ MKT เดือนนี้</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-4">
               <p className="text-[10px] font-black text-emerald-500 uppercase mb-2">ฝากสูงสุด</p>
               {mktRanking.byDeposit.map((r: any, i: number) => (
+                <div key={r.name} className="flex items-center py-1">
+                  <span className="text-xs font-bold text-slate-700">{i < 3 ? ['🥇','🥈','🥉'][i] : `${i+1}.`} {r.name}</span>
+                </div>
+              ))}
+            </div>
+            <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-4">
+              <p className="text-[10px] font-black text-purple-500 uppercase mb-2">เฉลี่ยต่อ User สูงสุด</p>
+              {(mktRanking.byAvg || []).map((r: any, i: number) => (
                 <div key={r.name} className="flex items-center py-1">
                   <span className="text-xs font-bold text-slate-700">{i < 3 ? ['🥇','🥈','🥉'][i] : `${i+1}.`} {r.name}</span>
                 </div>
