@@ -27,7 +27,7 @@ export const syncUsers = async (localUsers: UserProfile[]): Promise<UserProfile[
                 company: u.company,
                 avatar: u.avatar,
                 role: u.role,
-                pin: u.pin,
+                // pin ไม่ส่งมา client — verify ผ่าน /api/verify-pin
                 storedFace: u.stored_face,
                 faceSignature: u.face_signature,
                 leaveBalances: u.leave_balances,

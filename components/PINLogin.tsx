@@ -2,12 +2,6 @@
 import React, { useState } from 'react';
 import { UserProfile, Language } from '../types';
 
-const hashPIN = async (pin: string): Promise<string> => {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(pin + 'gw_salt_2026');
-  const hash = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-};
 
 interface PINLoginProps {
     users: UserProfile[];
@@ -31,15 +25,29 @@ const PINLogin: React.FC<PINLoginProps> = ({ users, onLogin, lang }) => {
         setPin(prev => prev.slice(0, -1));
     };
 
+    const [loading, setLoading] = useState(false);
+
     const handleLogin = async () => {
-        if (!selectedUser) return;
-        const hashed = await hashPIN(pin);
-        // Support both hashed and legacy plaintext PIN
-        if (selectedUser.pinHash ? hashed === selectedUser.pinHash : selectedUser.pin === pin) {
-            onLogin(selectedUser);
-        } else {
+        if (!selectedUser || loading) return;
+        setLoading(true);
+        try {
+            const resp = await fetch('/api/verify-pin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: selectedUser.id, pin }),
+            });
+            const data = await resp.json();
+            if (data.success) {
+                onLogin(selectedUser);
+            } else {
+                setError(true);
+                setPin('');
+            }
+        } catch {
             setError(true);
             setPin('');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -146,13 +154,13 @@ const PINLogin: React.FC<PINLoginProps> = ({ users, onLogin, lang }) => {
 
                 <button
                     onClick={handleLogin}
-                    disabled={pin.length < 4}
-                    className={`w-full py-5 rounded-[2rem] font-black uppercase tracking-normal transition-all ${pin.length < 4
+                    disabled={pin.length < 4 || loading}
+                    className={`w-full py-5 rounded-[2rem] font-black uppercase tracking-normal transition-all ${pin.length < 4 || loading
                         ? 'bg-white/5 text-white/20 cursor-not-allowed'
                         : 'bg-blue-600 text-white hover:bg-blue-500 shadow-xl shadow-blue-600/20 animate-in fade-in slide-in-from-bottom-2'
                         }`}
                 >
-                    {t.login}
+                    {loading ? '...' : t.login}
                 </button>
             </div>
         </div>

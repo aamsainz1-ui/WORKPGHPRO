@@ -397,16 +397,25 @@ const AppInner: React.FC = () => {
   };
 
   const handleUpdateMember = (id: string, data: any) => {
+    // ถ้ามีเปลี่ยน PIN → ใช้ API เพื่อ update Supabase โดยตรง
+    if (data.pin && data.pin !== '') {
+      fetch('/api/change-pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: id, newPin: data.pin, isAdmin: true }),
+      }).catch(console.error);
+    }
     setAllUsers(prev => prev.map(u => {
       if (u.id === id) {
         const updated = { ...u, ...data };
-        if (data.pin === '') delete updated.pin; // Keep existing if empty
+        delete updated.pin; // ไม่เก็บ PIN ใน client state
         return updated;
       }
       return u;
     }));
-    // Save to Supabase immediately
-    updateUserInCloud(id, data).catch(console.error);
+    // Save non-PIN fields to Supabase
+    const { pin: _pin, ...rest } = data;
+    if (Object.keys(rest).length > 0) updateUserInCloud(id, rest).catch(console.error);
   };
 
   const handleCreateMember = (data: any) => {
@@ -637,15 +646,17 @@ const AppInner: React.FC = () => {
               setCurrentUser(u);
               setAllUsers(prev => prev.map(it => it.id === u.id ? u : it));
             }} onChangePIN={async (oldPin: string, newPin: string) => {
-              const oldHash = await hashPIN(oldPin);
-              const user = currentUser as any;
-              // Support both hash and legacy plaintext
-              if (user.pinHash ? oldHash !== user.pinHash : user.pin !== oldPin) return false;
-              const newHash = await hashPIN(newPin);
-              const u = { ...currentUser, pin: newPin, pinHash: newHash } as any;
-              setCurrentUser(u);
-              setAllUsers(prev => prev.map(it => it.id === u.id ? u : it));
-              return true;
+              try {
+                const resp = await fetch('/api/change-pin', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ userId: currentUser.id, oldPin, newPin }),
+                });
+                const data = await resp.json();
+                return !!data.success;
+              } catch {
+                return false;
+              }
             }} />}
             {activeTab === 'organization' && <Organization
               members={teamMembers}
