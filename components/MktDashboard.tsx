@@ -252,7 +252,7 @@ const upsertRow = async (thaiDate: string, tab: string, name: string, row: RowDa
 const loadMonthlySummary = async (monthPrefix: string): Promise<MonthlySummaryRow[]> => {
   // date format: DD/MM/YYYY — month prefix is MM/YYYY, use LIKE %MM/YYYY
   const rows = await supaFetch(
-    `/rest/v1/mkt_data?date=like.*${encodeURIComponent(monthPrefix)}&select=name,fb,google,tiktok,register,deposit_member,first_deposit,daily_deposit,month_deposit`
+    `/rest/v1/mkt_data?date=like.*${encodeURIComponent(monthPrefix)}&select=date,name,fb,google,tiktok,register,deposit_member,first_deposit,daily_deposit,month_deposit`
   );
   if (!Array.isArray(rows)) return [];
 
@@ -275,7 +275,11 @@ const loadMonthlySummary = async (monthPrefix: string): Promise<MonthlySummaryRo
     map[n].register += Number(row.register) || 0;
     map[n].deposit_member += Number(row.deposit_member) || 0;
     map[n].first_deposit += Number(row.first_deposit) || 0;
-    map[n].daily_deposit += Number(row.daily_deposit) || 0;
+    // daily_deposit = เก็บค่าวันล่าสุด (ไม่ sum)
+    if (!map[n]._latestDate || (row.date && row.date > map[n]._latestDate)) {
+      map[n].daily_deposit = Number(row.daily_deposit) || 0;
+      map[n]._latestDate = row.date;
+    }
     // month_deposit — take max per day to avoid double-counting
     // but for simplicity we sum (user can adjust logic)
     map[n].month_deposit += Number(row.month_deposit) || 0;
@@ -417,7 +421,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
         const monthlyWdMap: Record<string, number> = {};
         const monthlyWdAmtMap: Record<string, number> = {};
         const monthlyFtdMap: Record<string, number> = {};
-        const monthlyDailyDepMap: Record<string, number> = {};
+        const todayDepMap: Record<string, number> = {};
         (json.monthly_items || []).forEach(item => {
           const staff = CAMPAIGN_STAFF_MAP[item.campaign_name];
           if (!staff) return;
@@ -427,7 +431,12 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
           monthlyWdMap[staff] = (monthlyWdMap[staff] || 0) + Math.round(item.total_withdraw || 0);
           monthlyWdAmtMap[staff] = (monthlyWdAmtMap[staff] || 0) + Math.round(item.register_withdraw_amount || 0);
           monthlyFtdMap[staff] = (monthlyFtdMap[staff] || 0) + Math.round(item.deposit_first_time_amount || 0);
-          monthlyDailyDepMap[staff] = (monthlyDailyDepMap[staff] || 0) + Math.round(item.total_deposit || 0);
+        });
+        // ฝากทั้งวัน = ยอดฝากวันนี้จาก items (ไม่ใช่ monthly_items)
+        (json.items || []).forEach(item => {
+          const staff = CAMPAIGN_STAFF_MAP[item.campaign_name];
+          if (!staff) return;
+          todayDepMap[staff] = (todayDepMap[staff] || 0) + Math.round(item.total_deposit || 0);
         });
 
         setMonthlySummary(prev => {
@@ -452,7 +461,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
             map[staff].total_withdraw = monthlyWdMap[staff] || 0;
             map[staff].register_withdraw_amount = monthlyWdAmtMap[staff] || 0;
             map[staff].first_deposit = monthlyFtdMap[staff] || map[staff].first_deposit || 0;
-            map[staff].daily_deposit = monthlyDailyDepMap[staff] || map[staff].daily_deposit || 0;
+            map[staff].daily_deposit = todayDepMap[staff] || map[staff].daily_deposit || 0;
             map[staff].depositPct = map[staff].register > 0
               ? Math.round((map[staff].deposit_member / map[staff].register) * 10000) / 100
               : 0;
