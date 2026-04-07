@@ -31,7 +31,8 @@ const Dashboard: React.FC<DashboardProps> = ({ isClockedIn, onAction, lastRecord
       fetch('/api/tiger-links')
         .then(r => r.json())
         .then(data => {
-          const items = data.monthly_items || [];
+          if (!data || !Array.isArray(data.monthly_items)) return;
+          const items = data.monthly_items;
           if (items.length === 0) return;
           const map: Record<string, { deposit: number; register: number; withdraw: number; deposit_member: number }> = {};
           items.forEach((item: any) => {

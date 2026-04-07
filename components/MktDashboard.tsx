@@ -524,7 +524,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
     const prevMonth = m === 1 ? 12 : m - 1;
     const prevYear = m === 1 ? y - 1 : y;
     const prevPrefix = `${String(prevMonth).padStart(2, '0')}/${prevYear}`;
-    loadMonthlySummary(prevPrefix).then(rows => setPrevMonthlySummary(rows));
+    loadMonthlySummary(prevPrefix).then(rows => setPrevMonthlySummary(rows)).catch(() => setPrevMonthlySummary([]));
   }, [selectedDate]);
 
   // Fetch withdraw data from Supabase
