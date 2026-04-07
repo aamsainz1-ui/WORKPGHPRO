@@ -1198,36 +1198,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
         })}
       </div>
 
-      {/* ===== ADS Pie Chart ===== */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-slate-100 shadow-lg p-5">
-          <h3 className="text-sm font-black text-slate-700 uppercase tracking-normal mb-4">🎯 สัดส่วน ADS</h3>
-          {adsPieData.length > 0 ? (
-            <div className="h-48">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={adsPieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} fontSize={11} fontWeight={700}>
-                    {adsPieData.map((_, i) => <Cell key={i} fill={ADS_COLORS[i % ADS_COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip formatter={(v: number) => fmt(v)} contentStyle={{ borderRadius: 12, fontWeight: 700, fontSize: 12 }} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <p className="text-xs text-slate-400 text-center py-8">ยังไม่มีข้อมูล ADS</p>
-          )}
-          <div className="flex justify-center gap-4 mt-2">
-            {adsPieData.map((d, i) => (
-              <div key={d.name} className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ADS_COLORS[i] }} />
-                <span className="text-[10px] font-bold text-slate-500">{d.name}: {fmt(d.value)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ===== ADS Cost Trend (ข้อ 5) ===== */}
+      {/* ===== ADS Cost Trend ===== */}
       <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-slate-100 shadow-lg p-5">
         <h3 className="text-sm font-black text-slate-700 uppercase tracking-normal mb-3">💰 ค่า ADS รายวัน</h3>
         <div className="h-48">
