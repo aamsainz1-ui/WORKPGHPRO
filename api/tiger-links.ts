@@ -34,6 +34,28 @@ async function loadCachedPayload(date?: string): Promise<TigerPayload | null> {
   }
 }
 
+async function saveCachePayload(date: string | undefined, payload: TigerPayload) {
+  const key = date ? `tiger_links_${date}` : 'tiger_links_latest';
+  const body = JSON.stringify({ key, value: JSON.stringify(payload), updated_at: new Date().toISOString() });
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/tiger_cache?key=eq.${encodeURIComponent(key)}`, {
+      method: 'DELETE',
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+      signal: AbortSignal.timeout(5000),
+    });
+    await fetch(`${SUPABASE_URL}/rest/v1/tiger_cache`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body,
+      signal: AbortSignal.timeout(5000),
+    });
+  } catch { /* cache save is best-effort */ }
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 'no-store');
@@ -59,6 +81,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       updated_at: data.updated_at || cached?.updated_at || new Date().toISOString(),
       date: data.date || cached?.date || new Date().toISOString().split('T')[0],
     };
+
+    // Save cache ทุกครั้งที่ VPS ตอบสำเร็จ
+    if (Array.isArray(data.items) && data.items.length > 0) {
+      saveCachePayload(date, merged);
+    }
 
     res.status(200).json(merged);
   } catch (err: any) {
