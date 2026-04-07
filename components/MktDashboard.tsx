@@ -1170,52 +1170,6 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
         </div>
       </div>
 
-      {/* ===== Monthly Overview Cards ===== */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-        {[
-          { label: 'รวม ADS', value: monthTotals.totalAds, prev: prevMonthTotals.totalAds, color: 'from-amber-500 to-orange-600', text: 'text-amber-700' },
-          { label: 'สมัคร', value: monthTotals.register, prev: prevMonthTotals.register, color: 'from-blue-500 to-indigo-600', text: 'text-blue-700' },
-          { label: 'สมาชิกฝาก', value: monthTotals.deposit_member, prev: prevMonthTotals.deposit_member, color: 'from-violet-500 to-purple-600', text: 'text-violet-700' },
-          { label: 'ฝากทั้งเดือน', value: monthTotals.month_deposit, prev: prevMonthTotals.month_deposit, color: 'from-emerald-500 to-green-600', text: 'text-emerald-700' },
-          { label: 'ยอดถอน', value: monthTotals.total_withdraw, prev: prevMonthTotals.total_withdraw, color: 'from-rose-500 to-red-600', text: 'text-rose-700' },
-          { label: 'กำไร/ขาดทุน', value: monthTotals.profitLoss, prev: prevMonthTotals.profitLoss, color: monthTotals.profitLoss >= 0 ? 'from-emerald-500 to-teal-600' : 'from-red-500 to-rose-600', text: monthTotals.profitLoss >= 0 ? 'text-emerald-700' : 'text-red-700' },
-        ].map((card, i) => {
-          const change = pctChange(card.value, card.prev);
-          return (
-            <div key={i} className="bg-white/80 backdrop-blur-xl rounded-2xl border border-slate-100 shadow-lg p-4 relative overflow-hidden">
-              <div className={`absolute top-0 right-0 w-16 h-16 bg-gradient-to-br ${card.color} opacity-10 rounded-full -mr-4 -mt-4`} />
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-normal">{card.label}</p>
-              <p className={`text-xl font-black mt-1 ${card.text}`}>{fmt(Math.round(card.value))}</p>
-              {card.prev > 0 && (
-                <div className={`flex items-center gap-1 mt-1 text-[10px] font-bold ${change >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                  <span>{change >= 0 ? '▲' : '▼'} {Math.abs(change)}%</span>
-                  <span className="text-slate-400">vs เดือนก่อน</span>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* ===== ADS Cost Trend ===== */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-slate-100 shadow-lg p-5">
-        <h3 className="text-sm font-black text-slate-700 uppercase tracking-normal mb-3">💰 ค่า ADS รายวัน</h3>
-        <div className="h-48">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={historyData.map(h => {
-              const s = staffFilter !== 'all' ? (h.staff?.[staffFilter] || {}) : h.total;
-              return { date: h.date?.slice(5), ADS: s?.ads || 0 };
-            })}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="date" tick={{ fontSize: 11, fontWeight: 700 }} />
-              <YAxis tick={{ fontSize: 11 }} />
-              <Tooltip contentStyle={{ borderRadius: 12, fontWeight: 700, fontSize: 12 }} formatter={(v: number) => fmt(v)} />
-              <Bar dataKey="ADS" fill="#f59e0b" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
       {/* ===== Monthly Summary ===== */}
       <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
@@ -1284,7 +1238,6 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                       <td className={`px-3 py-3 text-right font-black ${r.profitLoss >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>{fmt(Math.round(r.profitLoss))}</td>
                     </tr>
                   ))}
-                  {/* Monthly total row */}
                   {displayMonthlySummary.length > 0 && (
                     <tr className="bg-slate-900/5 border-t-2 border-slate-200">
                       <td className="px-4 py-4 font-black text-slate-900 sticky left-0 bg-slate-100/80 z-10">
@@ -1315,6 +1268,26 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
           </table>
         </div>
       </div>
+
+      {/* ===== ADS Cost Trend ===== */}
+      <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-slate-100 shadow-lg p-5">
+        <h3 className="text-sm font-black text-slate-700 uppercase tracking-normal mb-3">💰 ค่า ADS รายวัน</h3>
+        <div className="h-48">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={historyData.map(h => {
+              const s = staffFilter !== 'all' ? (h.staff?.[staffFilter] || {}) : h.total;
+              return { date: h.date?.slice(5), ADS: s?.ads || 0 };
+            })}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+              <XAxis dataKey="date" tick={{ fontSize: 11, fontWeight: 700 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip contentStyle={{ borderRadius: 12, fontWeight: 700, fontSize: 12 }} formatter={(v: number) => fmt(v)} />
+              <Bar dataKey="ADS" fill="#f59e0b" radius={[6, 6, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
       {/* ===== Trend Chart + ROI ===== */}
       <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
