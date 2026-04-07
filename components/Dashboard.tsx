@@ -23,34 +23,39 @@ const Dashboard: React.FC<DashboardProps> = ({ isClockedIn, onAction, lastRecord
   const [shiftDuration, setShiftDuration] = useState<string>("00:00:00");
   const [note, setNote] = useState("");
   const [selectedMode, setSelectedMode] = useState<WorkMode>(WorkMode.OFFICE);
-  const [mktRanking, setMktRanking] = useState<{ byDeposit: any[]; byPL: any[] } | null>(null);
+  const [mktRanking, setMktRanking] = useState<{ byDeposit: any[]; byPL: any[]; byAvg: any[] } | null>(null);
 
-  // Fetch MKT ranking from Tiger API
+  // Fetch MKT ranking from Tiger API — refresh ทุก 5 นาที
   useEffect(() => {
-    fetch('/api/tiger-links')
-      .then(r => r.json())
-      .then(data => {
-        const items = data.monthly_items || [];
-        if (items.length === 0) return;
-        const map: Record<string, { deposit: number; register: number; withdraw: number; deposit_member: number }> = {};
-        items.forEach((item: any) => {
-          const s = CAMPAIGN_STAFF[item.campaign_name];
-          if (!s) return;
-          if (!map[s]) map[s] = { deposit: 0, register: 0, withdraw: 0, deposit_member: 0 };
-          map[s].deposit += Math.round(item.total_deposit || 0);
-          map[s].register += item.total_register || 0;
-          map[s].withdraw += Math.round(item.total_withdraw || 0);
-          map[s].deposit_member += item.register_deposit_user || 0;
-        });
-        const arr = Object.entries(map).map(([name, d]) => ({ name, ...d, pl: d.deposit - d.withdraw }));
-        const withAvg = arr.map(r => ({ ...r, avgPerUser: r.deposit_member > 0 ? Math.round(r.deposit / r.deposit_member) : 0 }));
-        setMktRanking({
-          byDeposit: [...arr].sort((a, b) => b.deposit - a.deposit),
-          byPL: [...arr].sort((a, b) => b.pl - a.pl),
-          byAvg: [...withAvg].filter(r => r.avgPerUser > 0).sort((a, b) => b.avgPerUser - a.avgPerUser),
-        });
-      })
-      .catch(() => {});
+    const fetchRanking = () => {
+      fetch('/api/tiger-links')
+        .then(r => r.json())
+        .then(data => {
+          const items = data.monthly_items || [];
+          if (items.length === 0) return;
+          const map: Record<string, { deposit: number; register: number; withdraw: number; deposit_member: number }> = {};
+          items.forEach((item: any) => {
+            const s = CAMPAIGN_STAFF[item.campaign_name];
+            if (!s) return;
+            if (!map[s]) map[s] = { deposit: 0, register: 0, withdraw: 0, deposit_member: 0 };
+            map[s].deposit += Math.round(item.total_deposit || 0);
+            map[s].register += item.total_register || 0;
+            map[s].withdraw += Math.round(item.total_withdraw || 0);
+            map[s].deposit_member += item.register_deposit_user || 0;
+          });
+          const arr = Object.entries(map).map(([name, d]) => ({ name, ...d, pl: d.deposit - d.withdraw }));
+          const withAvg = arr.map(r => ({ ...r, avgPerUser: r.deposit_member > 0 ? Math.round(r.deposit / r.deposit_member) : 0 }));
+          setMktRanking({
+            byDeposit: [...arr].sort((a, b) => b.deposit - a.deposit),
+            byPL: [...arr].sort((a, b) => b.pl - a.pl),
+            byAvg: [...withAvg].filter(r => r.avgPerUser > 0).sort((a, b) => b.avgPerUser - a.avgPerUser),
+          });
+        })
+        .catch(() => {});
+    };
+    fetchRanking();
+    const timer = setInterval(fetchRanking, 5 * 60 * 1000);
+    return () => clearInterval(timer);
   }, []);
 
   const t = {
