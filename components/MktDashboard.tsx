@@ -276,9 +276,8 @@ const loadMonthlySummary = async (monthPrefix: string): Promise<MonthlySummaryRo
     map[n].deposit_member += Number(row.deposit_member) || 0;
     map[n].first_deposit += Number(row.first_deposit) || 0;
     map[n].daily_deposit += Number(row.daily_deposit) || 0;
-    // month_deposit — take max per day to avoid double-counting
-    // but for simplicity we sum (user can adjust logic)
-    map[n].month_deposit += Number(row.month_deposit) || 0;
+    // month_deposit เป็น running total — ใช้ค่าสูงสุด (วันล่าสุด)
+    map[n].month_deposit = Math.max(map[n].month_deposit, Number(row.month_deposit) || 0);
   });
 
   return Object.values(map).map(r => {
