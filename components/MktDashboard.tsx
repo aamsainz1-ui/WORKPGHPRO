@@ -788,6 +788,54 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
         </div>
       </div>
 
+      {/* Staff Profile Card — เมื่อเลือก staff */}
+      {staffFilter !== 'all' && monthlySummary.length > 0 && (() => {
+        const me = monthlySummary.find(r => r.name === staffFilter);
+        if (!me) return null;
+        const allByDeposit = [...monthlySummary].sort((a, b) => b.month_deposit - a.month_deposit);
+        const allByCPA = [...monthlySummary].filter(r => r.costPerRegister > 0).sort((a, b) => a.costPerRegister - b.costPerRegister);
+        const allByPL = [...monthlySummary].sort((a, b) => b.profitLoss - a.profitLoss);
+        const rankDep = allByDeposit.findIndex(r => r.name === staffFilter) + 1;
+        const rankCPA = allByCPA.findIndex(r => r.name === staffFilter) + 1;
+        const rankPL = allByPL.findIndex(r => r.name === staffFilter) + 1;
+        const total = monthlySummary.length;
+        return (
+          <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 rounded-[2rem] shadow-xl p-6 text-white">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center text-2xl font-black">
+                {staffFilter[0]}
+              </div>
+              <div>
+                <h3 className="text-xl font-black">{staffFilter}</h3>
+                <p className="text-xs font-bold text-white/70">ผลงานเดือนนี้</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center">
+                <p className="text-[10px] font-bold text-white/60 uppercase">ฝากทั้งเดือน</p>
+                <p className="text-lg font-black mt-1">{fmt(me.month_deposit)}</p>
+                <p className="text-[10px] font-bold text-yellow-300">🏅 อันดับ {rankDep}/{total}</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center">
+                <p className="text-[10px] font-bold text-white/60 uppercase">ต้นทุน/สมัคร</p>
+                <p className="text-lg font-black mt-1">{fmt(me.costPerRegister)}</p>
+                <p className="text-[10px] font-bold text-yellow-300">{rankCPA > 0 ? `🏅 อันดับ ${rankCPA}/${allByCPA.length}` : '-'}</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center">
+                <p className="text-[10px] font-bold text-white/60 uppercase">กำไร/ขาดทุน</p>
+                <p className={`text-lg font-black mt-1 ${me.profitLoss >= 0 ? 'text-emerald-300' : 'text-red-300'}`}>{fmt(Math.round(me.profitLoss))}</p>
+                <p className="text-[10px] font-bold text-yellow-300">🏅 อันดับ {rankPL}/{total}</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center">
+                <p className="text-[10px] font-bold text-white/60 uppercase">สมัคร / %ฝาก</p>
+                <p className="text-lg font-black mt-1">{me.register} / {fmtPct(me.depositPct)}</p>
+                <p className="text-[10px] font-bold text-white/50">สมาชิกฝาก {me.deposit_member}</p>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Withdraw Section */}
       {withdrawData && withdrawData.data.length > 0 && (
         <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-slate-100 shadow-xl p-6">
