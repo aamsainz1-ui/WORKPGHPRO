@@ -608,7 +608,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
     const rows = displayMonthlySummary.map(r => ({
       'ชื่อ': r.name, 'FB': r.fb, 'Google': r.google, 'TikTok': r.tiktok,
       'รวม ADS': r.totalAds, 'สมัคร': r.register, 'สมาชิกฝาก': r.deposit_member,
-      '%ฝาก': r.depositPct, 'ฝากแรก': r.first_deposit, 'ฝากทั้งวัน': r.daily_deposit,
+      '%ฝาก': r.depositPct, 'ฝากแรก': r.first_deposit,
       'ฝากทั้งเดือน': r.month_deposit, 'ยอดถอน': r.total_withdraw || 0,
       'ถอน R+D': r.register_withdraw_amount || 0,
       'ต้นทุน/สมัคร': r.costPerRegister, 'ต้นทุน/ฝาก': r.costPerDeposit,
@@ -618,14 +618,14 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
     rows.push({
       'ชื่อ': 'รวม', 'FB': monthTotals.fb, 'Google': monthTotals.google, 'TikTok': monthTotals.tiktok,
       'รวม ADS': monthTotals.totalAds, 'สมัคร': monthTotals.register, 'สมาชิกฝาก': monthTotals.deposit_member,
-      '%ฝาก': monthTotals.depositPct, 'ฝากแรก': monthTotals.first_deposit, 'ฝากทั้งวัน': monthTotals.daily_deposit,
+      '%ฝาก': monthTotals.depositPct, 'ฝากแรก': monthTotals.first_deposit,
       'ฝากทั้งเดือน': monthTotals.month_deposit, 'ยอดถอน': monthTotals.total_withdraw || 0,
       'ถอน R+D': monthTotals.register_withdraw_amount || 0,
       'ต้นทุน/สมัคร': monthTotals.costPerRegister, 'ต้นทุน/ฝาก': monthTotals.costPerDeposit,
       'กำไร/ขาดทุน': Math.round(monthTotals.profitLoss),
     });
     const ws = XLSX.utils.json_to_sheet(rows);
-    ws['!cols'] = Array(16).fill({ wch: 14 });
+    ws['!cols'] = Array(15).fill({ wch: 14 });
     const monthStr = selectedDate.slice(0, 7);
     XLSX.utils.book_append_sheet(wb, ws, `สรุปเดือน ${monthStr}`);
     const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
@@ -1207,7 +1207,6 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                 <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal text-right">สมาชิกฝาก</th>
                 <th className="px-3 py-3 text-[10px] font-black text-emerald-500 uppercase tracking-normal text-right">%ฝาก</th>
                 <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal text-right">ฝากแรก</th>
-                <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal text-right">ฝากทั้งวัน</th>
                 <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal text-right">ฝากทั้งเดือน</th>
                 <th className="px-3 py-3 text-[10px] font-black text-rose-400 uppercase tracking-normal text-right">ยอดถอน</th>
                 <th className="px-3 py-3 text-[10px] font-black text-rose-300 uppercase tracking-normal text-right">ถอน R+D</th>
@@ -1219,7 +1218,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
             <tbody>
               {displayMonthlySummary.length === 0 && !loadingMonthly ? (
                 <tr>
-                  <td colSpan={16} className="text-center py-8 text-slate-400 text-sm font-bold">ไม่มีข้อมูลในเดือนนี้</td>
+                  <td colSpan={15} className="text-center py-8 text-slate-400 text-sm font-bold">ไม่มีข้อมูลในเดือนนี้</td>
                 </tr>
               ) : (
                 <>
@@ -1241,7 +1240,6 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                       <td className="px-3 py-3 text-right font-bold text-slate-700">{fmt(r.deposit_member)}</td>
                       <td className="px-3 py-3 text-right font-black text-emerald-600">{fmtPct(r.depositPct)}</td>
                       <td className="px-3 py-3 text-right font-bold text-slate-700">{fmt(r.first_deposit)}</td>
-                      <td className="px-3 py-3 text-right font-bold text-slate-700">{fmt(r.daily_deposit)}</td>
                       <td className="px-3 py-3 text-right font-bold text-slate-700">{fmt(r.month_deposit)}</td>
                       <td className="px-3 py-3 text-right font-bold text-rose-500">{fmt(r.total_withdraw || 0)}</td>
                       <td className="px-3 py-3 text-right font-bold text-rose-400">{fmt(r.register_withdraw_amount || 0)}</td>
@@ -1267,7 +1265,6 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                       <td className="px-3 py-4 text-right font-black text-slate-900">{fmt(monthTotals.deposit_member)}</td>
                       <td className="px-3 py-4 text-right font-black text-emerald-700">{fmtPct(monthTotals.depositPct)}</td>
                       <td className="px-3 py-4 text-right font-black text-slate-900">{fmt(monthTotals.first_deposit)}</td>
-                      <td className="px-3 py-4 text-right font-black text-slate-900">{fmt(monthTotals.daily_deposit)}</td>
                       <td className="px-3 py-4 text-right font-black text-slate-900">{fmt(monthTotals.month_deposit)}</td>
                       <td className="px-3 py-4 text-right font-black text-rose-600">{fmt(monthTotals.total_withdraw || 0)}</td>
                       <td className="px-3 py-4 text-right font-black text-rose-500">{fmt(monthTotals.register_withdraw_amount || 0)}</td>
