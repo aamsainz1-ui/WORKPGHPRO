@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, ComposedChart } from 'recharts';
 
 const TIGER_API = '/api/tiger-links';
 
@@ -1128,9 +1128,11 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
             <p className="text-xs font-black text-slate-500 mb-3">ยอดฝาก / ถอน (บาท) รายวัน{staffFilter !== 'all' ? ` — ${staffFilter}` : ''}</p>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={historyData.map(h => {
+                <ComposedChart data={historyData.map(h => {
                   const s = staffFilter !== 'all' ? (h.staff?.[staffFilter] || {}) : h.total;
-                  return { date: h.date?.slice(5), ฝาก: s?.deposit_amount || 0, ถอน: s?.withdraw || 0 };
+                  const dep = s?.deposit_amount || 0;
+                  const wd = s?.withdraw || 0;
+                  return { date: h.date?.slice(5), ฝาก: dep, ถอน: wd, 'W/L': dep - wd };
                 })}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                   <XAxis dataKey="date" tick={{ fontSize: 11, fontWeight: 700 }} />
@@ -1139,7 +1141,8 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                   <Legend wrapperStyle={{ fontSize: 12, fontWeight: 700 }} />
                   <Bar dataKey="ฝาก" fill="#8b5cf6" radius={[6, 6, 0, 0]} />
                   <Bar dataKey="ถอน" fill="#f43f5e" radius={[6, 6, 0, 0]} />
-                </BarChart>
+                  <Line type="monotone" dataKey="W/L" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
+                </ComposedChart>
               </ResponsiveContainer>
             </div>
           </div>
