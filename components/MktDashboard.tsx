@@ -117,6 +117,9 @@ interface MonthlySummaryRow {
   depositPct: number;
   total_withdraw: number;
   register_withdraw_amount: number;
+  costPerRegister: number;
+  costPerDeposit: number;
+  profitLoss: number;
 }
 
 const emptyRow = (): RowData => ({
@@ -263,6 +266,7 @@ const loadMonthlySummary = async (monthPrefix: string): Promise<MonthlySummaryRo
         register: 0, deposit_member: 0, first_deposit: 0,
         daily_deposit: 0, month_deposit: 0, depositPct: 0,
         total_withdraw: 0, register_withdraw_amount: 0,
+        costPerRegister: 0, costPerDeposit: 0, profitLoss: 0,
       };
     }
     map[n].fb += Number(row.fb) || 0;
@@ -277,11 +281,17 @@ const loadMonthlySummary = async (monthPrefix: string): Promise<MonthlySummaryRo
     map[n].month_deposit += Number(row.month_deposit) || 0;
   });
 
-  return Object.values(map).map(r => ({
-    ...r,
-    totalAds: r.fb + r.google + r.tiktok,
-    depositPct: r.register > 0 ? Math.round((r.deposit_member / r.register) * 10000) / 100 : 0,
-  }));
+  return Object.values(map).map(r => {
+    const totalAds = r.fb + r.google + r.tiktok;
+    return {
+      ...r,
+      totalAds,
+      depositPct: r.register > 0 ? Math.round((r.deposit_member / r.register) * 10000) / 100 : 0,
+      costPerRegister: r.register > 0 ? Math.round(totalAds / r.register) : 0,
+      costPerDeposit: r.deposit_member > 0 ? Math.round(totalAds / r.deposit_member) : 0,
+      profitLoss: r.month_deposit - (r.total_withdraw || 0) - totalAds,
+    };
+  });
 };
 
 // ============================================================
@@ -406,6 +416,8 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
         const monthlyMemMap: Record<string, number> = {};
         const monthlyWdMap: Record<string, number> = {};
         const monthlyWdAmtMap: Record<string, number> = {};
+        const monthlyFtdMap: Record<string, number> = {};
+        const monthlyDailyDepMap: Record<string, number> = {};
         (json.monthly_items || []).forEach(item => {
           const staff = CAMPAIGN_STAFF_MAP[item.campaign_name];
           if (!staff) return;
@@ -414,6 +426,8 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
           monthlyMemMap[staff] = (monthlyMemMap[staff] || 0) + item.register_deposit_user;
           monthlyWdMap[staff] = (monthlyWdMap[staff] || 0) + Math.round(item.total_withdraw || 0);
           monthlyWdAmtMap[staff] = (monthlyWdAmtMap[staff] || 0) + Math.round(item.register_withdraw_amount || 0);
+          monthlyFtdMap[staff] = (monthlyFtdMap[staff] || 0) + Math.round(item.deposit_first_time_amount || 0);
+          monthlyDailyDepMap[staff] = (monthlyDailyDepMap[staff] || 0) + Math.round(item.total_deposit || 0);
         });
 
         setMonthlySummary(prev => {
@@ -437,10 +451,15 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
             map[staff].month_deposit = monthlyDepMap[staff] || map[staff].month_deposit;
             map[staff].total_withdraw = monthlyWdMap[staff] || 0;
             map[staff].register_withdraw_amount = monthlyWdAmtMap[staff] || 0;
+            map[staff].first_deposit = monthlyFtdMap[staff] || map[staff].first_deposit || 0;
+            map[staff].daily_deposit = monthlyDailyDepMap[staff] || map[staff].daily_deposit || 0;
             map[staff].depositPct = map[staff].register > 0
               ? Math.round((map[staff].deposit_member / map[staff].register) * 10000) / 100
               : 0;
             map[staff].totalAds = (map[staff].fb || 0) + (map[staff].google || 0) + (map[staff].tiktok || 0);
+            map[staff].costPerRegister = map[staff].register > 0 ? Math.round(map[staff].totalAds / map[staff].register) : 0;
+            map[staff].costPerDeposit = map[staff].deposit_member > 0 ? Math.round(map[staff].totalAds / map[staff].deposit_member) : 0;
+            map[staff].profitLoss = (map[staff].month_deposit || 0) - (map[staff].total_withdraw || 0) - map[staff].totalAds;
           });
           return Object.values(map);
         });
@@ -473,14 +492,19 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
     });
   }, [selectedDate]);
 
-  // Load monthly summary
+  // Load monthly summary + auto-refresh ทุก 30 วิ
   useEffect(() => {
     const monthPrefix = getMonthPrefix(selectedDate);
+    const fetchMonthly = () => {
+      loadMonthlySummary(monthPrefix).then(rows => {
+        setMonthlySummary(rows);
+        setLoadingMonthly(false);
+      });
+    };
     setLoadingMonthly(true);
-    loadMonthlySummary(monthPrefix).then(rows => {
-      setMonthlySummary(rows);
-      setLoadingMonthly(false);
-    });
+    fetchMonthly();
+    const monthlyTimer = setInterval(fetchMonthly, 5 * 60 * 1000); // refresh ทุก 5 นาที
+    return () => clearInterval(monthlyTimer);
   }, [selectedDate]);
 
   // Fetch withdraw data from Supabase
@@ -560,9 +584,14 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
     total_withdraw: acc.total_withdraw + (r.total_withdraw || 0),
     register_withdraw_amount: acc.register_withdraw_amount + (r.register_withdraw_amount || 0),
     depositPct: 0,
+    costPerRegister: 0,
+    costPerDeposit: 0,
+    profitLoss: acc.profitLoss + (r.profitLoss || 0),
     name: 'รวม',
-  }), { name: 'รวม', fb: 0, google: 0, tiktok: 0, totalAds: 0, register: 0, deposit_member: 0, first_deposit: 0, daily_deposit: 0, month_deposit: 0, depositPct: 0, total_withdraw: 0, register_withdraw_amount: 0 });
+  }), { name: 'รวม', fb: 0, google: 0, tiktok: 0, totalAds: 0, register: 0, deposit_member: 0, first_deposit: 0, daily_deposit: 0, month_deposit: 0, depositPct: 0, total_withdraw: 0, register_withdraw_amount: 0, costPerRegister: 0, costPerDeposit: 0, profitLoss: 0 });
   monthTotals.depositPct = monthTotals.register > 0 ? Math.round((monthTotals.deposit_member / monthTotals.register) * 10000) / 100 : 0;
+  monthTotals.costPerRegister = monthTotals.register > 0 ? Math.round(monthTotals.totalAds / monthTotals.register) : 0;
+  monthTotals.costPerDeposit = monthTotals.deposit_member > 0 ? Math.round(monthTotals.totalAds / monthTotals.deposit_member) : 0;
 
   // === EXPORT EXCEL ===
   const exportMonthlyExcel = () => {
@@ -573,6 +602,8 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
       '%ฝาก': r.depositPct, 'ฝากแรก': r.first_deposit, 'ฝากทั้งวัน': r.daily_deposit,
       'ฝากทั้งเดือน': r.month_deposit, 'ยอดถอน': r.total_withdraw || 0,
       'ถอน R+D': r.register_withdraw_amount || 0,
+      'ต้นทุน/สมัคร': r.costPerRegister, 'ต้นทุน/ฝาก': r.costPerDeposit,
+      'กำไร/ขาดทุน': Math.round(r.profitLoss),
     }));
     // Total row
     rows.push({
@@ -581,9 +612,11 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
       '%ฝาก': monthTotals.depositPct, 'ฝากแรก': monthTotals.first_deposit, 'ฝากทั้งวัน': monthTotals.daily_deposit,
       'ฝากทั้งเดือน': monthTotals.month_deposit, 'ยอดถอน': monthTotals.total_withdraw || 0,
       'ถอน R+D': monthTotals.register_withdraw_amount || 0,
+      'ต้นทุน/สมัคร': monthTotals.costPerRegister, 'ต้นทุน/ฝาก': monthTotals.costPerDeposit,
+      'กำไร/ขาดทุน': Math.round(monthTotals.profitLoss),
     });
     const ws = XLSX.utils.json_to_sheet(rows);
-    ws['!cols'] = Array(13).fill({ wch: 14 });
+    ws['!cols'] = Array(16).fill({ wch: 14 });
     const monthStr = selectedDate.slice(0, 7);
     XLSX.utils.book_append_sheet(wb, ws, `สรุปเดือน ${monthStr}`);
     const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
@@ -1169,12 +1202,15 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                 <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal text-right">ฝากทั้งเดือน</th>
                 <th className="px-3 py-3 text-[10px] font-black text-rose-400 uppercase tracking-normal text-right">ยอดถอน</th>
                 <th className="px-3 py-3 text-[10px] font-black text-rose-300 uppercase tracking-normal text-right">ถอน R+D</th>
+                <th className="px-3 py-3 text-[10px] font-black text-orange-500 uppercase tracking-normal text-right">ต้นทุน/สมัคร</th>
+                <th className="px-3 py-3 text-[10px] font-black text-orange-400 uppercase tracking-normal text-right">ต้นทุน/ฝาก</th>
+                <th className="px-3 py-3 text-[10px] font-black text-cyan-500 uppercase tracking-normal text-right">กำไร/ขาดทุน</th>
               </tr>
             </thead>
             <tbody>
               {displayMonthlySummary.length === 0 && !loadingMonthly ? (
                 <tr>
-                  <td colSpan={13} className="text-center py-8 text-slate-400 text-sm font-bold">ไม่มีข้อมูลในเดือนนี้</td>
+                  <td colSpan={16} className="text-center py-8 text-slate-400 text-sm font-bold">ไม่มีข้อมูลในเดือนนี้</td>
                 </tr>
               ) : (
                 <>
@@ -1200,6 +1236,9 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                       <td className="px-3 py-3 text-right font-bold text-slate-700">{fmt(r.month_deposit)}</td>
                       <td className="px-3 py-3 text-right font-bold text-rose-500">{fmt(r.total_withdraw || 0)}</td>
                       <td className="px-3 py-3 text-right font-bold text-rose-400">{fmt(r.register_withdraw_amount || 0)}</td>
+                      <td className="px-3 py-3 text-right font-bold text-orange-600">{fmt(r.costPerRegister)}</td>
+                      <td className="px-3 py-3 text-right font-bold text-orange-500">{fmt(r.costPerDeposit)}</td>
+                      <td className={`px-3 py-3 text-right font-black ${r.profitLoss >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>{fmt(Math.round(r.profitLoss))}</td>
                     </tr>
                   ))}
                   {/* Monthly total row */}
@@ -1223,6 +1262,9 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                       <td className="px-3 py-4 text-right font-black text-slate-900">{fmt(monthTotals.month_deposit)}</td>
                       <td className="px-3 py-4 text-right font-black text-rose-600">{fmt(monthTotals.total_withdraw || 0)}</td>
                       <td className="px-3 py-4 text-right font-black text-rose-500">{fmt(monthTotals.register_withdraw_amount || 0)}</td>
+                      <td className="px-3 py-4 text-right font-black text-orange-700">{fmt(monthTotals.costPerRegister)}</td>
+                      <td className="px-3 py-4 text-right font-black text-orange-600">{fmt(monthTotals.costPerDeposit)}</td>
+                      <td className={`px-3 py-4 text-right font-black ${monthTotals.profitLoss >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>{fmt(Math.round(monthTotals.profitLoss))}</td>
                     </tr>
                   )}
                 </>
