@@ -1171,103 +1171,6 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
         </div>
       </div>
 
-      {/* ===== Trend Chart + ROI ===== */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <h3 className="text-sm font-black text-slate-700 uppercase tracking-normal">📈 เทรนด์ & ROI</h3>
-          <div className="flex items-center gap-2">
-            {[7, 14, 30].map(d => (
-              <button key={d} onClick={() => setHistoryDays(d)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${historyDays === d ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
-              >{d} วัน</button>
-            ))}
-            {historyLoading && <span className="text-xs text-blue-400 font-bold animate-pulse">⏳</span>}
-          </div>
-        </div>
-        <div className="p-6 space-y-6">
-          {/* สมัคร & ฝาก Trend */}
-          <div>
-            <p className="text-xs font-black text-slate-500 mb-3">สมัคร / ฝาก (คน) รายวัน{staffFilter !== 'all' ? ` — ${staffFilter}` : ''}</p>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={historyData.map(h => {
-                  const s = staffFilter !== 'all' ? (h.staff?.[staffFilter] || {}) : h.total;
-                  return { date: h.date?.slice(5), สมัคร: s?.register || 0, ฝาก: s?.deposit_user || 0 };
-                })}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="date" tick={{ fontSize: 11, fontWeight: 700 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
-                  <Tooltip contentStyle={{ borderRadius: 12, fontWeight: 700, fontSize: 12 }} />
-                  <Legend wrapperStyle={{ fontSize: 12, fontWeight: 700 }} />
-                  <Line type="monotone" dataKey="สมัคร" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="ฝาก" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* ยอดฝาก & ถอน Trend */}
-          <div>
-            <p className="text-xs font-black text-slate-500 mb-3">ยอดฝาก / ถอน (บาท) รายวัน{staffFilter !== 'all' ? ` — ${staffFilter}` : ''}</p>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={historyData.map(h => {
-                  const s = staffFilter !== 'all' ? (h.staff?.[staffFilter] || {}) : h.total;
-                  const dep = s?.deposit_amount || 0;
-                  const wd = s?.withdraw || 0;
-                  return { date: h.date?.slice(5), ฝาก: dep, ถอน: wd, 'W/L': dep - wd };
-                })}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="date" tick={{ fontSize: 11, fontWeight: 700 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
-                  <Tooltip contentStyle={{ borderRadius: 12, fontWeight: 700, fontSize: 12 }} formatter={(v: number) => fmt(v)} />
-                  <Legend wrapperStyle={{ fontSize: 12, fontWeight: 700 }} />
-                  <Bar dataKey="ฝาก" fill="#8b5cf6" radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="ถอน" fill="#f43f5e" radius={[6, 6, 0, 0]} />
-                  <Line type="monotone" dataKey="W/L" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* ROI Card */}
-          <div>
-            <p className="text-xs font-black text-slate-500 mb-3">ROI รายวัน{staffFilter !== 'all' ? ` — ${staffFilter}` : ''}</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {(() => {
-                const recent = historyData.slice(-1)[0];
-                const s = recent ? (staffFilter !== 'all' ? (recent.staff?.[staffFilter] || {}) : recent.total) : {};
-                const ads = s?.ads || 0;
-                const dep = s?.deposit_amount || 0;
-                const roi = ads > 0 ? (((dep - ads) / ads) * 100) : 0;
-                const costPerReg = (s?.register || 0) > 0 ? Math.round(ads / s.register) : 0;
-                const costPerDep = (s?.deposit_user || 0) > 0 ? Math.round(ads / s.deposit_user) : 0;
-                return (
-                  <>
-                    <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl p-4 text-center">
-                      <p className="text-[10px] font-black text-blue-400 uppercase">ค่า ADS</p>
-                      <p className="text-xl font-black text-blue-700 mt-1">{fmt(ads)}</p>
-                    </div>
-                    <div className={`bg-gradient-to-br ${roi >= 0 ? 'from-emerald-50 to-emerald-100/50' : 'from-red-50 to-red-100/50'} rounded-2xl p-4 text-center`}>
-                      <p className="text-[10px] font-black text-slate-400 uppercase">ROI</p>
-                      <p className={`text-xl font-black mt-1 ${roi >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>{roi.toFixed(1)}%</p>
-                    </div>
-                    <div className="bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-2xl p-4 text-center">
-                      <p className="text-[10px] font-black text-amber-400 uppercase">ค่าหัว/สมัคร</p>
-                      <p className="text-xl font-black text-amber-700 mt-1">{fmt(costPerReg)}</p>
-                    </div>
-                    <div className="bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-2xl p-4 text-center">
-                      <p className="text-[10px] font-black text-purple-400 uppercase">ค่าหัว/ฝาก</p>
-                      <p className="text-xl font-black text-purple-700 mt-1">{fmt(costPerDep)}</p>
-                    </div>
-                  </>
-                );
-              })()}
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* ===== Monthly Overview Cards ===== */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         {[
@@ -1440,6 +1343,97 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
               )}
             </tbody>
           </table>
+        </div>
+      </div>
+      {/* ===== Trend Chart + ROI ===== */}
+      <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <h3 className="text-sm font-black text-slate-700 uppercase tracking-normal">📈 เทรนด์ & ROI</h3>
+          <div className="flex items-center gap-2">
+            {[7, 14, 30].map(d => (
+              <button key={d} onClick={() => setHistoryDays(d)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${historyDays === d ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+              >{d} วัน</button>
+            ))}
+            {historyLoading && <span className="text-xs text-blue-400 font-bold animate-pulse">⏳</span>}
+          </div>
+        </div>
+        <div className="p-6 space-y-6">
+          <div>
+            <p className="text-xs font-black text-slate-500 mb-3">สมัคร / ฝาก (คน) รายวัน{staffFilter !== 'all' ? ` — ${staffFilter}` : ''}</p>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={historyData.map(h => {
+                  const s = staffFilter !== 'all' ? (h.staff?.[staffFilter] || {}) : h.total;
+                  return { date: h.date?.slice(5), สมัคร: s?.register || 0, ฝาก: s?.deposit_user || 0 };
+                })}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11, fontWeight: 700 }} />
+                  <YAxis tick={{ fontSize: 11 }} />
+                  <Tooltip contentStyle={{ borderRadius: 12, fontWeight: 700, fontSize: 12 }} />
+                  <Legend wrapperStyle={{ fontSize: 12, fontWeight: 700 }} />
+                  <Line type="monotone" dataKey="สมัคร" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="ฝาก" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-black text-slate-500 mb-3">ยอดฝาก / ถอน (บาท) รายวัน{staffFilter !== 'all' ? ` — ${staffFilter}` : ''}</p>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={historyData.map(h => {
+                  const s = staffFilter !== 'all' ? (h.staff?.[staffFilter] || {}) : h.total;
+                  const dep = s?.deposit_amount || 0;
+                  const wd = s?.withdraw || 0;
+                  return { date: h.date?.slice(5), ฝาก: dep, ถอน: wd, 'W/L': dep - wd };
+                })}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11, fontWeight: 700 }} />
+                  <YAxis tick={{ fontSize: 11 }} />
+                  <Tooltip contentStyle={{ borderRadius: 12, fontWeight: 700, fontSize: 12 }} formatter={(v: number) => fmt(v)} />
+                  <Legend wrapperStyle={{ fontSize: 12, fontWeight: 700 }} />
+                  <Bar dataKey="ฝาก" fill="#8b5cf6" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="ถอน" fill="#f43f5e" radius={[6, 6, 0, 0]} />
+                  <Line type="monotone" dataKey="W/L" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-black text-slate-500 mb-3">ROI รายวัน{staffFilter !== 'all' ? ` — ${staffFilter}` : ''}</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {(() => {
+                const recent = historyData.slice(-1)[0];
+                const s = recent ? (staffFilter !== 'all' ? (recent.staff?.[staffFilter] || {}) : recent.total) : {};
+                const ads = s?.ads || 0;
+                const dep = s?.deposit_amount || 0;
+                const roi = ads > 0 ? (((dep - ads) / ads) * 100) : 0;
+                const costPerReg = (s?.register || 0) > 0 ? Math.round(ads / s.register) : 0;
+                const costPerDep = (s?.deposit_user || 0) > 0 ? Math.round(ads / s.deposit_user) : 0;
+                return (
+                  <>
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl p-4 text-center">
+                      <p className="text-[10px] font-black text-blue-400 uppercase">ค่า ADS</p>
+                      <p className="text-xl font-black text-blue-700 mt-1">{fmt(ads)}</p>
+                    </div>
+                    <div className={`bg-gradient-to-br ${roi >= 0 ? 'from-emerald-50 to-emerald-100/50' : 'from-red-50 to-red-100/50'} rounded-2xl p-4 text-center`}>
+                      <p className="text-[10px] font-black text-slate-400 uppercase">ROI</p>
+                      <p className={`text-xl font-black mt-1 ${roi >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>{roi.toFixed(1)}%</p>
+                    </div>
+                    <div className="bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-2xl p-4 text-center">
+                      <p className="text-[10px] font-black text-amber-400 uppercase">ค่าหัว/สมัคร</p>
+                      <p className="text-xl font-black text-amber-700 mt-1">{fmt(costPerReg)}</p>
+                    </div>
+                    <div className="bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-2xl p-4 text-center">
+                      <p className="text-[10px] font-black text-purple-400 uppercase">ค่าหัว/ฝาก</p>
+                      <p className="text-xl font-black text-purple-700 mt-1">{fmt(costPerDep)}</p>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          </div>
         </div>
       </div>
     </div>
