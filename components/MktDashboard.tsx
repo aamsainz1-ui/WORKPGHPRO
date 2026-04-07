@@ -1295,46 +1295,8 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
         })}
       </div>
 
-      {/* ===== Rankings + ADS Pie Chart ===== */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Top Staff Rankings */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-slate-100 shadow-lg p-5 lg:col-span-2">
-          <h3 className="text-sm font-black text-slate-700 uppercase tracking-normal mb-4">🏆 อันดับ Staff</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* Best CPA */}
-            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4">
-              <p className="text-[10px] font-black text-amber-500 uppercase mb-2">CPA ต่ำสุด (ต้นทุน/สมัคร)</p>
-              {staffRankByCPA.slice(0, 3).map((r, i) => (
-                <div key={r.name} className="flex items-center justify-between py-1">
-                  <span className="text-xs font-bold text-slate-700">{['🥇','🥈','🥉'][i]} {r.name}</span>
-                  <span className="text-xs font-black text-amber-700">{fmt(r.costPerRegister)}</span>
-                </div>
-              ))}
-            </div>
-            {/* Most Deposit */}
-            <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-4">
-              <p className="text-[10px] font-black text-emerald-500 uppercase mb-2">ฝากสูงสุด</p>
-              {staffRankByDeposit.slice(0, 3).map((r, i) => (
-                <div key={r.name} className="flex items-center justify-between py-1">
-                  <span className="text-xs font-bold text-slate-700">{['🥇','🥈','🥉'][i]} {r.name}</span>
-                  <span className="text-xs font-black text-emerald-700">{fmt(r.month_deposit)}</span>
-                </div>
-              ))}
-            </div>
-            {/* Best P&L */}
-            <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-4">
-              <p className="text-[10px] font-black text-cyan-500 uppercase mb-2">กำไรสูงสุด</p>
-              {staffRankByPL.slice(0, 3).map((r, i) => (
-                <div key={r.name} className="flex items-center justify-between py-1">
-                  <span className="text-xs font-bold text-slate-700">{['🥇','🥈','🥉'][i]} {r.name}</span>
-                  <span className={`text-xs font-black ${r.profitLoss >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>{fmt(Math.round(r.profitLoss))}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* ADS Pie Chart */}
+      {/* ===== ADS Pie Chart ===== */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-slate-100 shadow-lg p-5">
           <h3 className="text-sm font-black text-slate-700 uppercase tracking-normal mb-4">🎯 สัดส่วน ADS</h3>
           {adsPieData.length > 0 ? (

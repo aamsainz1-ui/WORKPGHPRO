@@ -2,19 +2,53 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { AttendanceType, AttendanceRecord, Language, WorkMode } from '../types';
 
+const CAMPAIGN_STAFF: Record<string, string> = {
+  ly888: 'ลัน', pp: 'แบงค์', tg999: 'ต้น', tk888: 'เก่ง', mm888: 'เม่า',
+};
+const USER_STAFF: Record<string, string> = {
+  'Lanny': 'ลัน', 'Bank': 'แบงค์', 'Ton': 'ต้น', 'Keng': 'เก่ง', 'Mao': 'เม่า',
+};
+
 interface DashboardProps {
   isClockedIn: boolean;
   onAction: (type: AttendanceType, note?: string, workMode?: WorkMode) => void;
   lastRecord?: AttendanceRecord;
   allRecords: AttendanceRecord[];
   lang: Language;
+  currentUserName?: string;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ isClockedIn, onAction, lastRecord, allRecords, lang }) => {
+const Dashboard: React.FC<DashboardProps> = ({ isClockedIn, onAction, lastRecord, allRecords, lang, currentUserName }) => {
   const [time, setTime] = useState(new Date());
   const [shiftDuration, setShiftDuration] = useState<string>("00:00:00");
   const [note, setNote] = useState("");
   const [selectedMode, setSelectedMode] = useState<WorkMode>(WorkMode.OFFICE);
+  const [mktRanking, setMktRanking] = useState<{ byDeposit: any[]; byPL: any[] } | null>(null);
+
+  // Fetch MKT ranking from Tiger API
+  useEffect(() => {
+    fetch('/api/tiger-links')
+      .then(r => r.json())
+      .then(data => {
+        const items = data.monthly_items || [];
+        if (items.length === 0) return;
+        const map: Record<string, { deposit: number; register: number; withdraw: number }> = {};
+        items.forEach((item: any) => {
+          const s = CAMPAIGN_STAFF[item.campaign_name];
+          if (!s) return;
+          if (!map[s]) map[s] = { deposit: 0, register: 0, withdraw: 0 };
+          map[s].deposit += Math.round(item.total_deposit || 0);
+          map[s].register += item.total_register || 0;
+          map[s].withdraw += Math.round(item.total_withdraw || 0);
+        });
+        const arr = Object.entries(map).map(([name, d]) => ({ name, ...d, pl: d.deposit - d.withdraw }));
+        setMktRanking({
+          byDeposit: [...arr].sort((a, b) => b.deposit - a.deposit),
+          byPL: [...arr].sort((a, b) => b.pl - a.pl),
+        });
+      })
+      .catch(() => {});
+  }, []);
 
   const t = {
     working: lang === Language.TH ? 'ปฏิบัติหน้าที่' : 'ON DUTY',
@@ -83,6 +117,31 @@ const Dashboard: React.FC<DashboardProps> = ({ isClockedIn, onAction, lastRecord
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
+      {/* MKT Ranking — ทุกคนเห็น */}
+      {mktRanking && (
+        <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-slate-100 shadow-xl p-5">
+          <h3 className="text-sm font-black text-slate-700 uppercase tracking-normal mb-4">🏆 อันดับ MKT เดือนนี้</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-4">
+              <p className="text-[10px] font-black text-emerald-500 uppercase mb-2">ฝากสูงสุด</p>
+              {mktRanking.byDeposit.map((r: any, i: number) => (
+                <div key={r.name} className="flex items-center py-1">
+                  <span className="text-xs font-bold text-slate-700">{i < 3 ? ['🥇','🥈','🥉'][i] : `${i+1}.`} {r.name}</span>
+                </div>
+              ))}
+            </div>
+            <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-4">
+              <p className="text-[10px] font-black text-cyan-500 uppercase mb-2">กำไรสูงสุด</p>
+              {mktRanking.byPL.map((r: any, i: number) => (
+                <div key={r.name} className="flex items-center py-1">
+                  <span className="text-xs font-bold text-slate-700">{i < 3 ? ['🥇','🥈','🥉'][i] : `${i+1}.`} {r.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-[4rem] p-10 sm:p-16 shadow-[0_32px_80px_rgba(0,0,0,0.03)] border border-slate-100 flex flex-col items-center text-center relative overflow-hidden group">
         <div className="absolute top-0 left-0 w-full h-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500"></div>
         
