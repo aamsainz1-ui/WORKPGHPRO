@@ -275,11 +275,7 @@ const loadMonthlySummary = async (monthPrefix: string): Promise<MonthlySummaryRo
     map[n].register += Number(row.register) || 0;
     map[n].deposit_member += Number(row.deposit_member) || 0;
     map[n].first_deposit += Number(row.first_deposit) || 0;
-    // daily_deposit = เก็บค่าวันล่าสุด (ไม่ sum)
-    if (!map[n]._latestDate || (row.date && row.date > map[n]._latestDate)) {
-      map[n].daily_deposit = Number(row.daily_deposit) || 0;
-      map[n]._latestDate = row.date;
-    }
+    map[n].daily_deposit += Number(row.daily_deposit) || 0;
     // month_deposit — take max per day to avoid double-counting
     // but for simplicity we sum (user can adjust logic)
     map[n].month_deposit += Number(row.month_deposit) || 0;
@@ -352,6 +348,12 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
   }, [historyDays]);
 
   const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  // Cleanup saveTimers on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(saveTimers.current).forEach(t => clearTimeout(t));
+    };
+  }, []);
   const [tigerData, setTigerData] = useState<TigerData | null>(null);
   const [tigerLoading, setTigerLoading] = useState(false);
   const tigerTimer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -982,7 +984,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
             <tbody>
               {!tigerData || ((tigerData.items||[]).length === 0 && (tigerData.monthly_items||[]).length === 0) ? (
                 <tr>
-                  <td colSpan={13} className="text-center py-8 text-slate-400 text-sm font-bold">
+                  <td colSpan={12} className="text-center py-8 text-slate-400 text-sm font-bold">
                     {tigerLoading ? '⏳ กำลังดึงข้อมูล...' : 'ไม่มีข้อมูล — กด Refresh หรือรอ auto-update'}
                   </td>
                 </tr>
