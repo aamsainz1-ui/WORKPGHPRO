@@ -518,67 +518,25 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
     return () => clearInterval(monthlyTimer);
   }, [selectedDate]);
 
-  // Load previous month summary — ดึงจาก Tiger API (วันสุดท้ายของเดือนก่อน) แล้ว fallback Supabase
+  // Load previous month summary — ดึงจาก /api/tiger-prev-month (cache ใน Supabase)
   useEffect(() => {
-    const [y, m] = selectedDate.split('-').map(Number);
-    const prevMonth = m === 1 ? 12 : m - 1;
-    const prevYear = m === 1 ? y - 1 : y;
-    // วันสุดท้ายของเดือนก่อน
-    const lastDay = new Date(prevYear, prevMonth, 0).getDate();
-    const prevDateStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
-
-    fetch(`${TIGER_API}?date=${prevDateStr}`)
+    fetch('/api/tiger-prev-month')
       .then(r => r.json())
-      .then((json: TigerData) => {
-        const items = json.monthly_items || [];
-        if (items.length === 0) throw new Error('no tiger data');
-        const map: Record<string, MonthlySummaryRow> = {};
-        items.forEach(item => {
-          const staff = CAMPAIGN_STAFF_MAP[item.campaign_name];
-          if (!staff) return;
-          if (!map[staff]) {
-            map[staff] = {
-              name: staff, fb: 0, google: 0, tiktok: 0, totalAds: 0,
-              register: 0, deposit_member: 0, first_deposit: 0,
-              daily_deposit: 0, month_deposit: 0, depositPct: 0,
-              total_withdraw: 0, register_withdraw_amount: 0,
-              costPerRegister: 0, costPerDeposit: 0, profitLoss: 0,
-            };
-          }
-          map[staff].register += item.total_register || 0;
-          map[staff].deposit_member += item.register_deposit_user || 0;
-          map[staff].month_deposit += Math.round(item.total_deposit || 0);
-          map[staff].total_withdraw += Math.round(item.total_withdraw || 0);
-          map[staff].first_deposit += Math.round(item.deposit_first_time_amount || 0);
-          map[staff].register_withdraw_amount += Math.round(item.register_withdraw_amount || 0);
-        });
-        // คำนวณ profitLoss = deposit - withdraw - ads(from supabase, ยังไม่มี ให้เป็น 0)
-        const rows = Object.values(map).map(r => ({
-          ...r,
-          profitLoss: r.month_deposit - r.total_withdraw - r.totalAds,
-          depositPct: r.register > 0 ? Math.round((r.deposit_member / r.register) * 10000) / 100 : 0,
-          costPerRegister: r.register > 0 ? Math.round(r.totalAds / r.register) : 0,
-          costPerDeposit: r.deposit_member > 0 ? Math.round(r.totalAds / r.deposit_member) : 0,
+      .then((json: { staff: Array<{ name: string; register: number; deposit_member: number; month_deposit: number; total_withdraw: number; first_deposit: number; register_withdraw_amount: number }> }) => {
+        if (!json.staff || json.staff.length === 0) { setPrevMonthlySummary([]); return; }
+        const rows: MonthlySummaryRow[] = json.staff.map(s => ({
+          name: s.name,
+          fb: 0, google: 0, tiktok: 0, totalAds: 0,
+          register: s.register, deposit_member: s.deposit_member, first_deposit: s.first_deposit || 0,
+          daily_deposit: 0, month_deposit: s.month_deposit, depositPct: 0,
+          total_withdraw: s.total_withdraw, register_withdraw_amount: s.register_withdraw_amount || 0,
+          costPerRegister: 0, costPerDeposit: 0,
+          profitLoss: s.month_deposit - s.total_withdraw,
         }));
         setPrevMonthlySummary(rows);
-
-        // บันทึกลง Supabase mkt_data ด้วย (เก็บ cache)
-        const prevPrefix = `${String(prevMonth).padStart(2, '0')}/${prevYear}`;
-        rows.forEach(r => {
-          const dateKey = `${String(lastDay).padStart(2, '0')}/${prevPrefix}`;
-          fetch(`${SUPABASE_URL}/rest/v1/mkt_data`, {
-            method: 'POST',
-            headers: { ...SUPA_HEADERS, 'Prefer': 'resolution=merge-duplicates' },
-            body: JSON.stringify({ date: dateKey, name: r.name, register: r.register, deposit_member: r.deposit_member, month_deposit: r.month_deposit }),
-          }).catch(() => {});
-        });
       })
-      .catch(() => {
-        // Fallback: ลอง Supabase mkt_data
-        const prevPrefix = `${String(prevMonth).padStart(2, '0')}/${prevYear}`;
-        loadMonthlySummary(prevPrefix).then(rows => setPrevMonthlySummary(rows)).catch(() => setPrevMonthlySummary([]));
-      });
-  }, [selectedDate]);
+      .catch(() => setPrevMonthlySummary([]));
+  }, []);
 
   // Fetch withdraw data from Supabase
   useEffect(() => {
@@ -666,8 +624,9 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
   monthTotals.costPerRegister = monthTotals.register > 0 ? Math.round(monthTotals.totalAds / monthTotals.register) : 0;
   monthTotals.costPerDeposit = monthTotals.deposit_member > 0 ? Math.round(monthTotals.totalAds / monthTotals.deposit_member) : 0;
 
-  // === Previous month totals for comparison ===
-  const prevMonthTotals = prevMonthlySummary.reduce((acc, r) => ({
+  // === Previous month totals for comparison (filtered by staff) ===
+  const displayPrevMonthlySummary = staffFilter === 'all' ? prevMonthlySummary : prevMonthlySummary.filter(r => r.name === staffFilter);
+  const prevMonthTotals = displayPrevMonthlySummary.reduce((acc, r) => ({
     totalAds: acc.totalAds + (r.totalAds || 0),
     register: acc.register + (r.register || 0),
     deposit_member: acc.deposit_member + (r.deposit_member || 0),
@@ -841,17 +800,18 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
       </div>
 
       {/* ===== Previous Month vs Current Month — Per Staff Cards ===== */}
-      {prevMonthlySummary.length > 0 && (
+      {displayPrevMonthlySummary.length > 0 && (
         <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-100">
             <h3 className="text-sm font-black text-slate-700 uppercase tracking-normal">📅 เปรียบเทียบเดือนก่อน</h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 p-5">
-            {(staffFilter === 'all' ? prevMonthlySummary : prevMonthlySummary.filter(r => r.name === staffFilter)).map(prev => {
+            {displayPrevMonthlySummary.map(prev => {
               const curr = displayMonthlySummary.find(r => r.name === prev.name);
               const currDep = curr?.month_deposit || 0;
               const currWd = curr?.total_withdraw || 0;
               const currReg = curr?.register || 0;
+              const currMem = curr?.deposit_member || 0;
               const depPct = pctChange(currDep, prev.month_deposit);
               return (
                 <div key={prev.name} className="bg-gradient-to-br from-slate-50 to-white rounded-2xl border border-slate-100 p-4">
@@ -880,6 +840,14 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                     <div className="flex justify-between">
                       <span className="text-slate-400 font-bold">ถอนเดือนนี้</span>
                       <span className="font-black text-rose-600">{fmt(Math.round(currWd))}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400 font-bold">สมาชิกฝากเดือนก่อน</span>
+                      <span className="font-black text-slate-700">{fmt(prev.deposit_member)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400 font-bold">สมาชิกฝากเดือนนี้</span>
+                      <span className="font-black text-emerald-600">{fmt(currMem)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400 font-bold">สมัครเดือนก่อน</span>
