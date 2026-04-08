@@ -840,6 +840,74 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
         </div>
       </div>
 
+      {/* ===== Previous Month vs Current Month — Per Staff Cards ===== */}
+      {prevMonthlySummary.length > 0 && (
+        <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100">
+            <h3 className="text-sm font-black text-slate-700 uppercase tracking-normal">📅 เปรียบเทียบเดือนก่อน</h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 p-5">
+            {(staffFilter === 'all' ? prevMonthlySummary : prevMonthlySummary.filter(r => r.name === staffFilter)).map(prev => {
+              const curr = displayMonthlySummary.find(r => r.name === prev.name);
+              const currDep = curr?.month_deposit || 0;
+              const currWd = curr?.total_withdraw || 0;
+              const currReg = curr?.register || 0;
+              const depPct = pctChange(currDep, prev.month_deposit);
+              return (
+                <div key={prev.name} className="bg-gradient-to-br from-slate-50 to-white rounded-2xl border border-slate-100 p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-sm font-black">{prev.name[0]}</div>
+                    <span className="font-black text-slate-800">{prev.name}</span>
+                  </div>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400 font-bold">ฝากเดือนก่อน</span>
+                      <span className="font-black text-slate-700">{fmt(Math.round(prev.month_deposit))}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400 font-bold">ฝากเดือนนี้</span>
+                      <span className="font-black text-green-600">{fmt(Math.round(currDep))}</span>
+                      {prev.month_deposit > 0 && (
+                        <span className={`font-black ${depPct >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                          {depPct >= 0 ? '▲' : '▼'}{Math.abs(depPct)}%
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400 font-bold">ถอนเดือนก่อน</span>
+                      <span className="font-black text-rose-500">{fmt(Math.round(prev.total_withdraw))}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400 font-bold">ถอนเดือนนี้</span>
+                      <span className="font-black text-rose-600">{fmt(Math.round(currWd))}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400 font-bold">สมัครเดือนก่อน</span>
+                      <span className="font-black text-slate-700">{fmt(prev.register)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400 font-bold">สมัครเดือนนี้</span>
+                      <span className="font-black text-blue-600">{fmt(currReg)}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {/* แถวรวม */}
+          <div className="px-5 pb-5">
+            <div className="bg-slate-900/5 rounded-2xl p-4 flex flex-wrap gap-6 text-xs">
+              <div><span className="text-slate-400 font-bold">ฝากรวมเดือนก่อน </span><span className="font-black text-slate-700">{fmt(Math.round(prevMonthTotals.month_deposit))}</span></div>
+              <div><span className="text-slate-400 font-bold">ฝากรวมเดือนนี้ </span><span className="font-black text-green-600">{fmt(Math.round(monthTotals.month_deposit))}</span>
+                {prevMonthTotals.month_deposit > 0 && <span className={`ml-1 font-black ${pctChange(monthTotals.month_deposit, prevMonthTotals.month_deposit) >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>{pctChange(monthTotals.month_deposit, prevMonthTotals.month_deposit) >= 0 ? '▲' : '▼'}{Math.abs(pctChange(monthTotals.month_deposit, prevMonthTotals.month_deposit))}%</span>}
+              </div>
+              <div><span className="text-slate-400 font-bold">ถอนรวมเดือนก่อน </span><span className="font-black text-rose-500">{fmt(Math.round(prevMonthTotals.total_withdraw))}</span></div>
+              <div><span className="text-slate-400 font-bold">ถอนรวมเดือนนี้ </span><span className="font-black text-rose-600">{fmt(Math.round(monthTotals.total_withdraw))}</span></div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Staff Profile Card — เมื่อเลือก staff */}
       {staffFilter !== 'all' && monthlySummary.length > 0 && (() => {
         const me = monthlySummary.find(r => r.name === staffFilter);
@@ -1222,41 +1290,6 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
           </table>
         </div>
       </div>
-
-      {/* ===== Previous Month vs Current Month Comparison Cards ===== */}
-      {displayMonthlySummary.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {[
-            { label: 'ADS', curr: monthTotals.totalAds, prev: prevMonthTotals.totalAds, cls: 'text-amber-600', icon: '💰' },
-            { label: 'สมัคร', curr: monthTotals.register, prev: prevMonthTotals.register, cls: 'text-blue-600', icon: '📝' },
-            { label: 'สมาชิกฝาก', curr: monthTotals.deposit_member, prev: prevMonthTotals.deposit_member, cls: 'text-emerald-600', icon: '👥' },
-            { label: 'ฝากทั้งเดือน', curr: monthTotals.month_deposit, prev: prevMonthTotals.month_deposit, cls: 'text-green-600', icon: '💵' },
-            { label: 'ยอดถอน', curr: monthTotals.total_withdraw, prev: prevMonthTotals.total_withdraw, cls: 'text-rose-600', icon: '📤' },
-            { label: 'กำไร/ขาดทุน', curr: monthTotals.profitLoss, prev: prevMonthTotals.profitLoss, cls: 'text-cyan-600', icon: '📊' },
-          ].map(({ label, curr, prev, cls, icon }) => {
-            const pct = pctChange(curr, prev);
-            const up = pct >= 0;
-            const isGood = label === 'ยอดถอน' ? !up : up;
-            return (
-              <div key={label} className="bg-white/80 backdrop-blur-xl rounded-2xl border border-slate-100 shadow-lg p-4">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <span className="text-base">{icon}</span>
-                  <span className="text-[10px] font-black text-slate-400 uppercase">{label}</span>
-                </div>
-                <div className={`text-lg font-black ${cls}`}>{fmt(Math.round(curr))}</div>
-                <div className="flex items-center gap-1.5 mt-1">
-                  <span className="text-[10px] text-slate-400 font-bold">เดือนก่อน {fmt(Math.round(prev))}</span>
-                  {prev > 0 && (
-                    <span className={`text-[10px] font-black ${isGood ? 'text-emerald-500' : 'text-red-500'}`}>
-                      {up ? '▲' : '▼'} {Math.abs(pct)}%
-                    </span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
 
       {/* ===== Monthly Summary ===== */}
       <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
