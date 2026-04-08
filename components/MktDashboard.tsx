@@ -799,83 +799,6 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
         </div>
       </div>
 
-      {/* ===== Previous Month vs Current Month — Per Staff Cards ===== */}
-      {displayPrevMonthlySummary.length > 0 && (
-        <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100">
-            <h3 className="text-sm font-black text-slate-700 uppercase tracking-normal">📅 เปรียบเทียบเดือนก่อน</h3>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 p-5">
-            {displayPrevMonthlySummary.map(prev => {
-              const curr = displayMonthlySummary.find(r => r.name === prev.name);
-              const currDep = curr?.month_deposit || 0;
-              const currWd = curr?.total_withdraw || 0;
-              const currReg = curr?.register || 0;
-              const currMem = curr?.deposit_member || 0;
-              const depPct = pctChange(currDep, prev.month_deposit);
-              return (
-                <div key={prev.name} className="bg-gradient-to-br from-slate-50 to-white rounded-2xl border border-slate-100 p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-sm font-black">{prev.name[0]}</div>
-                    <span className="font-black text-slate-800">{prev.name}</span>
-                  </div>
-                  <div className="space-y-2 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400 font-bold">ฝากเดือนก่อน</span>
-                      <span className="font-black text-slate-700">{fmt(Math.round(prev.month_deposit))}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400 font-bold">ฝากเดือนนี้</span>
-                      <span className="font-black text-green-600">{fmt(Math.round(currDep))}</span>
-                      {prev.month_deposit > 0 && (
-                        <span className={`font-black ${depPct >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                          {depPct >= 0 ? '▲' : '▼'}{Math.abs(depPct)}%
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400 font-bold">ถอนเดือนก่อน</span>
-                      <span className="font-black text-rose-500">{fmt(Math.round(prev.total_withdraw))}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400 font-bold">ถอนเดือนนี้</span>
-                      <span className="font-black text-rose-600">{fmt(Math.round(currWd))}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400 font-bold">สมาชิกฝากเดือนก่อน</span>
-                      <span className="font-black text-slate-700">{fmt(prev.deposit_member)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400 font-bold">สมาชิกฝากเดือนนี้</span>
-                      <span className="font-black text-emerald-600">{fmt(currMem)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400 font-bold">สมัครเดือนก่อน</span>
-                      <span className="font-black text-slate-700">{fmt(prev.register)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400 font-bold">สมัครเดือนนี้</span>
-                      <span className="font-black text-blue-600">{fmt(currReg)}</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          {/* แถวรวม */}
-          <div className="px-5 pb-5">
-            <div className="bg-slate-900/5 rounded-2xl p-4 flex flex-wrap gap-6 text-xs">
-              <div><span className="text-slate-400 font-bold">ฝากรวมเดือนก่อน </span><span className="font-black text-slate-700">{fmt(Math.round(prevMonthTotals.month_deposit))}</span></div>
-              <div><span className="text-slate-400 font-bold">ฝากรวมเดือนนี้ </span><span className="font-black text-green-600">{fmt(Math.round(monthTotals.month_deposit))}</span>
-                {prevMonthTotals.month_deposit > 0 && <span className={`ml-1 font-black ${pctChange(monthTotals.month_deposit, prevMonthTotals.month_deposit) >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>{pctChange(monthTotals.month_deposit, prevMonthTotals.month_deposit) >= 0 ? '▲' : '▼'}{Math.abs(pctChange(monthTotals.month_deposit, prevMonthTotals.month_deposit))}%</span>}
-              </div>
-              <div><span className="text-slate-400 font-bold">ถอนรวมเดือนก่อน </span><span className="font-black text-rose-500">{fmt(Math.round(prevMonthTotals.total_withdraw))}</span></div>
-              <div><span className="text-slate-400 font-bold">ถอนรวมเดือนนี้ </span><span className="font-black text-rose-600">{fmt(Math.round(monthTotals.total_withdraw))}</span></div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Staff Profile Card — เมื่อเลือก staff */}
       {staffFilter !== 'all' && monthlySummary.length > 0 && (() => {
         const me = monthlySummary.find(r => r.name === staffFilter);
@@ -1357,6 +1280,82 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
           </table>
         </div>
       </div>
+
+      {/* ===== Previous Month Comparison Table ===== */}
+      {displayPrevMonthlySummary.length > 0 && (
+        <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100">
+            <h3 className="text-sm font-black text-slate-700 uppercase tracking-normal">📅 เปรียบเทียบเดือนก่อน</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-100">
+                  <th className="text-left px-4 py-3 text-[10px] font-black text-slate-400 uppercase sticky left-0 bg-white/90 z-10 min-w-[80px]">Staff</th>
+                  <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase text-right">สมัคร<br/><span className="text-purple-400">ก่อน</span></th>
+                  <th className="px-3 py-3 text-[10px] font-black text-blue-500 uppercase text-right">สมัคร<br/><span className="text-blue-400">นี้</span></th>
+                  <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase text-right">สมาชิกฝาก<br/><span className="text-purple-400">ก่อน</span></th>
+                  <th className="px-3 py-3 text-[10px] font-black text-emerald-500 uppercase text-right">สมาชิกฝาก<br/><span className="text-emerald-400">นี้</span></th>
+                  <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase text-right">ฝาก<br/><span className="text-purple-400">ก่อน</span></th>
+                  <th className="px-3 py-3 text-[10px] font-black text-green-500 uppercase text-right">ฝาก<br/><span className="text-green-400">นี้</span></th>
+                  <th className="px-3 py-3 text-[10px] font-black text-emerald-500 uppercase text-right">%</th>
+                  <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase text-right">ถอน<br/><span className="text-purple-400">ก่อน</span></th>
+                  <th className="px-3 py-3 text-[10px] font-black text-rose-500 uppercase text-right">ถอน<br/><span className="text-rose-400">นี้</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                {displayPrevMonthlySummary.map((prev, idx) => {
+                  const curr = displayMonthlySummary.find(r => r.name === prev.name);
+                  const currDep = curr?.month_deposit || 0;
+                  const depPct = pctChange(currDep, prev.month_deposit);
+                  return (
+                    <tr key={prev.name} className={`border-b border-slate-50 hover:bg-purple-50/30 ${idx % 2 === 0 ? 'bg-slate-50/30' : ''}`}>
+                      <td className="px-4 py-3 font-black text-slate-800 sticky left-0 bg-inherit z-10">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-xs font-black">{prev.name[0]}</div>
+                          {prev.name}
+                        </div>
+                      </td>
+                      <td className="px-3 py-3 text-right font-bold text-slate-500">{fmt(prev.register)}</td>
+                      <td className="px-3 py-3 text-right font-black text-blue-600">{fmt(curr?.register || 0)}</td>
+                      <td className="px-3 py-3 text-right font-bold text-slate-500">{fmt(prev.deposit_member)}</td>
+                      <td className="px-3 py-3 text-right font-black text-emerald-600">{fmt(curr?.deposit_member || 0)}</td>
+                      <td className="px-3 py-3 text-right font-bold text-slate-500">{fmt(Math.round(prev.month_deposit))}</td>
+                      <td className="px-3 py-3 text-right font-black text-green-600">{fmt(Math.round(currDep))}</td>
+                      <td className={`px-3 py-3 text-right font-black ${depPct >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                        {prev.month_deposit > 0 ? `${depPct >= 0 ? '▲' : '▼'}${Math.abs(depPct)}%` : '-'}
+                      </td>
+                      <td className="px-3 py-3 text-right font-bold text-slate-500">{fmt(Math.round(prev.total_withdraw))}</td>
+                      <td className="px-3 py-3 text-right font-black text-rose-600">{fmt(Math.round(curr?.total_withdraw || 0))}</td>
+                    </tr>
+                  );
+                })}
+                {displayPrevMonthlySummary.length > 1 && (
+                  <tr className="bg-slate-900/5 border-t-2 border-slate-200">
+                    <td className="px-4 py-3 font-black text-slate-900 sticky left-0 bg-slate-100/80 z-10">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center text-white text-xs font-black">Σ</div>
+                        รวม
+                      </div>
+                    </td>
+                    <td className="px-3 py-3 text-right font-black text-slate-600">{fmt(prevMonthTotals.register)}</td>
+                    <td className="px-3 py-3 text-right font-black text-blue-700">{fmt(monthTotals.register)}</td>
+                    <td className="px-3 py-3 text-right font-black text-slate-600">{fmt(prevMonthTotals.deposit_member)}</td>
+                    <td className="px-3 py-3 text-right font-black text-emerald-700">{fmt(monthTotals.deposit_member)}</td>
+                    <td className="px-3 py-3 text-right font-black text-slate-600">{fmt(Math.round(prevMonthTotals.month_deposit))}</td>
+                    <td className="px-3 py-3 text-right font-black text-green-700">{fmt(Math.round(monthTotals.month_deposit))}</td>
+                    <td className={`px-3 py-3 text-right font-black ${pctChange(monthTotals.month_deposit, prevMonthTotals.month_deposit) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                      {prevMonthTotals.month_deposit > 0 ? `${pctChange(monthTotals.month_deposit, prevMonthTotals.month_deposit) >= 0 ? '▲' : '▼'}${Math.abs(pctChange(monthTotals.month_deposit, prevMonthTotals.month_deposit))}%` : '-'}
+                    </td>
+                    <td className="px-3 py-3 text-right font-black text-slate-600">{fmt(Math.round(prevMonthTotals.total_withdraw))}</td>
+                    <td className="px-3 py-3 text-right font-black text-rose-700">{fmt(Math.round(monthTotals.total_withdraw))}</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* ===== ADS Cost Trend ===== */}
       <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-slate-100 shadow-lg p-5">
