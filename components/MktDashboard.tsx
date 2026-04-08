@@ -1170,6 +1170,42 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
         </div>
       </div>
 
+      {/* ===== Previous Month vs Current Month Comparison Cards ===== */}
+      {prevMonthlySummary.length > 0 && displayMonthlySummary.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {[
+            { label: 'ADS', curr: monthTotals.totalAds, prev: prevMonthTotals.totalAds, color: 'amber', icon: '💰' },
+            { label: 'สมัคร', curr: monthTotals.register, prev: prevMonthTotals.register, color: 'blue', icon: '📝' },
+            { label: 'สมาชิกฝาก', curr: monthTotals.deposit_member, prev: prevMonthTotals.deposit_member, color: 'emerald', icon: '👥' },
+            { label: 'ฝากทั้งเดือน', curr: monthTotals.month_deposit, prev: prevMonthTotals.month_deposit, color: 'green', icon: '💵' },
+            { label: 'ยอดถอน', curr: monthTotals.total_withdraw, prev: prevMonthTotals.total_withdraw, color: 'rose', icon: '📤' },
+            { label: 'กำไร/ขาดทุน', curr: monthTotals.profitLoss, prev: prevMonthTotals.profitLoss, color: 'cyan', icon: '📊' },
+          ].map(({ label, curr, prev, color, icon }) => {
+            const pct = pctChange(curr, prev);
+            const up = pct >= 0;
+            // For withdraw, "up" is bad; for others, "up" is good
+            const isGood = label === 'ยอดถอน' ? !up : up;
+            return (
+              <div key={label} className="bg-white/80 backdrop-blur-xl rounded-2xl border border-slate-100 shadow-lg p-4">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="text-base">{icon}</span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase">{label}</span>
+                </div>
+                <div className={`text-lg font-black text-${color}-600`}>{fmt(Math.round(curr))}</div>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <span className="text-[10px] text-slate-400 font-bold">เดือนก่อน {fmt(Math.round(prev))}</span>
+                  {prev > 0 && (
+                    <span className={`text-[10px] font-black ${isGood ? 'text-emerald-500' : 'text-red-500'}`}>
+                      {up ? '▲' : '▼'} {Math.abs(pct)}%
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {/* ===== Monthly Summary ===== */}
       <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
