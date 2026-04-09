@@ -771,14 +771,23 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
 
     // Sheet 2: สรุปเดือน
     if (displayMonthlySummary.length > 0) {
-      const monthRows = displayMonthlySummary.map(r => ({
-        'ชื่อ': r.name, 'FB': r.fb, 'Google': r.google, 'TikTok': r.tiktok,
-        'รวม ADS': r.totalAds, 'สมัคร': r.register, 'สมาชิกฝาก': r.deposit_member,
-        'ฝากแรก': r.first_deposit, 'ฝากทั้งวัน': r.daily_deposit, 'ฝากทั้งเดือน': r.month_deposit,
-        '%ฝาก': r.depositPct,
-      }));
+      const monthRows = displayMonthlySummary.map(r => {
+        const totalWithdraw = r.total_withdraw || 0;
+        const winLoss = (r.month_deposit || 0) - totalWithdraw;
+        const avgPerUser = r.deposit_member > 0 ? Math.round((r.month_deposit || 0) / r.deposit_member) : 0;
+        const costPerReg = r.register > 0 ? Math.round(r.totalAds / r.register) : 0;
+        const costPerDep = r.deposit_member > 0 ? Math.round(r.totalAds / r.deposit_member) : 0;
+        return {
+          'ชื่อ': r.name, 'FB': r.fb, 'Google': r.google, 'TikTok': r.tiktok,
+          'รวม ADS': r.totalAds, 'สมัคร': r.register, 'สมาชิกฝาก': r.deposit_member,
+          '%ฝาก': r.depositPct, 'ฝากแรก': r.first_deposit, 'ฝากทั้งวัน': r.daily_deposit,
+          'ฝากทั้งเดือน': r.month_deposit, 'ยอดถอน': totalWithdraw,
+          'W/L': winLoss, 'เฉลี่ย/ยูส': avgPerUser,
+          'ค่าหัว/สมัคร': costPerReg, 'ค่าหัว/ฝาก': costPerDep,
+        };
+      });
       const ws2 = XLSX.utils.json_to_sheet(monthRows);
-      ws2['!cols'] = Array(11).fill({ wch: 14 });
+      ws2['!cols'] = Array(16).fill({ wch: 14 });
       XLSX.utils.book_append_sheet(wb, ws2, 'สรุปเดือน');
     }
 
