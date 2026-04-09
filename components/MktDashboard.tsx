@@ -313,6 +313,8 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
     return bkk.toISOString().split('T')[0];
   };
   const [selectedDate, setSelectedDate] = useState(getBkkDate);
+  const [endDate, setEndDate] = useState(''); // ว่าง = วันเดียว
+  const isRange = endDate && endDate !== selectedDate;
 
   // Auto-update วันที่เมื่อเที่ยงคืน Bangkok
   useEffect(() => {
@@ -354,6 +356,53 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
       Object.values(saveTimers.current).forEach(t => clearTimeout(t));
     };
   }, []);
+  const [rangeData, setRangeData] = useState<MktData | null>(null);
+  const [rangeLoading, setRangeLoading] = useState(false);
+  const [rangeTrigger, setRangeTrigger] = useState(0);
+
+  // Fetch range data only when search button is clicked
+  useEffect(() => {
+    if (rangeTrigger === 0 || !isRange) { return; }
+    setRangeLoading(true);
+    fetch(`/api/tiger-range?from=${selectedDate}&to=${endDate}`)
+      .then(r => r.json())
+      .then((json: { items: Array<{ campaign_name: string; total_register: number; register_deposit_user: number; total_deposit: number; total_withdraw: number; deposit_first_time_amount: number }> }) => {
+        if (!json.items) { setRangeData(null); return; }
+        const rd = initData();
+        const CMAP: Record<string, string> = CAMPAIGN_STAFF_MAP;
+        json.items.forEach(item => {
+          const staff = CMAP[item.campaign_name];
+          if (!staff) return;
+          const merged = recalc({
+            ...emptyRow(),
+            register: item.total_register || 0,
+            memberDeposit: item.register_deposit_user || 0,
+            firstDeposit: Math.round(item.deposit_first_time_amount || 0),
+            dailyDeposit: Math.round(item.total_deposit || 0),
+            totalWithdraw: Math.round(item.total_withdraw || 0),
+            monthlyDeposit: 0,
+          });
+          const existing = rd['TG'][staff] || emptyRow();
+          rd['TG'][staff] = recalc({
+            ...existing,
+            register: existing.register + merged.register,
+            memberDeposit: existing.memberDeposit + merged.memberDeposit,
+            firstDeposit: existing.firstDeposit + merged.firstDeposit,
+            dailyDeposit: existing.dailyDeposit + merged.dailyDeposit,
+            totalWithdraw: existing.totalWithdraw + merged.totalWithdraw,
+          });
+        });
+        setRangeData(rd);
+      })
+      .catch(() => setRangeData(null))
+      .finally(() => setRangeLoading(false));
+  }, [rangeTrigger]);
+
+  // Clear range data when endDate is cleared
+  useEffect(() => {
+    if (!isRange) setRangeData(null);
+  }, [isRange]);
+
   const [tigerData, setTigerData] = useState<TigerData | null>(null);
   const [tigerLoading, setTigerLoading] = useState(false);
   const tigerTimer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -483,6 +532,11 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
   }, []);
 
   useEffect(() => {
+    // หยุด auto-refresh เมื่ออยู่ในโหมด range search เพื่อไม่ให้ข้อมูลทับกัน
+    if (isRange) {
+      if (tigerTimer.current) { clearInterval(tigerTimer.current); tigerTimer.current = null; }
+      return;
+    }
     const bkk = new Date(new Date().getTime() + 7 * 60 * 60 * 1000);
     const today = bkk.toISOString().split('T')[0];
     fetchTiger(selectedDate !== today ? selectedDate : undefined);
@@ -491,7 +545,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
       fetchTiger(selectedDate !== nowToday ? selectedDate : undefined);
     }, 30 * 1000); // refresh ทุก 30 วิ
     return () => { if (tigerTimer.current) clearInterval(tigerTimer.current); };
-  }, [fetchTiger, selectedDate]);
+  }, [fetchTiger, selectedDate, isRange]);
 
   // Load today's data from Supabase on mount / date change
   useEffect(() => {
@@ -520,7 +574,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
 
   // Load previous month summary — ดึงจาก /api/tiger-prev-month (cache ใน Supabase)
   useEffect(() => {
-    fetch('/api/tiger-prev-month')
+    fetch(`/api/tiger-prev-month?date=${selectedDate}`)
       .then(r => r.json())
       .then((json: { staff: Array<{ name: string; register: number; deposit_member: number; month_deposit: number; total_withdraw: number; first_deposit: number; register_withdraw_amount: number }> }) => {
         if (!json.staff || json.staff.length === 0) { setPrevMonthlySummary([]); return; }
@@ -536,7 +590,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
         setPrevMonthlySummary(rows);
       })
       .catch(() => setPrevMonthlySummary([]));
-  }, []);
+  }, [selectedDate]);
 
   // Fetch withdraw data from Supabase
   useEffect(() => {
@@ -574,6 +628,9 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
         try {
           const thaiDate = toThaiDate(selectedDate);
           await upsertRow(thaiDate, activeTab, staff, tabData[staff]);
+          // Refresh monthly summary after save
+          const monthPrefix = getMonthPrefix(selectedDate);
+          loadMonthlySummary(monthPrefix).then(rows => setMonthlySummary(rows));
         } catch (e) {
           console.error('upsert error:', e);
         } finally {
@@ -586,9 +643,10 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
   }, [activeTab, selectedDate]);
 
   const displayStaff = staffFilter === 'all' ? STAFF : STAFF.filter(s => s === staffFilter);
+  const activeData = isRange && rangeData ? rangeData : data;
 
   const totals = displayStaff.reduce((acc, staff) => {
-    const row = data[activeTab][staff];
+    const row = activeData[activeTab][staff];
     if (!row) return acc;
     COLUMNS.forEach(col => {
       if (['depositPct','winLoss','avgPerUser','costPerRegister','costPerDeposit'].includes(col.key)) return;
@@ -754,29 +812,32 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">MKT Dashboard</h2>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-normal mt-1">ติดตามผลการตลาดรายวัน</p>
+      <div className="space-y-3">
+        {/* Title + Status */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl sm:text-3xl font-black text-slate-900 tracking-tight">MKT Dashboard</h2>
+            <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-normal mt-0.5">ติดตามผลการตลาดรายวัน</p>
+          </div>
+          <div className="flex items-center gap-1.5">
+            {saving && <span className="text-[10px] font-bold text-emerald-500 animate-pulse">💾</span>}
+            {(loading || rangeLoading) && <span className="text-[10px] font-bold text-blue-500 animate-pulse">⏳</span>}
+            {tigerData?.fetched_at && (
+              <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded-lg">
+                🐯 {new Date(tigerData.fetched_at).toLocaleTimeString('th-TH')}
+                {tigerLoading && <span className="ml-0.5 animate-pulse">⏳</span>}
+              </span>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          {saving && (
-            <span className="text-xs font-bold text-emerald-500 animate-pulse">💾 กำลังบันทึก...</span>
-          )}
-          {loading && (
-            <span className="text-xs font-bold text-blue-500 animate-pulse">⏳ กำลังโหลด...</span>
-          )}
-          {tigerData?.fetched_at && (
-            <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-3 py-1.5 rounded-xl">
-              🐯 {new Date(tigerData.fetched_at).toLocaleTimeString('th-TH')}
-              {tigerLoading && <span className="ml-1 animate-pulse">⏳</span>}
-            </span>
-          )}
+
+        {/* Controls */}
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           {isAdmin && (
             <select
               value={staffFilter}
               onChange={e => setStaffFilter(e.target.value)}
-              className="px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-sm font-bold text-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              className="px-2.5 py-2 rounded-xl border border-slate-200 bg-white text-[11px] sm:text-sm font-bold text-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             >
               <option value="all">👥 ทั้งหมด</option>
               {STAFF.map(s => (
@@ -787,14 +848,37 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
           <input
             type="date"
             value={selectedDate}
-            onChange={e => setSelectedDate(e.target.value)}
-            className="px-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-sm font-bold text-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            onChange={e => { setSelectedDate(e.target.value); if (endDate && e.target.value > endDate) setEndDate(''); }}
+            className="px-2 sm:px-3 py-2 rounded-xl border border-slate-200 bg-white text-[11px] sm:text-sm font-bold text-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+          />
+          <span className="text-slate-400 font-bold text-[10px] sm:text-xs">ถึง</span>
+          <input
+            type="date"
+            value={endDate}
+            min={selectedDate}
+            onChange={e => setEndDate(e.target.value)}
+            className="px-2 sm:px-3 py-2 rounded-xl border border-slate-200 bg-white text-[11px] sm:text-sm font-bold text-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           />
           <button
-            onClick={exportExcel}
-            className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-sm transition-colors"
+            onClick={() => {
+              if (isRange) {
+                setRangeTrigger(prev => prev + 1);
+              } else {
+                setSelectedDate(prev => prev);
+              }
+            }}
+            className="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[11px] sm:text-sm font-bold shadow-sm transition-colors"
           >
-            📄 ส่งออก Excel
+            🔍 ค้นหา
+          </button>
+          {isRange && (
+            <button onClick={() => setEndDate('')} className="px-2.5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-[11px] sm:text-xs font-bold text-slate-600 transition-colors">ล้าง</button>
+          )}
+          <button
+            onClick={exportExcel}
+            className="px-2.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] sm:text-sm font-bold shadow-sm transition-colors"
+          >
+            📄 Excel
           </button>
         </div>
       </div>
@@ -922,7 +1006,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
             </thead>
             <tbody>
               {displayStaff.map((staff, idx) => {
-                const row = data[activeTab][staff] || emptyRow();
+                const row = activeData[activeTab][staff] || emptyRow();
                 const isSaving = saving === `${activeTab}:${staff}`;
                 return (
                   <tr key={staff} className={`border-b border-slate-50 transition-colors hover:bg-blue-50/30 ${idx % 2 === 0 ? 'bg-slate-50/30' : ''} ${isSaving ? 'opacity-70' : ''}`}>
@@ -1291,66 +1375,98 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-100">
-                  <th className="text-left px-4 py-3 text-[10px] font-black text-slate-400 uppercase sticky left-0 bg-white/90 z-10 min-w-[80px]">Staff</th>
-                  <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase text-right">สมัคร<br/><span className="text-purple-400">ก่อน</span></th>
-                  <th className="px-3 py-3 text-[10px] font-black text-blue-500 uppercase text-right">สมัคร<br/><span className="text-blue-400">นี้</span></th>
-                  <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase text-right">สมาชิกฝาก<br/><span className="text-purple-400">ก่อน</span></th>
-                  <th className="px-3 py-3 text-[10px] font-black text-emerald-500 uppercase text-right">สมาชิกฝาก<br/><span className="text-emerald-400">นี้</span></th>
-                  <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase text-right">ฝาก<br/><span className="text-purple-400">ก่อน</span></th>
-                  <th className="px-3 py-3 text-[10px] font-black text-green-500 uppercase text-right">ฝาก<br/><span className="text-green-400">นี้</span></th>
-                  <th className="px-3 py-3 text-[10px] font-black text-emerald-500 uppercase text-right">%</th>
-                  <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase text-right">ถอน<br/><span className="text-purple-400">ก่อน</span></th>
-                  <th className="px-3 py-3 text-[10px] font-black text-rose-500 uppercase text-right">ถอน<br/><span className="text-rose-400">นี้</span></th>
+                  <th className="text-left px-2 sm:px-4 py-2 sm:py-3 text-[8px] sm:text-[10px] font-black text-slate-400 uppercase sticky left-0 bg-white/90 z-10 min-w-[50px] sm:min-w-[80px]">Staff</th>
+                  <th className="px-1.5 sm:px-3 py-2 sm:py-3 text-[8px] sm:text-[10px] font-black text-purple-400 uppercase text-right">สมัคร<br/><span className="text-purple-300">เดือนก่อน</span></th>
+                  <th className="px-1.5 sm:px-3 py-2 sm:py-3 text-[8px] sm:text-[10px] font-black text-blue-500 uppercase text-right">สมัคร<br/><span className="text-blue-400">เดือนนี้</span></th>
+                  <th className="px-1.5 sm:px-3 py-2 sm:py-3 text-[8px] sm:text-[10px] font-black text-purple-400 uppercase text-right">สมาชิกฝาก<br/><span className="text-purple-300">เดือนก่อน</span></th>
+                  <th className="px-1.5 sm:px-3 py-2 sm:py-3 text-[8px] sm:text-[10px] font-black text-emerald-500 uppercase text-right">สมาชิกฝาก<br/><span className="text-emerald-400">เดือนนี้</span></th>
+                  <th className="px-1.5 sm:px-3 py-2 sm:py-3 text-[8px] sm:text-[10px] font-black text-purple-400 uppercase text-right">ยอดฝาก<br/><span className="text-purple-300">เดือนก่อน</span></th>
+                  <th className="px-1.5 sm:px-3 py-2 sm:py-3 text-[8px] sm:text-[10px] font-black text-green-500 uppercase text-right">ยอดฝาก<br/><span className="text-green-400">เดือนนี้</span></th>
+                  <th className="px-1.5 sm:px-3 py-2 sm:py-3 text-[8px] sm:text-[10px] font-black text-purple-400 uppercase text-right">ฝากแรก<br/><span className="text-purple-300">เดือนก่อน</span></th>
+                  <th className="px-1.5 sm:px-3 py-2 sm:py-3 text-[8px] sm:text-[10px] font-black text-cyan-500 uppercase text-right">ฝากแรก<br/><span className="text-cyan-400">เดือนนี้</span></th>
+                  <th className="px-1.5 sm:px-3 py-2 sm:py-3 text-[8px] sm:text-[10px] font-black text-purple-400 uppercase text-right">ยอดถอน<br/><span className="text-purple-300">เดือนก่อน</span></th>
+                  <th className="px-1.5 sm:px-3 py-2 sm:py-3 text-[8px] sm:text-[10px] font-black text-rose-500 uppercase text-right">ยอดถอน<br/><span className="text-rose-400">เดือนนี้</span></th>
+                  <th className="px-1.5 sm:px-3 py-2 sm:py-3 text-[8px] sm:text-[10px] font-black text-purple-400 uppercase text-right">W/L<br/><span className="text-purple-300">เดือนก่อน</span></th>
+                  <th className="px-1.5 sm:px-3 py-2 sm:py-3 text-[8px] sm:text-[10px] font-black text-orange-500 uppercase text-right">W/L<br/><span className="text-orange-400">เดือนนี้</span></th>
                 </tr>
               </thead>
               <tbody>
                 {displayPrevMonthlySummary.map((prev, idx) => {
                   const curr = displayMonthlySummary.find(r => r.name === prev.name);
                   const currDep = curr?.month_deposit || 0;
-                  const depPct = pctChange(currDep, prev.month_deposit);
+                  const currWd = curr?.total_withdraw || 0;
+                  const wl = currDep - currWd - (prev.month_deposit - prev.total_withdraw);
                   return (
                     <tr key={prev.name} className={`border-b border-slate-50 hover:bg-purple-50/30 ${idx % 2 === 0 ? 'bg-slate-50/30' : ''}`}>
-                      <td className="px-4 py-3 font-black text-slate-800 sticky left-0 bg-inherit z-10">
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-xs font-black">{prev.name[0]}</div>
-                          {prev.name}
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 font-black text-slate-800 sticky left-0 bg-inherit z-10">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-[10px] sm:text-xs font-black flex-shrink-0">{prev.name[0]}</div>
+                          <span className="text-xs sm:text-sm">{prev.name}</span>
                         </div>
                       </td>
-                      <td className="px-3 py-3 text-right font-bold text-slate-500">{fmt(prev.register)}</td>
-                      <td className="px-3 py-3 text-right font-black text-blue-600">{fmt(curr?.register || 0)}</td>
-                      <td className="px-3 py-3 text-right font-bold text-slate-500">{fmt(prev.deposit_member)}</td>
-                      <td className="px-3 py-3 text-right font-black text-emerald-600">{fmt(curr?.deposit_member || 0)}</td>
-                      <td className="px-3 py-3 text-right font-bold text-slate-500">{fmt(Math.round(prev.month_deposit))}</td>
-                      <td className="px-3 py-3 text-right font-black text-green-600">{fmt(Math.round(currDep))}</td>
-                      <td className={`px-3 py-3 text-right font-black ${depPct >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                        {prev.month_deposit > 0 ? `${depPct >= 0 ? '▲' : '▼'}${Math.abs(depPct)}%` : '-'}
-                      </td>
-                      <td className="px-3 py-3 text-right font-bold text-slate-500">{fmt(Math.round(prev.total_withdraw))}</td>
-                      <td className="px-3 py-3 text-right font-black text-rose-600">{fmt(Math.round(curr?.total_withdraw || 0))}</td>
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-bold text-slate-500 text-xs sm:text-sm">{fmt(prev.register)}</td>
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-black text-blue-600 text-xs sm:text-sm">{fmt(curr?.register || 0)}</td>
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-bold text-slate-500 text-xs sm:text-sm">{fmt(prev.deposit_member)}</td>
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-black text-emerald-600 text-xs sm:text-sm">{fmt(curr?.deposit_member || 0)}</td>
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-bold text-slate-500 text-xs sm:text-sm">{fmt(Math.round(prev.month_deposit))}</td>
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-black text-green-600 text-xs sm:text-sm">{fmt(Math.round(currDep))}</td>
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-bold text-slate-500 text-xs sm:text-sm">{fmt(Math.round(prev.first_deposit))}</td>
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-black text-cyan-600 text-xs sm:text-sm">{fmt(Math.round(curr?.first_deposit || 0))}</td>
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-bold text-slate-500 text-xs sm:text-sm">{fmt(Math.round(prev.total_withdraw))}</td>
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-black text-rose-600 text-xs sm:text-sm">{fmt(Math.round(currWd))}</td>
+                      {(() => {
+                        const prevWL = prev.month_deposit - prev.total_withdraw;
+                        const currWL = currDep - currWd;
+                        return (
+                          <>
+                            <td className={`px-2 sm:px-3 py-2 sm:py-3 text-right font-black text-xs sm:text-sm ${prevWL >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                              {fmt(Math.round(prevWL))}
+                            </td>
+                            <td className={`px-2 sm:px-3 py-2 sm:py-3 text-right font-black text-xs sm:text-sm ${currWL >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                              {fmt(Math.round(currWL))}
+                            </td>
+                          </>
+                        );
+                      })()}
                     </tr>
                   );
                 })}
-                {displayPrevMonthlySummary.length > 1 && (
-                  <tr className="bg-slate-900/5 border-t-2 border-slate-200">
-                    <td className="px-4 py-3 font-black text-slate-900 sticky left-0 bg-slate-100/80 z-10">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center text-white text-xs font-black">Σ</div>
-                        รวม
-                      </div>
-                    </td>
-                    <td className="px-3 py-3 text-right font-black text-slate-600">{fmt(prevMonthTotals.register)}</td>
-                    <td className="px-3 py-3 text-right font-black text-blue-700">{fmt(monthTotals.register)}</td>
-                    <td className="px-3 py-3 text-right font-black text-slate-600">{fmt(prevMonthTotals.deposit_member)}</td>
-                    <td className="px-3 py-3 text-right font-black text-emerald-700">{fmt(monthTotals.deposit_member)}</td>
-                    <td className="px-3 py-3 text-right font-black text-slate-600">{fmt(Math.round(prevMonthTotals.month_deposit))}</td>
-                    <td className="px-3 py-3 text-right font-black text-green-700">{fmt(Math.round(monthTotals.month_deposit))}</td>
-                    <td className={`px-3 py-3 text-right font-black ${pctChange(monthTotals.month_deposit, prevMonthTotals.month_deposit) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                      {prevMonthTotals.month_deposit > 0 ? `${pctChange(monthTotals.month_deposit, prevMonthTotals.month_deposit) >= 0 ? '▲' : '▼'}${Math.abs(pctChange(monthTotals.month_deposit, prevMonthTotals.month_deposit))}%` : '-'}
-                    </td>
-                    <td className="px-3 py-3 text-right font-black text-slate-600">{fmt(Math.round(prevMonthTotals.total_withdraw))}</td>
-                    <td className="px-3 py-3 text-right font-black text-rose-700">{fmt(Math.round(monthTotals.total_withdraw))}</td>
-                  </tr>
-                )}
+                {displayPrevMonthlySummary.length > 1 && (() => {
+                  return (
+                    <tr className="bg-slate-900/5 border-t-2 border-slate-200">
+                      <td className="px-3 sm:px-4 py-3 sm:py-4 font-black text-slate-900 sticky left-0 bg-slate-100/80 z-10">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center text-white text-[10px] sm:text-xs font-black flex-shrink-0">Σ</div>
+                          <span className="text-xs sm:text-sm">รวม</span>
+                        </div>
+                      </td>
+                      <td className="px-2 sm:px-3 py-3 sm:py-4 text-right font-black text-slate-600 text-xs sm:text-sm">{fmt(prevMonthTotals.register)}</td>
+                      <td className="px-2 sm:px-3 py-3 sm:py-4 text-right font-black text-blue-700 text-xs sm:text-sm">{fmt(monthTotals.register)}</td>
+                      <td className="px-2 sm:px-3 py-3 sm:py-4 text-right font-black text-slate-600 text-xs sm:text-sm">{fmt(prevMonthTotals.deposit_member)}</td>
+                      <td className="px-2 sm:px-3 py-3 sm:py-4 text-right font-black text-emerald-700 text-xs sm:text-sm">{fmt(monthTotals.deposit_member)}</td>
+                      <td className="px-2 sm:px-3 py-3 sm:py-4 text-right font-black text-slate-600 text-xs sm:text-sm">{fmt(Math.round(prevMonthTotals.month_deposit))}</td>
+                      <td className="px-2 sm:px-3 py-3 sm:py-4 text-right font-black text-green-700 text-xs sm:text-sm">{fmt(Math.round(monthTotals.month_deposit))}</td>
+                      <td className="px-2 sm:px-3 py-3 sm:py-4 text-right font-black text-slate-600 text-xs sm:text-sm">{fmt(Math.round(prevMonthTotals.first_deposit || 0))}</td>
+                      <td className="px-2 sm:px-3 py-3 sm:py-4 text-right font-black text-cyan-700 text-xs sm:text-sm">{fmt(Math.round(monthTotals.first_deposit || 0))}</td>
+                      <td className="px-2 sm:px-3 py-3 sm:py-4 text-right font-black text-slate-600 text-xs sm:text-sm">{fmt(Math.round(prevMonthTotals.total_withdraw || 0))}</td>
+                      <td className="px-2 sm:px-3 py-3 sm:py-4 text-right font-black text-rose-700 text-xs sm:text-sm">{fmt(Math.round(monthTotals.total_withdraw || 0))}</td>
+                      {(() => {
+                        const prevWL = prevMonthTotals.month_deposit - (prevMonthTotals.total_withdraw || 0);
+                        const currWL = monthTotals.month_deposit - (monthTotals.total_withdraw || 0);
+                        return (
+                          <>
+                            <td className={`px-2 sm:px-3 py-3 sm:py-4 text-right font-black text-xs sm:text-sm ${prevWL >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                              {fmt(Math.round(prevWL))}
+                            </td>
+                            <td className={`px-2 sm:px-3 py-3 sm:py-4 text-right font-black text-xs sm:text-sm ${currWL >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                              {fmt(Math.round(currWL))}
+                            </td>
+                          </>
+                        );
+                      })()}
+                    </tr>
+                  );
+                })()}
               </tbody>
             </table>
           </div>

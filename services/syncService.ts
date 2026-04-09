@@ -25,7 +25,7 @@ export const syncUsers = async (localUsers: UserProfile[]): Promise<UserProfile[
                 employeeId: u.employee_id,
                 joinDate: u.join_date,
                 company: u.company,
-                avatar: u.avatar,
+                avatar: u.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name || u.id)}`,
                 role: u.role,
                 // pin ไม่ส่งมา client — verify ผ่าน /api/verify-pin
                 storedFace: u.stored_face,
