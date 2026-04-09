@@ -62,9 +62,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const date = typeof req.query?.date === 'string' ? req.query.date : undefined;
 
+  // VPS คืนแค่วันปัจจุบัน — ถ้าเลือกวันอื่นให้ดึงจาก cache อย่างเดียว
+  const bkkNow = new Date(Date.now() + 7 * 60 * 60 * 1000);
+  const today = bkkNow.toISOString().split('T')[0];
+  const isPastDate = date && date !== today;
+
+  if (isPastDate) {
+    const cached = await loadCachedPayload(date);
+    if (cached) {
+      return res.status(200).json({ ...cached, date });
+    }
+    return res.status(200).json({ items: [], monthly_items: [], date, error: 'No cached data for this date' });
+  }
+
   try {
-    const dateParam = date ? `?date=${date}` : '';
-    const upstream = await fetch(`${VPS_BASE}${dateParam}`, { signal: AbortSignal.timeout(10000) });
+    const upstream = await fetch(`${VPS_BASE}`, { signal: AbortSignal.timeout(10000) });
     const data: TigerPayload = await upstream.json();
     const cached = await loadCachedPayload(date);
 
@@ -79,12 +91,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       total: Array.isArray(data.items) ? data.items.length : cached?.total || 0,
       fetched_at: data.fetched_at || cached?.fetched_at || new Date().toISOString(),
       updated_at: data.updated_at || cached?.updated_at || new Date().toISOString(),
-      date: data.date || cached?.date || new Date().toISOString().split('T')[0],
+      date: data.date || cached?.date || today,
     };
 
-    // Save cache ทุกครั้งที่ VPS ตอบสำเร็จ
+    // Save cache ทุกครั้งที่ VPS ตอบสำเร็จ — เก็บทั้ง latest + วันที่
     if (Array.isArray(data.items) && data.items.length > 0) {
-      saveCachePayload(date, merged);
+      saveCachePayload(undefined, merged); // tiger_links_latest
+      saveCachePayload(today, merged);     // tiger_links_YYYY-MM-DD
     }
 
     res.status(200).json(merged);
