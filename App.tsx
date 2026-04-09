@@ -580,17 +580,20 @@ const AppInner: React.FC = () => {
     setPayrollRecords(prev => [newRecord, ...prev]);
   };
 
-  // Session timeout: auto-logout every minute check
+  // Session timeout: auto-logout every minute + on tab visibility change
   useEffect(() => {
-    const timer = setInterval(() => {
+    const checkTimeout = () => {
       const loginTime = Number(localStorage.getItem(SESSION_LOGIN_TIME_KEY) || '0');
       if (loginTime && (Date.now() - loginTime > SESSION_TIMEOUT_MS)) {
         localStorage.removeItem(CURRENT_USER_ID_KEY);
         localStorage.removeItem(SESSION_LOGIN_TIME_KEY);
         setCurrentUser(null);
       }
-    }, 60000);
-    return () => clearInterval(timer);
+    };
+    const timer = setInterval(checkTimeout, 60000);
+    const onVisibility = () => { if (document.visibilityState === 'visible') checkTimeout(); };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => { clearInterval(timer); document.removeEventListener('visibilitychange', onVisibility); };
   }, []);
 
   const handleLogin = useCallback(async (user: UserProfile) => {

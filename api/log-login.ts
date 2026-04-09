@@ -45,7 +45,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         Authorization: `Bearer ${SUPABASE_KEY}`,
         Prefer: 'return=minimal',
       },
-    }).catch(() => {});
+    }).catch((e) => console.error('login_logs cleanup failed:', e?.message));
 
     res.status(200).json({ ok: true });
   } catch (err: any) {

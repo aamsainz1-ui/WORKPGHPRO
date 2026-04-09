@@ -36,7 +36,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!oldPin) return res.status(400).json({ error: 'Missing oldPin' });
       const storedPin = rows[0].pin;
       const oldHash = await sha256(oldPin + 'gw_salt_2026');
-      const valid = storedPin === oldPin || storedPin === oldHash || oldHash === storedPin;
+      const valid = storedPin === oldHash || storedPin === oldPin;
       if (!valid) return res.status(401).json({ error: 'Invalid old PIN' });
     }
 

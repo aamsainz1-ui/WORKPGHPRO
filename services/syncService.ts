@@ -157,7 +157,7 @@ export const syncLeaves = async (localLeaves: LeaveRecord[]): Promise<LeaveRecor
             endDate: l.end_date,
             reason: l.reason,
             status: l.status,
-            requestedAt: Date.now() // Default to now if not stored
+            requestedAt: l.created_at ? new Date(l.created_at).getTime() : Date.now()
         }));
     } catch (error) {
         console.error('Sync leaves error:', error);

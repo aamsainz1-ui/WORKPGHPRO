@@ -77,8 +77,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isClockedIn, onAction, lastRecord
     const now = new Date();
     const day = now.getDay();
     const diff = now.getDate() - day + (day === 0 ? -6 : 1);
-    const monday = new Date(now.setDate(diff));
-    monday.setHours(0, 0, 0, 0);
+    const monday = new Date(now.getFullYear(), now.getMonth(), diff, 0, 0, 0, 0);
     const startOfWeek = monday.getTime();
 
     const daysData = Array(7).fill(0).map((_, i) => {

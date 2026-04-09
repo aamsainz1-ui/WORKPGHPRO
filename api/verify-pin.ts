@@ -40,9 +40,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const storedPin = rows[0].pin;
     if (!storedPin) return res.status(400).json({ error: 'No PIN set' });
 
-    // เช็คทั้ง plaintext และ hashed
+    // เช็ค: hash input แล้วเทียบกับ stored (ถ้า stored เป็น hash)
+    // หรือเทียบ plaintext ตรงๆ (กรณี stored ยังไม่ได้ hash)
     const pinHash = await sha256(pin + 'gw_salt_2026');
-    const valid = storedPin === pin || storedPin === pinHash || pinHash === storedPin;
+    const valid = storedPin === pinHash || storedPin === pin;
 
     if (valid) {
       return res.status(200).json({ success: true });

@@ -97,11 +97,11 @@ const DailySummary: React.FC<DailySummaryProps> = ({ records, members, onAdd, on
                 totalAds,
                 r.registrations,
                 r.depositors,
-                depositRate.toFixed(1) + '%',
+                Math.round(depositRate * 10) / 10 + '%',
                 r.firstDeposit,
                 r.fullDayDeposit,
                 r.fullMonthDeposit,
-                avgPerUser.toFixed(2)
+                Math.round(avgPerUser * 100) / 100
             ];
         });
 

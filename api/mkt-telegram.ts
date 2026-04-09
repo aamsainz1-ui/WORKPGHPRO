@@ -31,7 +31,9 @@ async function getTigerData() {
       { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
     );
     const rows = await res.json();
-    if (rows?.[0]?.value) return JSON.parse(rows[0].value);
+    if (rows?.[0]?.value) {
+      try { return JSON.parse(rows[0].value); } catch { /* bad cache */ }
+    }
     return { items: [], monthly_items: [] };
   }
 }
