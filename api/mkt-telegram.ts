@@ -73,10 +73,13 @@ function buildMessage(data: any) {
     totalDep += dep;
     totalWd += wd;
 
+    const avgPerUser = depUser > 0 ? Math.round(dep / depUser) : 0;
+
     lines.push(
       `👤 *${staff}*` +
       `\n   สมัคร: ${fmt(reg)} | ฝาก: ${fmt(depUser)} (${pct}%)` +
-      `\n   FTD: ${fmt(ftd)} | ฝากรวม: ${fmt(dep)} | ถอน: ${fmt(wd)}`
+      `\n   FTD: ${fmt(ftd)} | ฝากรวม: ${fmt(dep)} | ถอน: ${fmt(wd)}` +
+      `\n   เฉลี่ย/คน: ${fmt(avgPerUser)} บาท`
     );
   }
 
