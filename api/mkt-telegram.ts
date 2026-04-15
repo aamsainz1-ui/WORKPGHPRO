@@ -73,7 +73,7 @@ function buildMessage(data: any) {
     totalDep += dep;
     totalWd += wd;
 
-    const avgPerUser = depUser > 0 ? Math.round(dep / depUser) : 0;
+    const avgPerUser = depUser > 0 ? Math.round(ftd / depUser) : 0;
 
     lines.push(
       `👤 *${staff}*` +
