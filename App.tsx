@@ -18,6 +18,7 @@ import PermissionManager from './components/PermissionManager';
 import TeamStatusCard from './components/TeamStatusCard';
 import TeamManagement from './components/TeamManagement';
 import MktDashboard from './components/MktDashboard';
+import MeetingRoom from './components/MeetingRoom';
 import PINLogin from './components/PINLogin';
 import { verifyFace, reverseGeocode } from './services/gemini';
 import { verifyFaceLocal, initFaceDetection } from './services/faceService';
@@ -148,7 +149,7 @@ const AppInner: React.FC = () => {
   const [leaves, setLeaves] = useState<LeaveRecord[]>(boot.leaves);
   const [settings, setSettings] = useState<SystemSettings>(boot.settings);
   const [lang, setLang] = useState<Language>(boot.lang);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'history' | 'leave' | 'profile' | 'organization' | 'announcements' | 'admin' | 'calendar' | 'mkt' | 'payroll' | 'permissions' | 'teams'>(boot.tab);
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'history' | 'leave' | 'profile' | 'organization' | 'announcements' | 'admin' | 'calendar' | 'mkt' | 'payroll' | 'permissions' | 'teams' | 'meeting'>(boot.tab);
 
   const [isClockedIn, setIsClockedIn] = useState(() => records.length > 0 && records[0].type === AttendanceType.CHECK_IN);
   const [showScanner, setShowScanner] = useState(false);
@@ -677,6 +678,8 @@ const AppInner: React.FC = () => {
             />}
             {activeTab === 'announcements' && <Announcements announcements={announcements} lang={lang} isAdmin={currentUser.role === UserRole.ADMIN} onAdd={handleAddAnnouncement} onDelete={handleDeleteAnnouncement} />}
             {activeTab === 'calendar' && <ContentCalendar plans={contentPlans} onAdd={handleAddContentPlan} onDelete={handleDeleteContentPlan} lang={lang} />}
+            {activeTab === 'meeting' && <MeetingRoom />
+            }
             {activeTab === 'mkt' && <MktDashboard isAdmin={currentUser.role === UserRole.ADMIN} defaultStaff={currentUser.role !== UserRole.ADMIN ? (settings.mktViewPermissions?.[currentUser.id] || currentUser.name) : undefined} currentUserName={currentUser.name} />}
             {activeTab === 'payroll' && currentUser.role === UserRole.ADMIN && <PayrollManager members={teamMembers} payroll={payrollRecords} compensation={compensationSettings} onUpdateCompensation={handleUpdateCompensation} onProcessPayroll={handleProcessPayroll} lang={lang} />}
             {activeTab === 'admin' && <AdminConsole leaves={leaves} onApprove={handleLeaveApproval} members={teamMembers} lang={lang} settings={settings} onUpdateSettings={setSettings} onCreateMember={handleCreateMember} onUpdateMember={handleUpdateMember} allRecordsMap={allRecordsMap} announcements={announcements} onAddAnnouncement={handleAddAnnouncement} onDeleteAnnouncement={handleDeleteAnnouncement} />}
