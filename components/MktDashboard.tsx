@@ -410,8 +410,18 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
   const fetchTiger = useCallback(async (dateOverride?: string) => {
     setTigerLoading(true);
     try {
-      const dateParam = dateOverride ? `?date=${dateOverride}` : '';
-      const res = await fetch(`${TIGER_API}${dateParam}`);
+      const params = new URLSearchParams();
+      if (dateOverride) params.set('date', dateOverride);
+      params.set('_', String(Date.now()));
+      const qs = params.toString();
+      const res = await fetch(`${TIGER_API}${qs ? `?${qs}` : ''}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      });
       const json: TigerData = await res.json();
       // ถ้า scrape ล้มเหลวแต่มี items เก่า ให้ใช้ข้อมูลเก่าต่อ ไม่ล้างตาราง
       if (json.error && (!json.items || json.items.length === 0)) {
@@ -684,14 +694,40 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
 
   // === Previous month totals for comparison (filtered by staff) ===
   const displayPrevMonthlySummary = staffFilter === 'all' ? prevMonthlySummary : prevMonthlySummary.filter(r => r.name === staffFilter);
+  const prevByName = Object.fromEntries(displayPrevMonthlySummary.map(r => [r.name, r]));
+  const currByName = Object.fromEntries(displayMonthlySummary.map(r => [r.name, r]));
+  const compareStaffNames = (staffFilter === 'all'
+    ? [...STAFF, ...Array.from(new Set([...displayPrevMonthlySummary, ...displayMonthlySummary].map(r => r.name))).filter(name => !STAFF.includes(name))]
+    : [staffFilter]
+  ).filter(name => prevByName[name] || currByName[name]);
+  const comparisonRows = compareStaffNames.map(name => ({
+    name,
+    prev: prevByName[name] || {
+      name,
+      fb: 0, google: 0, tiktok: 0, totalAds: 0,
+      register: 0, deposit_member: 0, first_deposit: 0,
+      daily_deposit: 0, month_deposit: 0, depositPct: 0,
+      total_withdraw: 0, register_withdraw_amount: 0,
+      costPerRegister: 0, costPerDeposit: 0, profitLoss: 0,
+    },
+    curr: currByName[name] || {
+      name,
+      fb: 0, google: 0, tiktok: 0, totalAds: 0,
+      register: 0, deposit_member: 0, first_deposit: 0,
+      daily_deposit: 0, month_deposit: 0, depositPct: 0,
+      total_withdraw: 0, register_withdraw_amount: 0,
+      costPerRegister: 0, costPerDeposit: 0, profitLoss: 0,
+    },
+  }));
   const prevMonthTotals = displayPrevMonthlySummary.reduce((acc, r) => ({
     totalAds: acc.totalAds + (r.totalAds || 0),
     register: acc.register + (r.register || 0),
     deposit_member: acc.deposit_member + (r.deposit_member || 0),
+    first_deposit: acc.first_deposit + (r.first_deposit || 0),
     month_deposit: acc.month_deposit + (r.month_deposit || 0),
     total_withdraw: acc.total_withdraw + (r.total_withdraw || 0),
     profitLoss: acc.profitLoss + (r.profitLoss || 0),
-  }), { totalAds: 0, register: 0, deposit_member: 0, month_deposit: 0, total_withdraw: 0, profitLoss: 0 });
+  }), { totalAds: 0, register: 0, deposit_member: 0, first_deposit: 0, month_deposit: 0, total_withdraw: 0, profitLoss: 0 });
 
   const pctChange = (curr: number, prev: number) => prev > 0 ? Math.round(((curr - prev) / prev) * 100) : curr > 0 ? 100 : 0;
 
@@ -1375,7 +1411,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
       </div>
 
       {/* ===== Previous Month Comparison Table ===== */}
-      {displayPrevMonthlySummary.length > 0 && (
+      {comparisonRows.length > 0 && (
         <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-100">
             <h3 className="text-sm font-black text-slate-700 uppercase tracking-normal">📅 เปรียบเทียบเดือนก่อน</h3>
@@ -1400,31 +1436,29 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                 </tr>
               </thead>
               <tbody>
-                {displayPrevMonthlySummary.map((prev, idx) => {
-                  const curr = displayMonthlySummary.find(r => r.name === prev.name);
-                  const currDep = curr?.month_deposit || 0;
-                  const currWd = curr?.total_withdraw || 0;
-                  const wl = currDep - currWd - (prev.month_deposit - prev.total_withdraw);
+                {comparisonRows.map(({ name, prev, curr }, idx) => {
+                  const currDep = curr.month_deposit || 0;
+                  const currWd = curr.total_withdraw || 0;
                   return (
-                    <tr key={prev.name} className={`border-b border-slate-50 hover:bg-purple-50/30 ${idx % 2 === 0 ? 'bg-slate-50/30' : ''}`}>
+                    <tr key={name} className={`border-b border-slate-50 hover:bg-purple-50/30 ${idx % 2 === 0 ? 'bg-slate-50/30' : ''}`}>
                       <td className="px-3 sm:px-4 py-2 sm:py-3 font-black text-slate-800 sticky left-0 bg-inherit z-10">
                         <div className="flex items-center gap-1.5 sm:gap-2">
-                          <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-[10px] sm:text-xs font-black flex-shrink-0">{prev.name[0]}</div>
-                          <span className="text-xs sm:text-sm">{prev.name}</span>
+                          <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-[10px] sm:text-xs font-black flex-shrink-0">{name[0]}</div>
+                          <span className="text-xs sm:text-sm">{name}</span>
                         </div>
                       </td>
                       <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-bold text-slate-500 text-xs sm:text-sm">{fmt(prev.register)}</td>
-                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-black text-blue-600 text-xs sm:text-sm">{fmt(curr?.register || 0)}</td>
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-black text-blue-600 text-xs sm:text-sm">{fmt(curr.register || 0)}</td>
                       <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-bold text-slate-500 text-xs sm:text-sm">{fmt(prev.deposit_member)}</td>
-                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-black text-emerald-600 text-xs sm:text-sm">{fmt(curr?.deposit_member || 0)}</td>
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-black text-emerald-600 text-xs sm:text-sm">{fmt(curr.deposit_member || 0)}</td>
                       <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-bold text-slate-500 text-xs sm:text-sm">{fmt(Math.round(prev.month_deposit))}</td>
                       <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-black text-green-600 text-xs sm:text-sm">{fmt(Math.round(currDep))}</td>
-                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-bold text-slate-500 text-xs sm:text-sm">{fmt(Math.round(prev.first_deposit))}</td>
-                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-black text-cyan-600 text-xs sm:text-sm">{fmt(Math.round(curr?.first_deposit || 0))}</td>
-                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-bold text-slate-500 text-xs sm:text-sm">{fmt(Math.round(prev.total_withdraw))}</td>
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-bold text-slate-500 text-xs sm:text-sm">{fmt(Math.round(prev.first_deposit || 0))}</td>
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-black text-cyan-600 text-xs sm:text-sm">{fmt(Math.round(curr.first_deposit || 0))}</td>
+                      <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-bold text-slate-500 text-xs sm:text-sm">{fmt(Math.round(prev.total_withdraw || 0))}</td>
                       <td className="px-2 sm:px-3 py-2 sm:py-3 text-right font-black text-rose-600 text-xs sm:text-sm">{fmt(Math.round(currWd))}</td>
                       {(() => {
-                        const prevWL = prev.month_deposit - prev.total_withdraw;
+                        const prevWL = prev.month_deposit - (prev.total_withdraw || 0);
                         const currWL = currDep - currWd;
                         return (
                           <>
@@ -1440,7 +1474,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                     </tr>
                   );
                 })}
-                {displayPrevMonthlySummary.length > 1 && (() => {
+                {comparisonRows.length > 1 && (() => {
                   return (
                     <tr className="bg-slate-900/5 border-t-2 border-slate-200">
                       <td className="px-3 sm:px-4 py-3 sm:py-4 font-black text-slate-900 sticky left-0 bg-slate-100/80 z-10">
