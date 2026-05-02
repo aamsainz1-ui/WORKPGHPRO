@@ -40,51 +40,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const prevYear = m === 0 ? y - 1 : y;
   const cacheKey = `prev_month_${prevYear}-${String(prevMonth).padStart(2, '0')}`;
 
-  // 1. เช็ค cache ก่อน
-  try {
-    const cacheResp = await fetch(
-      `${SUPABASE_URL}/rest/v1/tiger_cache?key=eq.${encodeURIComponent(cacheKey)}&select=value&limit=1`,
-      { headers: SUPA_HEADERS, signal: AbortSignal.timeout(5000) }
-    );
-    const cacheRows = await cacheResp.json();
-    if (Array.isArray(cacheRows) && cacheRows[0]?.value) {
-      return res.status(200).json(JSON.parse(cacheRows[0].value));
-    }
-  } catch {}
-
-  // 2. ไม่มี cache — ดึงจาก tiger_cache daily snapshots (tiger_links_YYYY-MM-DD)
-  // (Tiger links-performance API ignores date param — คืนค่าวันปัจจุบันเสมอ)
-  const lastDay = new Date(prevYear, prevMonth, 0).getDate();
-  const map: Record<string, StaffSummary> = {};
   const monthStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}`;
+  const monthlyKey = `tiger_links_monthly_${monthStr}`;
+  const map: Record<string, StaffSummary> = {};
+
+  // 1. ดึงจาก tiger_links_monthly_YYYY-MM (Tiger range query — ถูกต้องที่สุด)
   try {
-    const snapResp = await fetch(
-      `${SUPABASE_URL}/rest/v1/tiger_cache?key=like.tiger_links_${monthStr}-*&select=key,value`,
-      { headers: SUPA_HEADERS, signal: AbortSignal.timeout(20000) }
+    const monthlyResp = await fetch(
+      `${SUPABASE_URL}/rest/v1/tiger_cache?key=eq.${encodeURIComponent(monthlyKey)}&select=value&limit=1`,
+      { headers: SUPA_HEADERS, signal: AbortSignal.timeout(8000) }
     );
-    const snaps = await snapResp.json();
-    if (Array.isArray(snaps)) {
-      for (const row of snaps) {
-        try {
-          const payload = JSON.parse(row.value);
-          for (const item of (payload.items || [])) {
-            const staff = CAMPAIGN_STAFF_MAP[item.campaign_name];
-            if (!staff) continue;
-            if (!map[staff]) {
-              map[staff] = { name: staff, register: 0, deposit_member: 0, month_deposit: 0, total_withdraw: 0, first_deposit: 0, register_withdraw_amount: 0 };
-            }
-            map[staff].register += item.total_register || 0;
-            map[staff].deposit_member += item.register_deposit_user || 0;
-            map[staff].month_deposit += Math.round(item.total_deposit || 0);
-            map[staff].total_withdraw += Math.round(item.total_withdraw || 0);
-            map[staff].first_deposit += Math.round(item.deposit_first_time_amount || 0);
-            map[staff].register_withdraw_amount += Math.round(item.register_withdraw_amount || 0);
-          }
-        } catch { /* skip */ }
+    const monthlyRows = await monthlyResp.json();
+    if (Array.isArray(monthlyRows) && monthlyRows[0]?.value) {
+      const payload = JSON.parse(monthlyRows[0].value);
+      for (const item of (payload.items || [])) {
+        const staff = CAMPAIGN_STAFF_MAP[item.campaign_name];
+        if (!staff) continue;
+        if (!map[staff]) {
+          map[staff] = { name: staff, register: 0, deposit_member: 0, month_deposit: 0, total_withdraw: 0, first_deposit: 0, register_withdraw_amount: 0 };
+        }
+        map[staff].register += item.total_register || 0;
+        map[staff].deposit_member += item.register_deposit_user || 0;
+        map[staff].month_deposit += Math.round(item.total_deposit || 0);
+        map[staff].total_withdraw += Math.round(item.total_withdraw || 0);
+        map[staff].first_deposit += Math.round(item.deposit_first_time_amount || 0);
+        map[staff].register_withdraw_amount += Math.round(item.register_withdraw_amount || 0);
       }
     }
-  } catch { /* no snapshots */ }
-  void lastDay;
+  } catch {}
 
   const result = {
     month: `${prevYear}-${String(prevMonth).padStart(2, '0')}`,
