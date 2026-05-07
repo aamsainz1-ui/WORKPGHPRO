@@ -364,35 +364,55 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
   useEffect(() => {
     if (rangeTrigger === 0 || !isRange) { return; }
     setRangeLoading(true);
-    fetch(`/api/tiger-range?from=${selectedDate}&to=${endDate}`)
-      .then(r => r.json())
-      .then((json: { items: Array<{ campaign_name: string; tab?: string; total_register: number; register_deposit_user: number; total_deposit: number; total_withdraw: number; deposit_first_time_amount: number }> }) => {
+
+    const [sy, sm, sd] = selectedDate.split('-');
+    const [ey, em, ed] = endDate.split('-');
+    const fromThai = `${sd}/${sm}/${sy}`;
+    const toThai = `${ed}/${em}/${ey}`;
+
+    Promise.all([
+      fetch(`/api/tiger-range?from=${selectedDate}&to=${endDate}`).then(r => r.json()).catch(() => ({ items: [] })),
+      supaFetch(`/rest/v1/mkt_data?date=gte.${encodeURIComponent(fromThai)}&date=lte.${encodeURIComponent(toThai)}&select=name,tab,fb,google,tiktok`)
+        .catch(() => [])
+    ])
+      .then(([json, mktRows]: [any, any]) => {
         if (!json.items) { setRangeData(null); return; }
         const rd = initData();
         const CMAP: Record<string, string> = CAMPAIGN_STAFF_MAP;
-        json.items.forEach(item => {
+
+        // Merge VPS data (register/deposit)
+        json.items.forEach((item: any) => {
           const staff = CMAP[item.campaign_name];
           if (!staff) return;
           const tab = (item.tab as TabKey) || 'TG';
-          const merged = recalc({
-            ...emptyRow(),
-            register: item.total_register || 0,
-            memberDeposit: item.register_deposit_user || 0,
-            firstDeposit: Math.round(item.deposit_first_time_amount || 0),
-            dailyDeposit: Math.round(item.total_deposit || 0),
-            totalWithdraw: Math.round(item.total_withdraw || 0),
-            monthlyDeposit: 0,
-          });
           const existing = rd[tab][staff] || emptyRow();
           rd[tab][staff] = recalc({
             ...existing,
-            register: existing.register + merged.register,
-            memberDeposit: existing.memberDeposit + merged.memberDeposit,
-            firstDeposit: existing.firstDeposit + merged.firstDeposit,
-            dailyDeposit: existing.dailyDeposit + merged.dailyDeposit,
-            totalWithdraw: existing.totalWithdraw + merged.totalWithdraw,
+            register: existing.register + (item.total_register || 0),
+            memberDeposit: existing.memberDeposit + (item.register_deposit_user || 0),
+            firstDeposit: existing.firstDeposit + Math.round(item.deposit_first_time_amount || 0),
+            dailyDeposit: existing.dailyDeposit + Math.round(item.total_deposit || 0),
+            totalWithdraw: existing.totalWithdraw + Math.round(item.total_withdraw || 0),
+            monthlyDeposit: 0,
           });
         });
+
+        // Merge mkt_data (fb/google/tiktok ad spend)
+        if (Array.isArray(mktRows)) {
+          mktRows.forEach((row: any) => {
+            const tab = (row.tab as TabKey) || 'TG';
+            const staff = row.name;
+            if (!staff || !TABS.includes(tab)) return;
+            const existing = rd[tab][staff] || emptyRow();
+            rd[tab][staff] = recalc({
+              ...existing,
+              fb: existing.fb + (Number(row.fb) || 0),
+              google: existing.google + (Number(row.google) || 0),
+              tiktok: existing.tiktok + (Number(row.tiktok) || 0),
+            });
+          });
+        }
+
         setRangeData(rd);
       })
       .catch(() => setRangeData(null))
