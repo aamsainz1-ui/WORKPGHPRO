@@ -366,13 +366,14 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
     setRangeLoading(true);
     fetch(`/api/tiger-range?from=${selectedDate}&to=${endDate}`)
       .then(r => r.json())
-      .then((json: { items: Array<{ campaign_name: string; total_register: number; register_deposit_user: number; total_deposit: number; total_withdraw: number; deposit_first_time_amount: number }> }) => {
+      .then((json: { items: Array<{ campaign_name: string; tab?: string; total_register: number; register_deposit_user: number; total_deposit: number; total_withdraw: number; deposit_first_time_amount: number }> }) => {
         if (!json.items) { setRangeData(null); return; }
         const rd = initData();
         const CMAP: Record<string, string> = CAMPAIGN_STAFF_MAP;
         json.items.forEach(item => {
           const staff = CMAP[item.campaign_name];
           if (!staff) return;
+          const tab = (item.tab as TabKey) || 'TG';
           const merged = recalc({
             ...emptyRow(),
             register: item.total_register || 0,
@@ -382,8 +383,8 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
             totalWithdraw: Math.round(item.total_withdraw || 0),
             monthlyDeposit: 0,
           });
-          const existing = rd['TG'][staff] || emptyRow();
-          rd['TG'][staff] = recalc({
+          const existing = rd[tab][staff] || emptyRow();
+          rd[tab][staff] = recalc({
             ...existing,
             register: existing.register + merged.register,
             memberDeposit: existing.memberDeposit + merged.memberDeposit,

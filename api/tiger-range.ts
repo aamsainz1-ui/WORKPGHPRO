@@ -47,6 +47,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const map: Record<string, CampaignItem> = {};
   const cachedDates = new Set<string>();
 
+  // Fetch tab assignments from mkt_data สำหรับ date range นี้
+  const tabMap: Record<string, string> = {}; // campaign_name => tab
+  try {
+    const dateLikePatterns = dates.map(d => {
+      const [y, m, dd] = d.split('-');
+      return `${dd}/${m}/${y}`;
+    });
+    const orFilter = dateLikePatterns.map(p => `date.like.*${encodeURIComponent(p)}`).join(',');
+    const mktRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/mkt_data?or=(${orFilter})&select=name,tab`,
+      { headers: SUPA_HEADERS, signal: AbortSignal.timeout(10000) }
+    );
+    const mktRows = await mktRes.json();
+    if (Array.isArray(mktRows)) {
+      mktRows.forEach(row => {
+        const name = row.name?.toLowerCase?.() || '';
+        const tab = row.tab || 'TG';
+        const campKey = Object.entries({
+          'ly888': 'ลัน', 'pp': 'แบงค์', 'tg999': 'ต้น',
+          'tk888': 'เก่ง', 'mm888': 'เม่า'
+        }).find(([k, v]) => v === name)?.[0];
+        if (campKey) tabMap[campKey] = tab;
+      });
+    }
+  } catch { /* use default TG */ }
+
   // ลองดึงจาก tiger_cache ก่อน
   try {
     const keys = dates.map(dt => `tiger_links_${dt}`);
@@ -128,11 +154,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     } catch { /* VPS also failed, return what we have */ }
   }
 
+  // Add tab info to response
+  const itemsWithTab = Object.values(map).map(item => ({
+    ...item,
+    tab: tabMap[item.campaign_name] || 'TG',
+  }));
+
   res.status(200).json({
     from,
     to,
     days: dates.length,
-    items: Object.values(map),
+    items: itemsWithTab,
     fetched_at: new Date().toISOString(),
   });
 }
