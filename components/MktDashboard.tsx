@@ -312,15 +312,29 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
     const bkk = new Date(new Date().getTime() + 7 * 60 * 60 * 1000);
     return bkk.toISOString().split('T')[0];
   };
+  // selectedDate = วันที่ที่โหลด/บันทึกจริง และเป็นวันที่ของ Links Performance
+  // rangeDate/endDate = ช่องค้นหาด้านบนเท่านั้น เพื่อไม่ให้ range search ไปเปลี่ยน Links Performance
   const [selectedDate, setSelectedDate] = useState(getBkkDate);
+  const [rangeDate, setRangeDate] = useState(getBkkDate);
   const [endDate, setEndDate] = useState(''); // ว่าง = วันเดียว
-  const isRange = endDate && endDate !== selectedDate;
+  const isRange = Boolean(endDate && endDate !== rangeDate);
+  const lastAutoDateRef = useRef(getBkkDate());
 
-  // Auto-update วันที่เมื่อเที่ยงคืน Bangkok
+  useEffect(() => {
+    if (!endDate) setRangeDate(selectedDate);
+  }, [selectedDate, endDate]);
+
+  // Auto-update เฉพาะตอนผู้ใช้ยังอยู่ที่ "วันนี้" เท่านั้น
+  // ห้ามลากวันที่ค้นหาย้อนหลัง/range กลับมาเป็นวันนี้ทุก 60 วินาที
   useEffect(() => {
     const checkDate = setInterval(() => {
       const today = getBkkDate();
-      setSelectedDate(prev => prev === today ? prev : today);
+      setSelectedDate(prev => {
+        const previousAutoDate = lastAutoDateRef.current;
+        lastAutoDateRef.current = today;
+        if (prev === previousAutoDate) return today;
+        return prev;
+      });
     }, 60000); // เช็คทุก 1 นาที
     return () => clearInterval(checkDate);
   }, []);
@@ -365,13 +379,13 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
     if (rangeTrigger === 0 || !isRange) { return; }
     setRangeLoading(true);
 
-    const [sy, sm, sd] = selectedDate.split('-');
+    const [sy, sm, sd] = rangeDate.split('-');
     const [ey, em, ed] = endDate.split('-');
     const fromThai = `${sd}/${sm}/${sy}`;
     const toThai = `${ed}/${em}/${ey}`;
 
     Promise.all([
-      fetch(`/api/tiger-range?from=${selectedDate}&to=${endDate}`).then(r => r.json()).catch(() => ({ items: [] })),
+      fetch(`/api/tiger-range?from=${rangeDate}&to=${endDate}`).then(r => r.json()).catch(() => ({ items: [] })),
       supaFetch(`/rest/v1/mkt_data?date=gte.${encodeURIComponent(fromThai)}&date=lte.${encodeURIComponent(toThai)}&select=name,tab,fb,google,tiktok`)
         .catch(() => [])
     ])
@@ -563,11 +577,6 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
   }, []);
 
   useEffect(() => {
-    // หยุด auto-refresh เมื่ออยู่ในโหมด range search เพื่อไม่ให้ข้อมูลทับกัน
-    if (isRange) {
-      if (tigerTimer.current) { clearInterval(tigerTimer.current); tigerTimer.current = null; }
-      return;
-    }
     const bkk = new Date(new Date().getTime() + 7 * 60 * 60 * 1000);
     const today = bkk.toISOString().split('T')[0];
     fetchTiger(selectedDate !== today ? selectedDate : undefined);
@@ -576,7 +585,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
       fetchTiger(selectedDate !== nowToday ? selectedDate : undefined);
     }, 30 * 1000); // refresh ทุก 30 วิ
     return () => { if (tigerTimer.current) clearInterval(tigerTimer.current); };
-  }, [fetchTiger, selectedDate, isRange]);
+  }, [fetchTiger, selectedDate]);
 
   // Load today's data from Supabase on mount / date change
   useEffect(() => {
@@ -913,16 +922,21 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
           )}
           <input
             type="date"
-            value={selectedDate}
-            onChange={e => { setSelectedDate(e.target.value); if (endDate && e.target.value > endDate) setEndDate(''); }}
+            value={rangeDate}
+            onChange={e => {
+              const next = e.target.value;
+              setRangeDate(next);
+              setRangeData(null);
+              if (endDate && next > endDate) setEndDate('');
+            }}
             className="px-2 sm:px-3 py-2 rounded-xl border border-slate-200 bg-white text-[11px] sm:text-sm font-bold text-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           />
           <span className="text-slate-400 font-bold text-[10px] sm:text-xs">ถึง</span>
           <input
             type="date"
             value={endDate}
-            min={selectedDate}
-            onChange={e => setEndDate(e.target.value)}
+            min={rangeDate}
+            onChange={e => { setEndDate(e.target.value); setRangeData(null); }}
             className="px-2 sm:px-3 py-2 rounded-xl border border-slate-200 bg-white text-[11px] sm:text-sm font-bold text-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           />
           <button
@@ -930,7 +944,8 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
               if (isRange) {
                 setRangeTrigger(prev => prev + 1);
               } else {
-                setSelectedDate(prev => prev);
+                setRangeData(null);
+                setSelectedDate(rangeDate);
               }
             }}
             className="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[11px] sm:text-sm font-bold shadow-sm transition-colors"
@@ -938,7 +953,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
             🔍 ค้นหา
           </button>
           {isRange && (
-            <button onClick={() => setEndDate('')} className="px-2.5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-[11px] sm:text-xs font-bold text-slate-600 transition-colors">ล้าง</button>
+            <button onClick={() => { setEndDate(''); setRangeDate(selectedDate); setRangeData(null); }} className="px-2.5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-[11px] sm:text-xs font-bold text-slate-600 transition-colors">ล้าง</button>
           )}
           <button
             onClick={exportExcel}
@@ -1090,7 +1105,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                     </td>
                     {COLUMNS.map(col => (
                       <td key={col.key} className="px-3 py-3 text-right">
-                        {col.editable ? (
+                        {col.editable && !(isRange && !!rangeData) ? (
                           <input
                             type="number"
                             value={(row as any)[col.key] || ''}
@@ -1192,7 +1207,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
           <div className="flex items-center gap-2">
             {tigerLoading && <span className="text-xs text-blue-400 font-bold animate-pulse">⏳ กำลังโหลด...</span>}
             <button
-              onClick={fetchTiger}
+              onClick={() => fetchTiger(selectedDate !== getBkkDate() ? selectedDate : undefined)}
               className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-black text-slate-600 transition-colors"
             >
               🔄 Refresh
