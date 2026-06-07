@@ -77,7 +77,8 @@ const COLUMNS = [
   { key: 'dailyDeposit', label: 'ฝากทั้งวัน', editable: false },
   { key: 'monthlyDeposit', label: 'ฝากทั้งเดือน', editable: false },
   { key: 'totalWithdraw', label: 'ยอดถอน', editable: false },
-  { key: 'winLoss', label: 'W/L', editable: false },
+  { key: 'turnover', label: 'เทิร์นโอเวอร์', editable: false },
+  { key: 'winLoss', label: 'วิน/ลอส', editable: false },
   { key: 'avgPerUser', label: 'เฉลี่ย/ยูส', editable: false },
   { key: 'costPerRegister', label: 'ค่าหัว/สมัคร', editable: false },
   { key: 'costPerDeposit', label: 'ค่าหัว/ฝาก', editable: false },
@@ -95,6 +96,7 @@ interface RowData {
   dailyDeposit: number;
   monthlyDeposit: number;
   totalWithdraw: number;
+  turnover: number;
   winLoss: number;
   avgPerUser: number;
   costPerRegister: number;
@@ -126,7 +128,7 @@ const emptyRow = (): RowData => ({
   fb: 0, google: 0, tiktok: 0, totalAds: 0,
   register: 0, memberDeposit: 0, depositPct: 0,
   firstDeposit: 0, dailyDeposit: 0, monthlyDeposit: 0,
-  totalWithdraw: 0, winLoss: 0,
+  totalWithdraw: 0, turnover: 0, winLoss: 0,
   avgPerUser: 0, costPerRegister: 0, costPerDeposit: 0,
 });
 
@@ -142,11 +144,12 @@ const initData = (): MktData => {
 const recalc = (row: RowData): RowData => {
   const totalAds = row.fb + row.google + row.tiktok;
   const depositPct = row.register > 0 ? Math.round((row.memberDeposit / row.register) * 10000) / 100 : 0;
-  const winLoss = row.dailyDeposit - row.totalWithdraw;
+  // winLoss: ใช้ค่าจริงจาก Tiger (row.winLoss) ถ้ามี ไม่งั้น fallback = ฝากวัน - ถอน
+  const winLoss = row.winLoss !== 0 ? row.winLoss : (row.dailyDeposit - row.totalWithdraw);
   const avgPerUser = row.memberDeposit > 0 ? Math.round(row.firstDeposit / row.memberDeposit) : 0;
   const costPerRegister = row.register > 0 ? Math.round(totalAds / row.register) : 0;
   const costPerDeposit = row.memberDeposit > 0 ? Math.round(totalAds / row.memberDeposit) : 0;
-  return { ...row, totalAds, depositPct, winLoss, avgPerUser, costPerRegister, costPerDeposit };
+  return { ...row, totalAds, depositPct, turnover: row.turnover, winLoss, avgPerUser, costPerRegister, costPerDeposit };
 };
 
 // วันที่ format DD/MM/YYYY
@@ -215,6 +218,8 @@ const loadTodayData = async (thaiDate: string): Promise<MktData> => {
           dailyDeposit: Number(row.daily_deposit) || 0,
           monthlyDeposit: Number(row.month_deposit) || 0,
           totalWithdraw: Number(row.total_withdraw) || 0,
+          turnover: Number(row.turnover) || 0,
+          winLoss: Number(row.winloss) || Number(row.win_loss) || 0,
           avgPerUser: 0,
           costPerRegister: 0,
           costPerDeposit: 0,
@@ -501,6 +506,8 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
               firstDeposit: todayItem ? Math.round(todayItem.deposit_first_time_amount) : 0,
               dailyDeposit: todayItem ? Math.round(todayItem.total_deposit) : 0,
               totalWithdraw: todayItem ? Math.round(todayItem.total_withdraw) : 0,
+              turnover: todayItem ? Math.round((todayItem as any).total_turnover || (todayItem as any).total_turn_over || 0) : 0,
+              winLoss: todayItem ? Math.round((todayItem as any).total_winloss || (todayItem as any).total_turn_winlose || 0) : 0,
               monthlyDeposit: monthlyMap[staff] || 0,
             });
             tabData[staff] = merged;
@@ -1237,13 +1244,15 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                 <th className="px-3 py-3 text-[10px] font-black text-slate-400 uppercase tracking-normal text-right">R+D Amount</th>
                 <th className="px-3 py-3 text-[10px] font-black text-rose-300 uppercase tracking-normal text-right">ถอน คน</th>
                 <th className="px-3 py-3 text-[10px] font-black text-rose-200 uppercase tracking-normal text-right">ถอน Amount</th>
+                <th className="px-3 py-3 text-[10px] font-black text-indigo-400 uppercase tracking-normal text-right">เทิร์นโอเวอร์</th>
+                <th className="px-3 py-3 text-[10px] font-black text-cyan-400 uppercase tracking-normal text-right">วิน/ลอส</th>
 
               </tr>
             </thead>
             <tbody>
               {!tigerData || ((tigerData.items||[]).length === 0 && (tigerData.monthly_items||[]).length === 0) ? (
                 <tr>
-                  <td colSpan={12} className="text-center py-8 text-slate-400 text-sm font-bold">
+                  <td colSpan={14} className="text-center py-8 text-slate-400 text-sm font-bold">
                     {tigerLoading ? '⏳ กำลังดึงข้อมูล...' : 'ไม่มีข้อมูล — กด Refresh หรือรอ auto-update'}
                   </td>
                 </tr>
@@ -1293,6 +1302,8 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                         <td className="px-3 py-3 text-right font-bold text-slate-600">{fmt(Math.round(item.register_deposit_amount))}</td>
                         <td className="px-3 py-3 text-right font-bold text-rose-300">{fmt(item.register_withdraw_user || 0)}</td>
                         <td className="px-3 py-3 text-right font-bold text-rose-200">{fmt(Math.round(item.register_withdraw_amount || 0))}</td>
+                        <td className="px-3 py-3 text-right font-black text-indigo-600">{fmt(Math.round((item as any).total_turnover || (item as any).total_turn_over || 0))}</td>
+                        <td className={`px-3 py-3 text-right font-black ${(((item as any).total_winloss || (item as any).total_turn_winlose || 0) < 0) ? 'text-emerald-600' : 'text-rose-600'}`}>{fmt(Math.round((item as any).total_winloss || (item as any).total_turn_winlose || 0))}</td>
 
                       </tr>
                     );

@@ -18,6 +18,8 @@ interface StaffSummary {
   total_withdraw: number;
   first_deposit: number;
   register_withdraw_amount: number;
+  total_turnover: number;
+  total_winloss: number;
 }
 
 const CAMPAIGN_STAFF_MAP: Record<string, string> = {
@@ -57,7 +59,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const staff = CAMPAIGN_STAFF_MAP[item.campaign_name];
         if (!staff) continue;
         if (!map[staff]) {
-          map[staff] = { name: staff, register: 0, deposit_member: 0, month_deposit: 0, total_withdraw: 0, first_deposit: 0, register_withdraw_amount: 0 };
+          map[staff] = { name: staff, register: 0, deposit_member: 0, month_deposit: 0, total_withdraw: 0, first_deposit: 0, register_withdraw_amount: 0, total_turnover: 0, total_winloss: 0 };
         }
         map[staff].register += item.total_register || 0;
         map[staff].deposit_member += item.register_deposit_user || 0;
@@ -65,6 +67,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         map[staff].total_withdraw += Math.round(item.total_withdraw || 0);
         map[staff].first_deposit += Math.round(item.deposit_first_time_amount || 0);
         map[staff].register_withdraw_amount += Math.round(item.register_withdraw_amount || 0);
+        map[staff].total_turnover += Math.round(item.total_turnover || item.total_turn_over || 0);
+        map[staff].total_winloss += Math.round(item.total_winloss || item.total_turn_winlose || 0);
       }
     }
   } catch {}
