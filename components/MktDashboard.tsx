@@ -154,7 +154,7 @@ const recalc = (row: RowData): RowData => {
   const costPerRegister = row.register > 0 ? Math.round(totalAds / row.register) : 0;
   const costPerDeposit = row.memberDeposit > 0 ? Math.round(totalAds / row.memberDeposit) : 0;
   // กำไร/ขาดทุน = ฝาก - ถอน (ไม่เกี่ยวกับ Tiger W/L)
-  const profitLoss = Math.round(row.dailyDeposit - row.totalWithdraw);
+  const profitLoss = Math.round(row.dailyDeposit - row.totalWithdraw - totalAds);
   return { ...row, totalAds, depositPct, turnover: row.turnover, winLoss, hasTigerWinloss: row.hasTigerWinloss, profitLoss, avgPerUser, costPerRegister, costPerDeposit };
 };
 
@@ -581,8 +581,8 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
             map[staff].totalAds = (map[staff].fb || 0) + (map[staff].google || 0) + (map[staff].tiktok || 0);
             map[staff].costPerRegister = map[staff].register > 0 ? Math.round(map[staff].totalAds / map[staff].register) : 0;
             map[staff].costPerDeposit = map[staff].deposit_member > 0 ? Math.round(map[staff].totalAds / map[staff].deposit_member) : 0;
-            // กำไร/ขาดทุน = ฝาก - ถอน
-            map[staff].profitLoss = (map[staff].month_deposit || 0) - (map[staff].total_withdraw || 0);
+            // กำไร/ขาดทุน = ฝาก - ถอน - ADS
+            map[staff].profitLoss = (map[staff].month_deposit || 0) - (map[staff].total_withdraw || 0) - (map[staff].totalAds || 0);
           });
           return Object.values(map);
         });
@@ -643,7 +643,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
           daily_deposit: 0, month_deposit: s.month_deposit, depositPct: 0,
           total_withdraw: s.total_withdraw, register_withdraw_amount: s.register_withdraw_amount || 0,
           costPerRegister: 0, costPerDeposit: 0,
-          profitLoss: s.month_deposit - s.total_withdraw,
+          profitLoss: s.month_deposit - s.total_withdraw - ((s.fb || 0) + (s.google || 0) + (s.tiktok || 0)),
         }));
         setPrevMonthlySummary(rows);
       })
