@@ -227,6 +227,7 @@ const loadTodayData = async (thaiDate: string): Promise<MktData> => {
           // field ใน Supabase mkt_data คือ winloss/win_loss ไม่ใช่ total_winloss
           winLoss: row.winloss != null ? Number(row.winloss) : (row.win_loss != null ? Number(row.win_loss) : 0),
           hasTigerWinloss: row.winloss != null || row.win_loss != null,
+          profitLoss: 0,
           avgPerUser: 0,
           costPerRegister: 0,
           costPerDeposit: 0,
