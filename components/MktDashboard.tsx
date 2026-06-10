@@ -79,6 +79,7 @@ const COLUMNS = [
   { key: 'totalWithdraw', label: 'ยอดถอน', editable: false },
   { key: 'turnover', label: 'เทิร์นโอเวอร์', editable: false },
   { key: 'winLoss', label: 'วิน/ลอส', editable: false },
+  { key: 'profitLoss', label: 'กำไร/วัน', editable: false },
   { key: 'avgPerUser', label: 'เฉลี่ย/ยูส', editable: false },
   { key: 'costPerRegister', label: 'ค่าหัว/สมัคร', editable: false },
   { key: 'costPerDeposit', label: 'ค่าหัว/ฝาก', editable: false },
@@ -99,6 +100,7 @@ interface RowData {
   turnover: number;
   hasTigerWinloss: boolean;
   winLoss: number;
+  profitLoss: number;
   avgPerUser: number;
   costPerRegister: number;
   costPerDeposit: number;
@@ -129,7 +131,7 @@ const emptyRow = (): RowData => ({
   fb: 0, google: 0, tiktok: 0, totalAds: 0,
   register: 0, memberDeposit: 0, depositPct: 0,
   firstDeposit: 0, dailyDeposit: 0, monthlyDeposit: 0,
-  totalWithdraw: 0, turnover: 0, winLoss: 0, hasTigerWinloss: false,
+  totalWithdraw: 0, turnover: 0, winLoss: 0, hasTigerWinloss: false, profitLoss: 0,
   avgPerUser: 0, costPerRegister: 0, costPerDeposit: 0,
 });
 
@@ -151,7 +153,8 @@ const recalc = (row: RowData): RowData => {
   const avgPerUser = row.memberDeposit > 0 ? Math.round(row.firstDeposit / row.memberDeposit) : 0;
   const costPerRegister = row.register > 0 ? Math.round(totalAds / row.register) : 0;
   const costPerDeposit = row.memberDeposit > 0 ? Math.round(totalAds / row.memberDeposit) : 0;
-  return { ...row, totalAds, depositPct, turnover: row.turnover, winLoss, hasTigerWinloss: row.hasTigerWinloss, avgPerUser, costPerRegister, costPerDeposit };
+  const profitLoss = Math.round(winLoss - totalAds);
+  return { ...row, totalAds, depositPct, turnover: row.turnover, winLoss, hasTigerWinloss: row.hasTigerWinloss, profitLoss, avgPerUser, costPerRegister, costPerDeposit };
 };
 
 // วันที่ format DD/MM/YYYY
@@ -1204,6 +1207,13 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
             {totalRecalced.winLoss < 0 ? `-${fmt(Math.abs(totalRecalced.winLoss))}` : fmt(totalRecalced.winLoss)}
           </p>
           <p className="text-xs font-bold text-slate-400 mt-1">ฝากเดือนนี้ {fmt(totalRecalced.monthlyDeposit)}</p>
+        </div>
+        <div className="bg-white/80 backdrop-blur-xl rounded-[1.5rem] border border-slate-100 p-5 shadow-sm">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-normal mb-2">กำไร/วัน</p>
+          <p className={`text-2xl font-black ${totalRecalced.profitLoss >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+            {totalRecalced.profitLoss < 0 ? `-${fmt(Math.abs(totalRecalced.profitLoss))}` : fmt(totalRecalced.profitLoss)}
+          </p>
+          <p className="text-xs font-bold text-slate-400 mt-1">W/L - ค่าADS</p>
         </div>
       </div>
 
