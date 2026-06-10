@@ -704,7 +704,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
     const row = activeData[activeTab][staff];
     if (!row) return acc;
     COLUMNS.forEach(col => {
-      if (['depositPct','winLoss','avgPerUser','costPerRegister','costPerDeposit'].includes(col.key)) return;
+      if (['depositPct','winLoss','profitLoss','avgPerUser','costPerRegister','costPerDeposit'].includes(col.key)) return;
       (acc as any)[col.key] = ((acc as any)[col.key] || 0) + (row as any)[col.key];
     });
     return acc;
@@ -833,7 +833,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
         'รวม ADS': r.totalAds, 'สมัคร': r.register, 'สมาชิกฝาก': r.memberDeposit,
         '%ฝาก': r.depositPct, 'ฝากแรก': r.firstDeposit, 'ฝากทั้งวัน': r.dailyDeposit,
         'ฝากทั้งเดือน': r.monthlyDeposit, 'ยอดถอน': r.totalWithdraw,
-        'W/L': r.winLoss, 'เฉลี่ย/ยูส': r.avgPerUser,
+        'W/L': r.winLoss, 'กำไร/วัน': r.profitLoss, 'เฉลี่ย/ยูส': r.avgPerUser,
         'ค่าหัว/สมัคร': r.costPerRegister, 'ค่าหัว/ฝาก': r.costPerDeposit,
       });
     });
@@ -843,7 +843,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
       'รวม ADS': totalRecalced.totalAds, 'สมัคร': totalRecalced.register, 'สมาชิกฝาก': totalRecalced.memberDeposit,
       '%ฝาก': totalRecalced.depositPct, 'ฝากแรก': totalRecalced.firstDeposit, 'ฝากทั้งวัน': totalRecalced.dailyDeposit,
       'ฝากทั้งเดือน': totalRecalced.monthlyDeposit, 'ยอดถอน': totalRecalced.totalWithdraw,
-      'W/L': totalRecalced.winLoss, 'เฉลี่ย/ยูส': totalRecalced.avgPerUser,
+      'W/L': totalRecalced.winLoss, 'กำไร/วัน': totalRecalced.profitLoss, 'เฉลี่ย/ยูส': totalRecalced.avgPerUser,
       'ค่าหัว/สมัคร': totalRecalced.costPerRegister, 'ค่าหัว/ฝาก': totalRecalced.costPerDeposit,
     });
     const ws1 = XLSX.utils.json_to_sheet(dailyRows);
@@ -884,7 +884,7 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
           'รวม ADS': r.totalAds, 'สมัคร': r.register, 'สมาชิกฝาก': r.memberDeposit,
           '%ฝาก': r.depositPct, 'ฝากแรก': r.firstDeposit, 'ฝากทั้งวัน': r.dailyDeposit,
           'ฝากทั้งเดือน': r.monthlyDeposit, 'ยอดถอน': r.totalWithdraw,
-          'W/L': r.winLoss, 'เฉลี่ย/ยูส': r.avgPerUser,
+          'W/L': r.winLoss, 'กำไร/วัน': r.profitLoss, 'เฉลี่ย/ยูส': r.avgPerUser,
           'ค่าหัว/สมัคร': r.costPerRegister, 'ค่าหัว/ฝาก': r.costPerDeposit,
         });
       });
@@ -1136,12 +1136,12 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                             col.key === 'costPerRegister' ? 'text-purple-600' :
                             col.key === 'costPerDeposit' ? 'text-rose-600' :
                             col.key === 'totalWithdraw' ? 'text-rose-500' :
-                            col.key === 'winLoss' ? ((row as any)[col.key] >= 0 ? 'text-emerald-600' : 'text-red-600') :
+                            col.key === 'winLoss' || col.key === 'profitLoss' ? ((row as any)[col.key] >= 0 ? 'text-emerald-600' : 'text-red-600') :
                             'text-slate-700'
                           }`}>
                             {col.key === 'depositPct'
                             ? fmtPct((row as any)[col.key])
-                            : col.key === 'winLoss'
+                            : col.key === 'winLoss' || col.key === 'profitLoss'
                               ? ((row as any)[col.key] < 0 ? `-${fmt(Math.abs((row as any)[col.key]))}` : fmt((row as any)[col.key]))
                               : fmt((row as any)[col.key])
                           }
@@ -1168,11 +1168,12 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
                     <span className={`font-black text-sm ${
                       col.key === 'totalAds' ? 'text-amber-700' :
                       col.key === 'depositPct' ? 'text-emerald-700' :
+                      col.key === 'profitLoss' ? ((totalRecalced as any)[col.key] >= 0 ? 'text-emerald-700' : 'text-red-600') :
                       'text-slate-900'
                     }`}>
                       {col.key === 'depositPct'
                     ? fmtPct(totalRecalced.depositPct)
-                    : col.key === 'winLoss'
+                    : col.key === 'winLoss' || col.key === 'profitLoss'
                       ? ((totalRecalced as any)[col.key] < 0 ? `-${fmt(Math.abs((totalRecalced as any)[col.key]))}` : fmt((totalRecalced as any)[col.key]))
                       : fmt((totalRecalced as any)[col.key])
                   }
