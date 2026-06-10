@@ -97,6 +97,7 @@ interface RowData {
   monthlyDeposit: number;
   totalWithdraw: number;
   turnover: number;
+  hasTigerWinloss: boolean;
   winLoss: number;
   avgPerUser: number;
   costPerRegister: number;
@@ -128,7 +129,7 @@ const emptyRow = (): RowData => ({
   fb: 0, google: 0, tiktok: 0, totalAds: 0,
   register: 0, memberDeposit: 0, depositPct: 0,
   firstDeposit: 0, dailyDeposit: 0, monthlyDeposit: 0,
-  totalWithdraw: 0, turnover: 0, winLoss: 0,
+  totalWithdraw: 0, turnover: 0, winLoss: 0, hasTigerWinloss: false,
   avgPerUser: 0, costPerRegister: 0, costPerDeposit: 0,
 });
 
@@ -144,12 +145,13 @@ const initData = (): MktData => {
 const recalc = (row: RowData): RowData => {
   const totalAds = row.fb + row.google + row.tiktok;
   const depositPct = row.register > 0 ? Math.round((row.memberDeposit / row.register) * 10000) / 100 : 0;
-  // winLoss: ใช้ค่าจริงจาก Tiger (row.winLoss) ถ้ามี ไม่งั้น fallback = ฝากวัน - ถอน
-  const winLoss = row.winLoss !== 0 ? row.winLoss : (row.dailyDeposit - row.totalWithdraw);
+  // winLoss: fallback เฉพาะเมื่อ Tiger ยังไม่เคย load (hasTigerWinloss=false)
+  // Tiger ส่ง 0 จริง (winless=winwin) ต้องแสดง 0 ไม่ใช่ deposit-withdraw
+  const winLoss = row.hasTigerWinloss ? row.winLoss : (row.dailyDeposit - row.totalWithdraw);
   const avgPerUser = row.memberDeposit > 0 ? Math.round(row.firstDeposit / row.memberDeposit) : 0;
   const costPerRegister = row.register > 0 ? Math.round(totalAds / row.register) : 0;
   const costPerDeposit = row.memberDeposit > 0 ? Math.round(totalAds / row.memberDeposit) : 0;
-  return { ...row, totalAds, depositPct, turnover: row.turnover, winLoss, avgPerUser, costPerRegister, costPerDeposit };
+  return { ...row, totalAds, depositPct, turnover: row.turnover, winLoss, hasTigerWinloss: row.hasTigerWinloss, avgPerUser, costPerRegister, costPerDeposit };
 };
 
 // วันที่ format DD/MM/YYYY
@@ -219,7 +221,9 @@ const loadTodayData = async (thaiDate: string): Promise<MktData> => {
           monthlyDeposit: Number(row.month_deposit) || 0,
           totalWithdraw: Number(row.total_withdraw) || 0,
           turnover: Number(row.turnover) || 0,
-          winLoss: Number(row.winloss) || Number(row.win_loss) || 0,
+          // field ใน Supabase mkt_data คือ winloss/win_loss ไม่ใช่ total_winloss
+          winLoss: row.winloss != null ? Number(row.winloss) : (row.win_loss != null ? Number(row.win_loss) : 0),
+          hasTigerWinloss: row.winloss != null || row.win_loss != null,
           avgPerUser: 0,
           costPerRegister: 0,
           costPerDeposit: 0,
@@ -507,7 +511,8 @@ const MktDashboard: React.FC<MktDashboardProps> = ({ defaultStaff, isAdmin = tru
               dailyDeposit: todayItem ? Math.round(todayItem.total_deposit) : 0,
               totalWithdraw: todayItem ? Math.round(todayItem.total_withdraw) : 0,
               turnover: todayItem ? Math.round((todayItem as any).total_turnover || (todayItem as any).total_turn_over || 0) : 0,
-              winLoss: todayItem ? Math.round((todayItem as any).total_winloss || (todayItem as any).total_turn_winlose || 0) : 0,
+              winLoss: todayItem ? Math.round((todayItem as any).total_winloss ?? (todayItem as any).total_turn_winlose ?? 0) : 0,
+              hasTigerWinloss: todayItem != null,
               monthlyDeposit: monthlyMap[staff] || 0,
             });
             tabData[staff] = merged;

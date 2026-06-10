@@ -114,8 +114,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             map[key].total_withdraw += item.total_withdraw || 0;
             map[key].deposit_first_time_amount += item.deposit_first_time_amount || 0;
             map[key].register_withdraw_amount += item.register_withdraw_amount || 0;
-            map[key].total_turnover += item.total_turnover || item.total_turn_over || 0;
-            map[key].total_winloss += item.total_winloss || item.total_turn_winlose || 0;
+            map[key].total_turnover += Math.round(item.total_turnover || item.total_turn_over || 0);
+            map[key].total_winloss += Math.round(item.total_winloss || item.total_turn_winlose || 0);
           }
         } catch { /* skip bad cache entry */ }
       }
@@ -157,8 +157,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           map[key].total_withdraw += item.total_withdraw || 0;
           map[key].deposit_first_time_amount += item.deposit_first_time_amount || 0;
           map[key].register_withdraw_amount += item.register_withdraw_amount || 0;
-          map[key].total_turnover += item.total_turnover || item.total_turn_over || 0;
-          map[key].total_winloss += item.total_winloss || item.total_turn_winlose || 0;
+          map[key].total_turnover += Math.round(item.total_turnover || item.total_turn_over || 0);
+          map[key].total_winloss += Math.round(item.total_winloss || item.total_turn_winlose || 0);
         }
       }
     } catch { /* VPS also failed, return what we have */ }
